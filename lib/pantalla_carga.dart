@@ -49,9 +49,9 @@ class _LoadingScreenState extends State<LoadingScreen> {
               Container(
                 width: 300,
                 height: 120,
-                padding: const EdgeInsets.all(10.0),
+                padding: const EdgeInsets.all(7.5),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Colors.red[800],
                   borderRadius: BorderRadius.circular(10.0),
                   boxShadow: [
                     BoxShadow(
@@ -67,11 +67,12 @@ class _LoadingScreenState extends State<LoadingScreen> {
                     const Text(
                       'Cargando...',
                       style: TextStyle(
-                        fontSize: 24,
+                        color: Colors.white,
+                        fontSize: 28,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 15),
                     LinearProgressIndicator(
                       value: _progressValue,
                       backgroundColor: Colors.blue[100],
@@ -81,8 +82,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
                     const SizedBox(height: 10),
                     Text(
                       '${(_progressValue * 90.9).toStringAsFixed(1)}% completado',
-                      style: TextStyle(
-                        color: Colors.grey[800],
+                      style: const TextStyle(
+                        color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

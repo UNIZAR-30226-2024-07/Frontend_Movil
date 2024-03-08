@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:psoft_07/pantalla_registro.dart';
 
@@ -34,12 +35,24 @@ class LoginScreen extends StatelessWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
+                            const Text(
+                              'Inicio Sesion',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 25
+                              ),
+                            ),
+                            const SizedBox(height: 5.0),
                             const SizedBox(
                               width: 300,
+                              height: 40,
                               child: TextField(
                                 decoration: InputDecoration(
                                   hintText: 'Usuario',
-                                  icon: Icon(Icons.person),
+                                  icon: Icon(
+                                      Icons.person,
+                                      color: Colors.white,
+                                  ),
                                   filled: true,
                                   fillColor: Colors.white,
                                 ),
@@ -47,18 +60,23 @@ class LoginScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 10.0),
                             const SizedBox(
+                              height: 40,
                               width: 300, // Ajusta el tamaño del cuadro de texto de la contraseña para que coincida con el de usuario
                               child: TextField(
                                 decoration: InputDecoration(
                                   hintText: 'Contraseña',
-                                  icon: Icon(Icons.lock),
+                                  icon: Icon(
+                                    Icons.lock,
+                                    color: Colors.white,
+                                  ),
                                   filled: true,
                                   fillColor: Colors.white,
                                 ),
                                 obscureText: true,
+
                               ),
                             ),
-                            const SizedBox(height: 20.0),
+                            const SizedBox(height: 10.0),
                             ElevatedButton(
                               onPressed: () {
                                 // Implementar la lógica de inicio de sesión aquí
@@ -71,6 +89,35 @@ class LoginScreen extends StatelessWidget {
                                 style: TextStyle(color: Colors.white),
                               ),
                             ),
+                            const SizedBox(height: 5.0),
+
+                            Container(
+                                height: 1.0,
+                                color: Colors.white,
+                            ),
+                            const SizedBox(height: 10.0),
+                            const Text(
+                                'Si no tiene cuenta, pulse aquí',
+                                style: TextStyle(color: Colors.white),
+                            ),
+
+                            TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => RegisterScreen()),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue,
+
+                              ),
+                              child: const Text(
+                                'Registrarse',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+
                           ],
                         ),
                       ),
@@ -78,33 +125,8 @@ class LoginScreen extends StatelessWidget {
                     const SizedBox(height: 10.0),
                   ],
                 ),
-                Positioned(
-                  right: 20.0,
-                  bottom: 20.0,
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => RegisterScreen()),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                    ),
-                    child: const Text(
-                      'Registrarse',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ),
-                const Positioned(
-                  right: 20.0,
-                  bottom: 60.0,
-                  child: Text(
-                    'Si no tiene cuenta, pulse aquí',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
+
+
               ],
             ),
           ),

@@ -7,7 +7,7 @@ class MyScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.red[800],
+        backgroundColor: Colors.brown[600],
         elevation: 2, // Ajusta el valor según el tamaño de la sombra que desees
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
