@@ -1,9 +1,44 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:psoft_07/pantalla_derrota_partida.dart';
+import 'package:psoft_07/pantalla_inicio.dart';
 import 'package:psoft_07/pantalla_registro.dart';
+import 'package:get/get.dart';
+
+
+
 
 class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+  LoginScreen({super.key});
+
+
+  TextEditingController nombre = TextEditingController();
+  TextEditingController contrasenya = TextEditingController();
+  final getConnect = GetConnect();
+
+
+  void _login(nombre, contrasenya, context) async {
+    print("------------------------------------------------------");
+    print("${nombre}, ${contrasenya}");
+
+    final res = await getConnect.post('https://backend-uf65.onrender.com/api/user/login', {
+      "nick":nombre,
+      "password":contrasenya
+    });
+    print(res.body['status']);
+    if (res.body['status'] == 'error') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => WelcomeScreen()),
+      );
+    }
+    else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => VictoryScreen()),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,11 +78,13 @@ class LoginScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 5.0),
-                            const SizedBox(
+                            SizedBox(
                               width: 300,
                               height: 40,
                               child: TextField(
-                                decoration: InputDecoration(
+                                controller: nombre,
+                                keyboardType: TextInputType.text,
+                                decoration: const InputDecoration(
                                   hintText: 'Usuario',
                                   icon: Icon(
                                       Icons.person,
@@ -59,11 +96,13 @@ class LoginScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 10.0),
-                            const SizedBox(
+                            SizedBox(
                               height: 40,
                               width: 300, // Ajusta el tamaño del cuadro de texto de la contraseña para que coincida con el de usuario
                               child: TextField(
-                                decoration: InputDecoration(
+                                controller: contrasenya,
+                                keyboardType: TextInputType.text,
+                                decoration: const InputDecoration(
                                   hintText: 'Contraseña',
                                   icon: Icon(
                                     Icons.lock,
@@ -79,7 +118,7 @@ class LoginScreen extends StatelessWidget {
                             const SizedBox(height: 10.0),
                             ElevatedButton(
                               onPressed: () {
-                                // Implementar la lógica de inicio de sesión aquí
+                                _login(nombre.text, contrasenya.text, context);
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.blue,
@@ -140,7 +179,7 @@ class LoginScreen extends StatelessWidget {
 
 
 void main() {
-  runApp(const MaterialApp(
+  runApp(MaterialApp(
     home: LoginScreen(),
   ));
 }
