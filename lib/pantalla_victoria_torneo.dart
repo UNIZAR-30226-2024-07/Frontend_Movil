@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'colores.dart';
 
 class VictoryScreen extends StatelessWidget {
+  const VictoryScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     final int coinsEarned = 100; // Aquí habrá que poner el número de monedas que se gana
@@ -38,7 +40,7 @@ class VictoryScreen extends StatelessWidget {
                         width: 120,
                         height: 120,
                       ),
-                      SizedBox(width: 20),
+                      const SizedBox(width: 20),
                       Column(
                         children: [
                           Text(
@@ -56,7 +58,7 @@ class VictoryScreen extends StatelessWidget {
                               ],
                             ),
                           ),
-                          SizedBox(height: 5),
+                          const SizedBox(height: 5),
                           Image.asset(
                             'assets/trofeo.png', // Imagen del trofeo
                             width: 95,
@@ -64,7 +66,7 @@ class VictoryScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-                      SizedBox(width: 20),
+                      const SizedBox(width: 20),
                       Image.asset(
                         'assets/medalla.png', // Imagen de la estrella a la derecha
                         width: 120,
@@ -72,7 +74,7 @@ class VictoryScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   Text(
                     '¡Has ganado el torneo!',
                     style: TextStyle(
@@ -105,21 +107,21 @@ class VictoryScreen extends StatelessWidget {
                     color: Colors.black.withOpacity(0.5),
                     spreadRadius: 3,
                     blurRadius: 9,
-                    offset: Offset(0, 3), // Cambiar la posición de la sombra
+                    offset: const Offset(0, 3), // Cambiar la posición de la sombra
                   ),
                 ],
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.monetization_on, // Icono de moneda
                     color: Colors.white,
                   ),
-                  SizedBox(width: 4),
+                  const SizedBox(width: 4),
                   Text(
                     '+$coinsEarned',
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
@@ -138,7 +140,7 @@ class VictoryScreen extends StatelessWidget {
                     color: Colors.black.withOpacity(0.3),
                     spreadRadius: -8,
                     blurRadius: 6,
-                    offset: Offset(0, 0), // Cambiar la posición de la sombra
+                    offset: const Offset(0, 0), // Cambiar la posición de la sombra
                   ),
                 ],
               ),
@@ -162,8 +164,8 @@ class VictoryScreen extends StatelessWidget {
         onPressed: () {
           // Agrega aquí la lógica para lo que sucede cuando se presiona el botón de "Aceptar y Continuar"
         },
-        child: Icon(Icons.arrow_forward),
-        backgroundColor: Colors.red.shade300, // Color de fondo del botón
+        backgroundColor: Colors.red.shade300,
+        child: Icon(Icons.arrow_forward), // Color de fondo del botón
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat, // Posición del botón flotante
     );
@@ -171,7 +173,7 @@ class VictoryScreen extends StatelessWidget {
 }
 
 void main() {
-  runApp(MaterialApp(
+  runApp(const MaterialApp(
     home: VictoryScreen(),
   ));
 }
