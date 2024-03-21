@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:cookie_jar/cookie_jar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:psoft_07/colores.dart';
@@ -5,12 +8,15 @@ import 'package:psoft_07/pantalla_derrota_partida.dart';
 import 'package:psoft_07/pantalla_inicio.dart';
 import 'package:psoft_07/pantalla_registro.dart';
 import 'package:get/get.dart';
+
 import 'package:psoft_07/pantalla_victoria_partida.dart';
 
 
 
 
 class LoginScreen extends StatelessWidget {
+
+
   LoginScreen({super.key});
 
 
@@ -18,12 +24,12 @@ class LoginScreen extends StatelessWidget {
   TextEditingController contrasenya = TextEditingController();
   final getConnect = GetConnect();
 
-
   void _login(nombre, contrasenya, context) async {
     final res = await getConnect.post('https://backend-uf65.onrender.com/api/user/login', {
       "nick":nombre,
       "password":contrasenya
     });
+
     if (res.body['status'] == 'error') {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -36,7 +42,26 @@ class LoginScreen extends StatelessWidget {
         context,
         MaterialPageRoute(builder: (context) => VictoryScreen()),
       );
+
+      String token = (res.headers?["set-cookie"])!.substring(6);
+
+      // Encontrar la posición del primer ;
+      int index = token.indexOf(';');
+
+      // Obtener el substring hasta el primer ;
+      String nuevaCadena = token.substring(0, index);
+
+      print(nuevaCadena);
+
+      final usuario = await getConnect.get('https://backend-uf65.onrender.com/api/user/userById/65f19cbe4daf856b024c86f2',
+      headers: {
+        'Cookie': 'token=$nuevaCadena'
+      });
+
+      print(usuario);
     }
+
+
   }
 
   @override
