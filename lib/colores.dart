@@ -8,3 +8,7 @@ class ColoresApp {
   static const Color tercerColor = Color(0xFFF7C04A);
   static const Color cuartoColor = Color(0xFFF8F5E4);
 }
+
+class EnlaceApp {
+ static String enlaceBase = 'https://backend-uf65.onrender.com';
+}

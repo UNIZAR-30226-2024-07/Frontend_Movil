@@ -1,6 +1,4 @@
 import 'dart:io';
-
-import 'package:cookie_jar/cookie_jar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:psoft_07/colores.dart';
