@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:psoft_07/colores.dart';
 import 'package:psoft_07/pantalla_derrota_partida.dart';
 import 'package:psoft_07/pantalla_inicio.dart';
+import 'package:psoft_07/pantalla_principal.dart';
 import 'package:psoft_07/pantalla_registro.dart';
 import 'package:get/get.dart';
 
@@ -36,30 +37,27 @@ class LoginScreen extends StatelessWidget {
       );
     }
     else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => VictoryScreen()),
-      );
 
-      String token = (res.headers?["set-cookie"])!.substring(6);
 
-      // Encontrar la posición del primer ;
-      int index = token.indexOf(';');
 
-      // Obtener el substring hasta el primer ;
-      String nuevaCadena = token.substring(0, index);
 
-      print(nuevaCadena);
+      print(res.body['user']['rol']);
 
-      final usuario = await getConnect.get('https://backend-uf65.onrender.com/api/user/userById/65f19cbe4daf856b024c86f2',
-      headers: {
-        'Cookie': 'token=$nuevaCadena'
-      });
+      if (res.body['user']['rol'] == 'user') {
+        String token = res.body['token'];
 
-      print(usuario);
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => Principal(token)),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Usuario no existe", textAlign: TextAlign.center,), // Para poner un mensaje
+          ),
+        );
+      }
     }
-
-
   }
 
   @override
@@ -150,7 +148,6 @@ class LoginScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 5.0),
-
                           Container(
                               height: 1.0,
                               color: Colors.white,

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 
-class MyScreen extends StatelessWidget {
-  const MyScreen({Key? key}) : super(key: key);
+class Principal extends StatelessWidget {
+
+
+  final String token;
+
+  Principal(this.token, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +45,7 @@ class MyScreen extends StatelessWidget {
               onPressed: () {
                 // Acción para el botón de Partida Pública
               },
-              child: const Text('Partida Pública'),
+              child: Text(token),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
@@ -62,10 +66,16 @@ class MyScreen extends StatelessWidget {
       ),
     );
   }
+
+  @override
+  State<StatefulWidget> createState() {
+    // TODO: implement createState
+    throw UnimplementedError();
+  }
 }
 
 void main() {
   runApp(MaterialApp(
-    home: MyScreen(),
+    home: Principal('Un token'),
   ));
 }

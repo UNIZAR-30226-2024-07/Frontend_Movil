@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:psoft_07/colores.dart';
+import 'package:psoft_07/pantalla_registro_password.dart';
+
 
 class RegisterScreen extends StatelessWidget {
-  const RegisterScreen({Key? key}) : super(key: key);
+  RegisterScreen({Key? key}) : super(key: key);
+
+  TextEditingController name = TextEditingController();
+  TextEditingController surname = TextEditingController();
+  TextEditingController nickname = TextEditingController();
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: ColoresApp.fondoPantallaColor,
       body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/tapete_fondo_pantalla.jpg'),
-            fit: BoxFit.cover,
-          ),
-        ),
         child: Center(
           child: Padding(
             padding: const EdgeInsets.all(20.0),
@@ -23,9 +26,9 @@ class RegisterScreen extends StatelessWidget {
                   children: [
                     Container(
                       width: 400,
-                      height: 310,
+                      height: 300,
                       decoration: BoxDecoration(
-                        color: Colors.red[800],
+                        color: ColoresApp.cabeceraColor,
                         borderRadius: BorderRadius.circular(15.0),
                       ),
                       child: Padding(
@@ -33,86 +36,70 @@ class RegisterScreen extends StatelessWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const SizedBox(
+                            const Text(
+                              'Registro Usuario',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 25
+                              ),
+                            ),
+                            const SizedBox(height: 20.0),
+                            SizedBox(
                               width: 250,
                               height: 40,
                               child: TextField(
-                                decoration: InputDecoration(
-                                  hintText: 'Nombre y Apellidos',
-                                  icon: Icon(Icons.person),
+                                controller: name,
+                                decoration: const InputDecoration(
+                                  hintText: 'Nombre',
+                                  icon: Icon(Icons.person, color: Colors.white,),
                                   filled: true,
                                   fillColor: Colors.white,
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 5.0),
-                            const SizedBox(
+                            const SizedBox(height: 8.0),
+                            SizedBox(
                               width: 250,
                               height: 40,
                               child: TextField(
-                                decoration: InputDecoration(
-                                  hintText: 'Nombre de usuario',
-                                  icon: Icon(Icons.person),
+                                controller: surname,
+                                decoration: const InputDecoration(
+                                  hintText: 'Apellidos',
+                                  icon: Icon(Icons.person, color: Colors.white),
                                   filled: true,
                                   fillColor: Colors.white,
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 5.0),
-                            const SizedBox(
+                            const SizedBox(height: 8.0),
+                            SizedBox(
                               width: 250,
                               height: 40,
                               child: TextField(
-                                decoration: InputDecoration(
-                                  hintText: 'Correo',
-                                  icon: Icon(Icons.email),
+                                controller: nickname,
+                                decoration: const InputDecoration(
+                                  hintText: 'Nickname',
+                                  icon: Icon(Icons.person, color: Colors.white),
                                   filled: true,
                                   fillColor: Colors.white,
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 5.0),
-                            const SizedBox(
-                              width: 250,
-                              height: 40,
-                              child: TextField(
-                                decoration: InputDecoration(
-                                  hintText: 'Contraseña',
-                                  icon: Icon(Icons.lock),
-                                  filled: true,
-                                  fillColor: Colors.white,
-                                ),
-                                obscureText: true,
-                              ),
-                            ),
-                            const SizedBox(height: 5.0),
-                            const SizedBox(
-                              width: 250,
-                              height: 40,
-                              child: TextField(
-                                decoration: InputDecoration(
-                                  hintText: 'Repita la contraseña',
-                                  icon: Icon(Icons.lock),
-                                  filled: true,
-                                  fillColor: Colors.white,
-                                ),
-                                obscureText: true,
-                              ),
-                            ),
-                            const SizedBox(height: 0.0),
+                            const SizedBox(height: 20.0),
                             ElevatedButton(
                               onPressed: () {
-                                // Implementar la lógica de registro aquí
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => RegisterScreenPassword(name, surname, nickname)),
+                                );
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue,
-                                padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.0), // Ajusta el relleno del botón
-                                minimumSize: Size(50.0, 5.0), // Define el tamaño mínimo del botón
+                                backgroundColor: ColoresApp.segundoColor,
+                                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.0), // Ajusta el relleno del botón
+                                fixedSize: const Size(100.0, 30.0), // Define el tamaño mínimo del botón
                               ),
-                              child: const Text(
-                                'Enviar',
-                                style: TextStyle(color: Colors.white),
-                              ),
+                              child: const Icon(Icons.arrow_forward, color: Colors.white,)
                             ),
                           ],
                         ),
@@ -132,7 +119,7 @@ class RegisterScreen extends StatelessWidget {
 
 
 void main() {
-  runApp(const MaterialApp(
+  runApp(MaterialApp(
     home: RegisterScreen(),
   ));
 }
