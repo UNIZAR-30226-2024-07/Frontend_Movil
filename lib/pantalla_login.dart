@@ -2,15 +2,11 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:psoft_07/colores.dart';
-import 'package:psoft_07/pantalla_derrota_partida.dart';
+import 'package:psoft_07/Usuario.dart';
 import 'package:psoft_07/pantalla_inicio.dart';
 import 'package:psoft_07/pantalla_principal.dart';
 import 'package:psoft_07/pantalla_registro.dart';
 import 'package:get/get.dart';
-
-import 'package:psoft_07/pantalla_victoria_partida.dart';
-
-
 
 
 class LoginScreen extends StatelessWidget {
@@ -24,7 +20,7 @@ class LoginScreen extends StatelessWidget {
   final getConnect = GetConnect();
 
   void _login(nombre, contrasenya, context) async {
-    final res = await getConnect.post('https://backend-uf65.onrender.com/api/user/login', {
+    final res = await getConnect.post('${EnlaceApp.enlaceBase}/api/user/login', {
       "nick":nombre,
       "password":contrasenya
     });
@@ -38,17 +34,61 @@ class LoginScreen extends StatelessWidget {
     }
     else {
 
-
-
-
-      print(res.body['user']['rol']);
-
       if (res.body['user']['rol'] == 'user') {
-        String token = res.body['token'];
+
+        print(res.body['user']['avatars']);
+
+
+        User user = User(
+          id: res.body['user']['_id'],
+          nick: res.body['user']['nick'],
+          name: res.body['user']['name'],
+          surname: res.body['user']['surname'],
+          email: res.body['user']['email'],
+          password: res.body['user']['password'],
+          rol: res.body['user']['rol'],
+          tournaments: [],
+          coins: res.body['user']['coins'].toInt(),
+          avatars: [],
+          rugs: [],
+          cards: [],
+          token: res.body['token']);
+
+        // Bucle para agregar cada avatar a la lista de avatares del usuario
+        for (var avatarData in res.body['user']['tournaments']) {
+          user.avatars.add(AvatarEntry(
+            avatar: avatarData['tournaments'],
+            current: avatarData['position'],
+          ));
+        }
+
+        // Bucle para agregar cada avatar a la lista de avatares del usuario
+        for (var avatarData in res.body['user']['avatars']) {
+          user.avatars.add(AvatarEntry(
+            avatar: avatarData['avatar'],
+            current: avatarData['current'],
+          ));
+        }
+
+        // Bucle para agregar cada avatar a la lista de avatares del usuario
+        for (var avatarData in res.body['user']['rugs']) {
+          user.avatars.add(AvatarEntry(
+            avatar: avatarData['rug'],
+            current: avatarData['current'],
+          ));
+        }
+
+        // Bucle para agregar cada avatar a la lista de avatares del usuario
+        for (var avatarData in res.body['user']['cards']) {
+          user.avatars.add(AvatarEntry(
+            avatar: avatarData['card'],
+            current: avatarData['current'],
+          ));
+        }
 
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => Principal(token)),
+          MaterialPageRoute(builder: (context) => Principal(user)),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

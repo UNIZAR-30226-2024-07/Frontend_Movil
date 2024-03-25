@@ -4,6 +4,8 @@ import 'package:psoft_07/colores.dart';
 import 'package:psoft_07/pantalla_principal.dart';
 import 'package:psoft_07/pantalla_registro.dart';
 
+import 'Usuario.dart';
+
 class RegisterScreenPassword extends StatelessWidget {
 
   TextEditingController name;
@@ -47,7 +49,7 @@ class RegisterScreenPassword extends StatelessWidget {
       return;
     }
 
-    final res = await getConnect.post('https://backend-uf65.onrender.com/api/user/add', {
+    final res = await getConnect.post('${EnlaceApp.enlaceBase}/api/user/add', {
       "nick":nickname,
       "name":name,
       "surname":surname,
@@ -64,17 +66,48 @@ class RegisterScreenPassword extends StatelessWidget {
     }
     else {
 
-      String cookie = (res.headers?["set-cookie"])!;
+      User user = User(
+          id: res.body['user']['_id'],
+          nick: res.body['user']['nick'],
+          name: res.body['user']['name'],
+          surname: res.body['user']['surname'],
+          email: res.body['user']['email'],
+          password: res.body['user']['password'],
+          rol: res.body['user']['rol'],
+          coins: res.body['user']['coins'],
+          tournaments: [],
+          avatars: [],
+          rugs: [],
+          cards: [],
+          token: res.body['token']);
 
-      // Encontrar la posición del primer ;
-      int index = cookie.indexOf(';');
+      // Bucle para agregar cada avatar a la lista de avatares del usuario
+      for (var avatarData in res.body['user']['avatars']) {
+        user.avatars.add(AvatarEntry(
+          avatar: avatarData['avatar'],
+          current: avatarData['current'],
+        ));
+      }
 
-      // Obtener el substring hasta el primer ;
-      String token = cookie.substring(0, index);
+      // Bucle para agregar cada avatar a la lista de avatares del usuario
+      for (var avatarData in res.body['user']['rugs']) {
+        user.avatars.add(AvatarEntry(
+          avatar: avatarData['rug'],
+          current: avatarData['current'],
+        ));
+      }
+
+      // Bucle para agregar cada avatar a la lista de avatares del usuario
+      for (var avatarData in res.body['user']['cards']) {
+        user.avatars.add(AvatarEntry(
+          avatar: avatarData['card'],
+          current: avatarData['current'],
+        ));
+      }
 
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => Principal(token)),
+        MaterialPageRoute(builder: (context) => Principal(user)),
         );
       }
   }

@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:psoft_07/colores.dart';
+
+import 'Usuario.dart';
 
 class Principal extends StatelessWidget {
 
 
-  final String token;
+  final User user;
 
-  Principal(this.token, {super.key});
+  Principal(this.user, {super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: ColoresApp.fondoPantallaColor,
       appBar: AppBar(
-        backgroundColor: Colors.brown[600],
+        backgroundColor: ColoresApp.cabeceraColor,
         elevation: 2, // Ajusta el valor según el tamaño de la sombra que desees
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -27,13 +31,13 @@ class Principal extends StatelessWidget {
             onPressed: () {
               // Acción para el botón de Amigos
             },
-            icon: const Icon(Icons.group),
+            icon: const Icon(Icons.group, color: Colors.white,),
           ),
           IconButton(
             onPressed: () {
               // Acción para el botón de Ranking
             },
-            icon: const Icon(Icons.format_list_numbered),
+            icon: const Icon(Icons.format_list_numbered, color: Colors.white,),
           ),
         ],
       ),
@@ -45,21 +49,48 @@ class Principal extends StatelessWidget {
               onPressed: () {
                 // Acción para el botón de Partida Pública
               },
-              child: Text(token),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColoresApp.segundoColor,
+              ),
+              child: const Text(
+                  "Partida Publica",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 // Acción para el botón de Partida Privada
               },
-              child: const Text('Partida Privada'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColoresApp.segundoColor,
+              ),
+              child: const Text(
+                  'Partida Privada',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 // Acción para el botón de Torneo
               },
-              child: const Text('Torneo'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColoresApp.segundoColor,
+              ),
+              child: const Text(
+                  'Torneo',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         ),
@@ -76,6 +107,21 @@ class Principal extends StatelessWidget {
 
 void main() {
   runApp(MaterialApp(
-    home: Principal('Un token'),
+    home: Principal(
+        User(
+            id: "",
+            nick: "",
+            name: "",
+            surname: "",
+            email: "",
+            password: "",
+            rol: "",
+            coins: 0,
+            tournaments: [],
+            avatars: [],
+            rugs: [],
+            cards: [],
+            token: "")
+    ),
   ));
 }
