@@ -13,7 +13,7 @@ class SearchFriendsScreen extends StatefulWidget {
     try {
       final getConnect = GetConnect();
       final response = await getConnect.get(
-        'https://backend-uf65.onrender.com/api/user/getAllUsers',
+        '${EnlaceApp.enlaceBase}/api/user/getAllUsers',
         headers: {
           "Authorization": user.token,
         },
@@ -38,7 +38,7 @@ class SearchFriendsScreen extends StatefulWidget {
     try {
       final getConnect = GetConnect();
       final response = await getConnect.get(
-        'https://backend-uf65.onrender.com/api/avatar/avatarById/$avatarId',
+        '${EnlaceApp.enlaceBase}/api/avatar/avatarById/$avatarId',
         headers: {
           "Authorization": user.token,
         },
@@ -51,7 +51,7 @@ class SearchFriendsScreen extends StatefulWidget {
 
   Future<String> _getImageUrl(String avatarId) async {
     final imageName = await _getFriendAvatar(avatarId);
-    return "https://backend-uf65.onrender.com/images/$imageName";
+    return "${EnlaceApp.enlaceBase}/images/$imageName";
   }
 
   @override
@@ -67,7 +67,7 @@ class _SearchFriendsScreenState extends State<SearchFriendsScreen> {
     try {
       final getConnect = GetConnect();
       final response = await getConnect.post(
-        'https://backend-uf65.onrender.com/api/friend/add/$friendId',
+        '${EnlaceApp.enlaceBase}/api/friend/add/$friendId',
         '',
         headers: {
           "Authorization": widget.user.token,

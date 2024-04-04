@@ -22,7 +22,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
     try {
       final getConnect = GetConnect();
       final response = await getConnect.get(
-        'https://backend-uf65.onrender.com/api/friend/getAllFriends',
+        '${EnlaceApp.enlaceBase}/api/friend/getAllFriends',
         headers: {
           "Authorization": widget.user.token,
         },
@@ -39,7 +39,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
     try {
       final getConnect = GetConnect();
       final response = await getConnect.get(
-        'https://backend-uf65.onrender.com/api/avatar/avatarById/$avatarId',
+        '${EnlaceApp.enlaceBase}/api/avatar/avatarById/$avatarId',
         headers: {
           "Authorization": widget.user.token,
         },
@@ -52,7 +52,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
 
   Future<String> _getImageUrl(String avatarId) async {
     final imageName = await _getFriendAvatar(avatarId);
-    return "https://backend-uf65.onrender.com/images/$imageName";
+    return "${EnlaceApp.enlaceBase}/images/$imageName";
   }
 
   String currentAvatar(List<dynamic> avatars) {

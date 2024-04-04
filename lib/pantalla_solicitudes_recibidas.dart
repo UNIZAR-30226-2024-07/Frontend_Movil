@@ -21,7 +21,7 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
     try {
       final getConnect = GetConnect();
       final response = await getConnect.get(
-        'https://backend-uf65.onrender.com/api/friend/getAllReceivedFriends',
+        '${EnlaceApp.enlaceBase}/api/friend/getAllReceivedFriends',
         headers: {
           "Authorization": widget.user.token,
         },
@@ -36,7 +36,7 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
     try {
       final getConnect = GetConnect();
       final response = await getConnect.get(
-        'https://backend-uf65.onrender.com/api/avatar/avatarById/$avatarId',
+        '${EnlaceApp.enlaceBase}/api/avatar/avatarById/$avatarId',
         headers: {
           "Authorization": widget.user.token,
         },
@@ -49,14 +49,14 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
 
   Future<String> _getImageUrl(String avatarId) async {
     final imageName = await _getFriendAvatar(avatarId);
-    return "https://backend-uf65.onrender.com/images/$imageName";
+    return "${EnlaceApp.enlaceBase}/images/$imageName";
   }
 
   Future<void> _acceptFriendRequest(String friendId) async {
     try {
       final getConnect = GetConnect();
       await getConnect.put(
-        'https://backend-uf65.onrender.com/api/friend/accept/$friendId',
+        '${EnlaceApp.enlaceBase}/api/friend/accept/$friendId',
         '',
         headers: {
           "Authorization": widget.user.token,
@@ -72,7 +72,7 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
     try {
       final getConnect = GetConnect();
       await getConnect.put(
-        'https://backend-uf65.onrender.com/api/friend/reject/$friendId',
+        '${EnlaceApp.enlaceBase}/api/friend/reject/$friendId',
         '',
         headers: {
           "Authorization": widget.user.token,

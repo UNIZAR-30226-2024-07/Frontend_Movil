@@ -12,12 +12,13 @@ class VictoryScreen extends StatelessWidget {
     final int coinsEarned = 100; // Aquí habrá que poner el número de monedas que se gana
 
     return Scaffold(
-      backgroundColor: ColoresApp.fondoPantallaColor2,
+      backgroundColor: ColoresApp.fondoPantallaColor,
       appBar: AppBar(
+        toolbarHeight: 45,
         backgroundColor: ColoresApp.cabeceraColor,
         elevation: 2,
         leading: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(3.0),
           child: Image.asset(
             'assets/logo.png',
             width: 50,
@@ -60,11 +61,14 @@ class VictoryScreen extends StatelessWidget {
                         height: 100,
                       ),
                       SizedBox(width: 50),
-                      Image.asset(
-                        'assets/victoria.png',
-                        width: 150,
-                        height: 150,
-                        fit: BoxFit.cover,
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10), // Ajusta el radio según tu preferencia
+                        child: Image.asset(
+                          'assets/victoria.png',
+                          width: 150,
+                          height: 150,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                       SizedBox(width: 50),
                       Image.asset(
