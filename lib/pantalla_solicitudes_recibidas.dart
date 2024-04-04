@@ -3,37 +3,34 @@ import 'package:get/get_connect/connect.dart';
 import 'package:psoft_07/Usuario.dart';
 import 'package:psoft_07/funcionesAvatar.dart';
 import 'package:psoft_07/pantalla_buscar_amigos.dart';
-import 'package:psoft_07/pantalla_solicitudes_recibidas.dart'; // Importa la pantalla de FriendRequestsScreen
+import 'package:psoft_07/pantalla_solicitudes_recibidas.dart';
 import 'colores.dart';
 
-class FriendsScreen extends StatefulWidget {
+class FriendRequestsScreen extends StatefulWidget {
   final FuncionesAvatar fAvatar = FuncionesAvatar();
   final User user;
 
-  FriendsScreen(this.user, {super.key});
+  FriendRequestsScreen(this.user, {super.key});
 
   @override
-  _FriendsScreenState createState() => _FriendsScreenState();
+  _FriendRequestsScreenState createState() => _FriendRequestsScreenState();
 }
 
-class _FriendsScreenState extends State<FriendsScreen> {
-  List<dynamic>? userData;
-  Future<List<dynamic>> _getAllFriends() async {
+class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
+  Future<Map<String, dynamic>> _getAllReceivedRequests() async {
     try {
       final getConnect = GetConnect();
       final response = await getConnect.get(
-        'https://backend-uf65.onrender.com/api/friend/getAllFriends',
+        'https://backend-uf65.onrender.com/api/friend/getAllReceivedFriends',
         headers: {
           "Authorization": widget.user.token,
         },
       );
-      final friends = List<dynamic>.from(response.body['friend']);
-      return friends;
+      return response.body;
     } catch (e) {
       throw Exception('Failed to load user data');
     }
   }
-
 
   Future<String> _getFriendAvatar(String avatarId) async {
     try {
@@ -55,6 +52,38 @@ class _FriendsScreenState extends State<FriendsScreen> {
     return "https://backend-uf65.onrender.com/images/$imageName";
   }
 
+  Future<void> _acceptFriendRequest(String friendId) async {
+    try {
+      final getConnect = GetConnect();
+      await getConnect.put(
+        'https://backend-uf65.onrender.com/api/friend/accept/$friendId',
+        '',
+        headers: {
+          "Authorization": widget.user.token,
+        },
+      );
+      setState(() {});
+    } catch (e) {
+      throw Exception('Failed to accept friend request');
+    }
+  }
+
+  Future<void> _rejectFriendRequest(String friendId) async {
+    try {
+      final getConnect = GetConnect();
+      await getConnect.put(
+        'https://backend-uf65.onrender.com/api/friend/reject/$friendId',
+        '',
+        headers: {
+          "Authorization": widget.user.token,
+        },
+      );
+      setState(() {});
+    } catch (e) {
+      throw Exception('Failed to reject friend request');
+    }
+  }
+
   String currentAvatar(List<dynamic> avatars) {
     int i = 0;
     String avatarId = '660316f09ea0caeffda7def9';
@@ -68,13 +97,6 @@ class _FriendsScreenState extends State<FriendsScreen> {
       i++;
     }
     return avatarId;
-  }
-
-  void _refreshFriendsList() {
-    setState(() {
-      // Coloca aquí el código necesario para actualizar la lista de amigos
-      // Esto se ejecutará cuando se regrese de la pantalla de FriendRequestsScreen
-    });
   }
 
   @override
@@ -95,8 +117,8 @@ class _FriendsScreenState extends State<FriendsScreen> {
           ),
         ),
       ),
-      body: FutureBuilder<List<dynamic>>(
-        future: _getAllFriends(),
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: _getAllReceivedRequests(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
@@ -107,14 +129,14 @@ class _FriendsScreenState extends State<FriendsScreen> {
               child: Text('Error: ${snapshot.error}'),
             );
           } else {
-            userData = snapshot.data;
+            final userData = snapshot.data;
 
             WidgetsBinding.instance!.addPostFrameCallback((_) {
-              if (userData!.isEmpty) {
+              if (userData?['friend'].isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text(
-                      'No se encontraron amigos',
+                      'No se encontraron solicitudes de amistad',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 18,
@@ -132,54 +154,48 @@ class _FriendsScreenState extends State<FriendsScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                      width: 170, // Anchura del contenedor
-                      decoration:  BoxDecoration(
-                        color: ColoresApp.segundoColor, // Color de fondo
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.people, // Icono de personas
-                            size: 20, // Tamaño del icono
-                            color: Colors.white, // Color del icono
-                          ),
-                          SizedBox(width: 5), // Espacio entre el icono y el texto
-                          Text(
-                            'Lista de amigos',
-                            style: TextStyle(
-                              fontSize: 16, // Tamaño del texto
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 270),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    width: 170, // Anchura del contenedor
+                    decoration:  BoxDecoration(
+                      color: ColoresApp.segundoColor, // Color de fondo
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                  ],
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.people, // Icono de personas
+                          size: 20, // Tamaño del icono
+                          color: Colors.white, // Color del icono
+                        ),
+                        SizedBox(width: 5), // Espacio entre el icono y el texto
+                        Text(
+                          'Solicitudes Recibidas',
+                          style: TextStyle(
+                            fontSize: 16, // Tamaño del texto
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-
-
                 const SizedBox(height: 20),
                 Expanded(
                   child: ListView.builder(
-                    itemCount: userData?.length,
+                    itemCount: userData?['friend'].length,
                     itemBuilder: (BuildContext context, int index) {
-                      final friend = userData?[index];
-
+                      final friend = userData?['friend'][index];
                       String avatarId;
                       if (friend['avatars'].isEmpty) {
                         avatarId = '6603f0690c9c5706f2ebfb32'; // avatar default
                       } else {
                         avatarId = currentAvatar(friend['avatars']);
                       }
-
                       return Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Card(
@@ -211,16 +227,41 @@ class _FriendsScreenState extends State<FriendsScreen> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            trailing: ElevatedButton(
-                              onPressed: () {
-                                // Elimina el amigo y actualiza la lista
-                                // _deleteFriend(friend['_id']);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                foregroundColor: Colors.white,
-                                backgroundColor: Colors.red[900],
-                              ),
-                              child: const Text('Eliminar'),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                SizedBox(
+                                  width: 108, // Ancho deseado del botón "Aceptar"
+                                  height: 40,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      _acceptFriendRequest(friend['_id']);
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      fixedSize: Size(100, 50), // Tamaño deseado del botón "Aceptar"
+                                      foregroundColor: Colors.white,
+                                      backgroundColor: Colors.green[900],
+                                    ),
+                                    child: Text('Aceptar'),
+                                  ),
+                                ),
+                                const SizedBox(width: 8), // Espacio entre botones
+                                SizedBox(
+                                  width: 108, // Ancho deseado del botón "Rechazar"
+                                  height: 40,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      _rejectFriendRequest(friend['_id']);
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      fixedSize: const Size(100, 50), // Tamaño deseado del botón "Rechazar"
+                                      foregroundColor: Colors.white,
+                                      backgroundColor: Colors.red[900],
+                                    ),
+                                    child: const Text('Rechazar'),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -228,53 +269,11 @@ class _FriendsScreenState extends State<FriendsScreen> {
                     },
                   ),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
               ],
             );
           }
         },
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
-      floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(right: 10.0, top: 70.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            SizedBox(
-              width: 50, // Ancho deseado del botón flotante
-              height: 50, // Alto deseado del botón flotante
-              child: FloatingActionButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => FriendRequestsScreen(widget.user)),
-                  ).then((value) {
-                    // Cuando se regresa de FriendRequestsScreen, actualiza la lista de amigos
-                    _refreshFriendsList();
-                  });
-                },
-                backgroundColor: ColoresApp.segundoColor,
-                child: const Icon(Icons.notification_add, color: Colors.white),
-              ),
-            ),
-            const SizedBox(width: 15),
-            SizedBox(
-              width: 50, // Ancho deseado del botón flotante
-              height: 50, // Alto deseado del botón flotante
-              child: FloatingActionButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => SearchFriendsScreen(widget.user, userData!)),
-                  );
-                },
-                backgroundColor: ColoresApp.segundoColor,
-                child: const Icon(Icons.person_add, color: Colors.white),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -282,7 +281,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
 
 void main() {
   runApp(MaterialApp(
-    home: FriendsScreen(
+    home: FriendRequestsScreen(
       User(
         id: "",
         nick: "",
