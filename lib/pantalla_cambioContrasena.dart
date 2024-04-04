@@ -6,17 +6,17 @@ import 'package:get/get.dart';
 import 'package:psoft_07/pantalla_victoria_partida.dart';
 
 
-class changeNameScreen extends StatelessWidget {
+class changePasswordScreen extends StatelessWidget {
 
-  changeNameScreen({super.key});
+  changePasswordScreen({super.key});
 
 
-  TextEditingController nombreActual = TextEditingController();
-  TextEditingController nuevoNombre = TextEditingController();
-  TextEditingController confirmacionNuevoNombre = TextEditingController();
+  TextEditingController passwdActual = TextEditingController();
+  TextEditingController passwdNueva = TextEditingController();
+  TextEditingController passwdNuevaConfirmar = TextEditingController();
   final getConnect = GetConnect();
 
-  void _comprobarCampos(String nombreActual, String nuevoNombre, String confirmarNuevoNombre) async {
+  void _cambioPasswd(String nombreActual, String nuevoNombre, String confirmarNuevoNombre) async {
     // Comprobar si nombreActual es igual a nuevoNombre
     if (nombreActual == nuevoNombre) {
       // Mostrar mensaje de error para nombreActual igual a nuevoNombre
@@ -32,7 +32,7 @@ class changeNameScreen extends StatelessWidget {
     }
 
     // Ambas condiciones son correctas, realizar la petición a la API
-    final res = await getConnect.put('https://backend-uf65.onrender.com/api/user/update', {
+    final res = await getConnect.post('https://backend-uf65.onrender.com/api/user/login', {
       "nick": nombreActual,
       "password": nuevoNombre // Utilizamos nuevoNombre para la prueba, puedes cambiarlo según sea necesario
     });
@@ -70,7 +70,7 @@ class changeNameScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Text(
-                            'Cambio de Nombre',
+                            'Cambio de Contraseña',
                             style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -82,12 +82,12 @@ class changeNameScreen extends StatelessWidget {
                             width: 300,
                             height: 40,
                             child: TextField(
-                              controller: nombreActual,
+                              controller: passwdActual,
                               keyboardType: TextInputType.text,
                               decoration: const InputDecoration(
-                                hintText: 'Nombre de usuario actual',
+                                hintText: 'Contraseña actual',
                                 icon: Icon(
-                                  Icons.person,
+                                  Icons.lock,
                                   color: Colors.white,
                                 ),
                                 filled: true,
@@ -100,12 +100,12 @@ class changeNameScreen extends StatelessWidget {
                             height: 40,
                             width: 300,
                             child: TextField(
-                              controller: nuevoNombre,
+                              controller: passwdNueva,
                               keyboardType: TextInputType.text,
                               decoration: const InputDecoration(
-                                hintText: 'Nuevo nombre',
+                                hintText: 'Nueva contraseña',
                                 icon: Icon(
-                                  Icons.person_add_rounded,
+                                  Icons.password,
                                   color: Colors.white,
                                 ),
                                 filled: true,
@@ -118,12 +118,12 @@ class changeNameScreen extends StatelessWidget {
                             height: 40,
                             width: 300,
                             child: TextField(
-                              controller: confirmacionNuevoNombre,
+                              controller: passwdNuevaConfirmar,
                               keyboardType: TextInputType.text,
                               decoration: const InputDecoration(
-                                hintText: 'Confirmar Nuevo nombre',
+                                hintText: 'Confirmar contraseña',
                                 icon: Icon(
-                                  Icons.person_add_rounded,
+                                  Icons.password,
                                   color: Colors.white,
                                 ),
                                 filled: true,
@@ -134,13 +134,13 @@ class changeNameScreen extends StatelessWidget {
                           const SizedBox(height: 10.0),
                           ElevatedButton(
                             onPressed: () {
-                              _comprobarCampos(nombreActual.text, nuevoNombre.text, confirmacionNuevoNombre.text);
+                              _cambioPasswd(passwdActual.text, passwdNueva.text, passwdNuevaConfirmar.text);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: ColoresApp.segundoColor,
                             ),
                             child: const Text(
-                              'Cambiar Nombre',
+                              'Cambiar Contraseña',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -169,6 +169,6 @@ class changeNameScreen extends StatelessWidget {
 
 void main() {
   runApp(MaterialApp(
-    home: changeNameScreen(),
+    home: changePasswordScreen(),
   ));
 }
