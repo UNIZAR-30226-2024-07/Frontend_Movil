@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:psoft_07/colores.dart';
+import 'package:psoft_07/pantalla_login.dart';
 import 'package:psoft_07/pantalla_registro_password.dart';
 
 
@@ -87,19 +88,38 @@ class RegisterScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 20.0),
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => RegisterScreenPassword(name, surname, nickname)),
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: ColoresApp.segundoColor,
-                                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.0), // Ajusta el relleno del botón
-                                fixedSize: const Size(100.0, 30.0), // Define el tamaño mínimo del botón
-                              ),
-                              child: const Icon(Icons.arrow_forward, color: Colors.white,)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(builder: (context) => LoginScreen()),
+                                      );
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: ColoresApp.segundoColor,
+                                      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.0), // Ajusta el relleno del botón
+                                      fixedSize: const Size(100.0, 30.0), // Define el tamaño mínimo del botón
+                                    ),
+                                    child: const Icon(Icons.arrow_back , color: Colors.white,)
+                                ),
+                                ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(builder: (context) => RegisterScreenPassword(name, surname, nickname)),
+                                      );
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: ColoresApp.segundoColor,
+                                      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.0), // Ajusta el relleno del botón
+                                      fixedSize: const Size(100.0, 30.0), // Define el tamaño mínimo del botón
+                                    ),
+                                    child: const Icon(Icons.arrow_forward, color: Colors.white,)
+                                ),
+                              ],
                             ),
                           ],
                         ),

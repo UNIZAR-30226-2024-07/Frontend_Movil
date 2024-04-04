@@ -82,6 +82,14 @@ class RegisterScreenPassword extends StatelessWidget {
           token: res.body['token']);
 
       // Bucle para agregar cada avatar a la lista de avatares del usuario
+      for (var tournamentData in res.body['user']['tournaments']) {
+        user.tournaments.add(TournamentEntry(
+          tournament: tournamentData['tournament'],
+          round: tournamentData['position'],
+        ));
+      }
+
+      // Bucle para agregar cada avatar a la lista de avatares del usuario
       for (var avatarData in res.body['user']['avatars']) {
         user.avatars.add(AvatarEntry(
           avatar: avatarData['avatar'],
@@ -90,20 +98,21 @@ class RegisterScreenPassword extends StatelessWidget {
       }
 
       // Bucle para agregar cada avatar a la lista de avatares del usuario
-      for (var avatarData in res.body['user']['rugs']) {
-        user.avatars.add(AvatarEntry(
-          avatar: avatarData['rug'],
-          current: avatarData['current'],
+      for (var rugData in res.body['user']['rugs']) {
+        user.rugs.add(RugEntry(
+          rug: rugData['rug'],
+          current: rugData['current'],
         ));
       }
 
       // Bucle para agregar cada avatar a la lista de avatares del usuario
-      for (var avatarData in res.body['user']['cards']) {
-        user.avatars.add(AvatarEntry(
-          avatar: avatarData['card'],
-          current: avatarData['current'],
+      for (var cardData in res.body['user']['cards']) {
+        user.cards.add(CardEntry(
+          card: cardData['card'],
+          current: cardData['current'],
         ));
       }
+
 
       Navigator.push(
         context,
@@ -171,6 +180,7 @@ class RegisterScreenPassword extends StatelessWidget {
                                   filled: true,
                                   fillColor: Colors.white,
                                 ),
+                                obscureText: true,
                               ),
                             ),
                             const SizedBox(height: 8.0),
@@ -185,6 +195,8 @@ class RegisterScreenPassword extends StatelessWidget {
                                   filled: true,
                                   fillColor: Colors.white,
                                 ),
+                                obscureText: true,
+
                               ),
                             ),
                             const SizedBox(height: 20.0),

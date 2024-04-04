@@ -34,11 +34,11 @@ class User {
 
 class TournamentEntry {
   String tournament;
-  int position;
+  int round;
 
   TournamentEntry({
     required this.tournament,
-    this.position = 8,
+    this.round = 8,
   });
 }
 

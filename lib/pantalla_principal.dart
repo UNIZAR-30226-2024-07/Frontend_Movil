@@ -5,7 +5,6 @@ import 'Usuario.dart';
 
 class Principal extends StatelessWidget {
 
-
   final User user;
 
   Principal(this.user, {super.key});
