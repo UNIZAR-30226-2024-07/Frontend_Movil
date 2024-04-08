@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:psoft_07/colores.dart';
 import 'package:get/get.dart';
+import 'package:psoft_07/pantalla_cambiar_avatar.dart';
 import 'package:psoft_07/pantalla_cambioNombre.dart';
 import 'package:psoft_07/pantalla_victoria_partida.dart';
 
@@ -27,74 +28,92 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+          backgroundColor: ColoresApp.cabeceraColor,
+          elevation: 2, // Ajusta el valor según el tamaño de la sombra que desees
+          leading: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Image.asset(
+              'assets/logo.png', // Ruta de la imagen
+              width: 50, // Ancho de la imagen
+              height: 50, // Altura de la imagen
+              fit: BoxFit.cover,
+            ),
+          ),
+      ),
+
       backgroundColor: ColoresApp.fondoPantallaColor,
       body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Stack(
-            children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 400,
-                    height: 300,
-                    decoration: BoxDecoration(
-                      color: ColoresApp.cabeceraColor,
-                      borderRadius: BorderRadius.circular(15.0),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            // Acción para la primera opción
-                          },
-                          child: Text(
-                            'Cambiar avatar',
-                            style: TextStyle(fontSize: 20),
-                          ),
-                        ),
-                        SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: () {
-                            // Acción para la segunda opción
-                          },
-                          child: Text(
-                            'Cambiar nombre usuario',
-                            style: TextStyle(fontSize: 20),
-                          ),
-                        ),
-                        SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: () {
-                            // Acción para la tercera opción
-                          },
-                          child: Text(
-                            'Cambiar contraseña',
-                            style: TextStyle(fontSize: 20),
-                          ),
-                        ),
-                        SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: () {
-                            // Acción para la tercera opción
-                          },
-                          child: Text(
-                            'Ver estadísticas',
-                            style: TextStyle(fontSize: 20),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 10.0),
-                ],
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ChangeAvatar(user)),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColoresApp.segundoColor,
               ),
-
-
-            ],
-          ),
+              child: const Text(
+                'Cambiar avatar',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                // Acción para la segunda opción
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColoresApp.segundoColor,
+              ),
+              child: const Text(
+                'Cambiar nombre usuario',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                // Acción para la tercera opción
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColoresApp.segundoColor,
+              ),
+              child: const Text(
+                'Cambiar contraseña',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                // Acción para la tercera opción
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColoresApp.segundoColor,
+              ),
+              child: const Text(
+                'Ver estadísticas',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
