@@ -34,7 +34,7 @@ class changePasswordScreen extends StatelessWidget {
 
     // Ambas condiciones son correctas, realizar la petición a la API
     final res = await getConnect.post('https://backend-uf65.onrender.com/api/user/update', {
-      "nick": context.,
+      //"nick": context.,
       "password": passwdNuevaConfirmar // Utilizamos nuevoNombre para la prueba, puedes cambiarlo según sea necesario
     });
 

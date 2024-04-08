@@ -1,117 +1,123 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:psoft_07/pantalla_login.dart';
-import 'package:psoft_07/pantalla_registro.dart';
+import 'package:psoft_07/colores.dart';
+import 'package:get/get.dart';
+import 'package:psoft_07/pantalla_cambioNombre.dart';
+import 'package:psoft_07/pantalla_victoria_partida.dart';
 
-class WelcomeScreen extends StatelessWidget {
-  const WelcomeScreen({Key? key}) : super(key: key);
+import 'Usuario.dart';
+
+
+class SettingsScreen extends StatelessWidget {
+
+  final User user;
+
+  SettingsScreen(this.user, {super.key});
+  final getConnect = GetConnect();
+
+  void mostrarError(String mensaje, BuildContext context) {
+    // Aquí puedes implementar la lógica para mostrar un pop-up con el mensaje de error
+    // Por ejemplo, utilizando showDialog o ScaffoldMessenger.of(context).showSnackBar
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(mensaje),
+      duration: Duration(seconds: 3),
+    ));
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.green,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(40.0),
-        child: AppBar(
-        backgroundColor: Colors.brown[600],
-          leading: Padding (
-            padding: const EdgeInsets.only(left: 8.0, bottom: 5.0),
-            child: Image.asset(
-            'assets/logo.png',
-            width: 30,
-            height: 30,
-            ),
+      backgroundColor: ColoresApp.fondoPantallaColor,
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Stack(
+            children: [
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 400,
+                    height: 300,
+                    decoration: BoxDecoration(
+                      color: ColoresApp.cabeceraColor,
+                      borderRadius: BorderRadius.circular(15.0),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            // Acción para la primera opción
+                          },
+                          child: Text(
+                            'Cambiar avatar',
+                            style: TextStyle(fontSize: 20),
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        ElevatedButton(
+                          onPressed: () {
+                            // Acción para la segunda opción
+                          },
+                          child: Text(
+                            'Cambiar nombre usuario',
+                            style: TextStyle(fontSize: 20),
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        ElevatedButton(
+                          onPressed: () {
+                            // Acción para la tercera opción
+                          },
+                          child: Text(
+                            'Cambiar contraseña',
+                            style: TextStyle(fontSize: 20),
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        ElevatedButton(
+                          onPressed: () {
+                            // Acción para la tercera opción
+                          },
+                          child: Text(
+                            'Ver estadísticas',
+                            style: TextStyle(fontSize: 20),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10.0),
+                ],
+              ),
+
+
+            ],
           ),
         ),
       ),
-        body: Center(
-            child: Column (
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginScreen()),
-                  );
-                },
-                style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all<Color>(Colors.white),
-                ),
-                child: const Text(
-                  'Cambiar avatar',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 20,
-                  ), // Cambia el color del texto si es necesario
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginScreen()),
-                  );
-                },
-                style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all<Color>(Colors.white),
-
-                ),
-                child: const Text(
-                  'Cambiar nombre usuario',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 20,
-                  ), // Cambia el color del texto si es necesario
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginScreen()),
-                  );
-                },
-                style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all<Color>(Colors.white),
-
-                ),
-                child: const Text(
-                  'Cambiar contraseña',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 20,
-                  ), // Cambia el color del texto si es necesario
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginScreen()),
-                  );
-                },
-                style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all<Color>(Colors.white),
-
-                ),
-                child: const Text(
-                  'Ver estadisticas',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 20,
-                  ), // Cambia el color del texto si es necesario
-                ),
-              ),
-            ],
-          )
-        ),
     );
   }
 }
 
 void main() {
-  runApp(const MaterialApp(
-    home: WelcomeScreen(),
+  runApp(MaterialApp(
+    home: changeNameScreen(
+        User(
+            id: "",
+            nick: "",
+            name: "",
+            surname: "",
+            email: "",
+            password: "",
+            rol: "",
+            coins: 0,
+            tournaments: [],
+            avatars: [],
+            rugs: [],
+            cards: [],
+            token: "")
+    ),
   ));
 }
