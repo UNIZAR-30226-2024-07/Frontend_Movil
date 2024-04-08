@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'Usuario.dart';
 
 class PauseScreen extends StatelessWidget {
-  const PauseScreen({Key? key}) : super(key: key);
+  final User user;
 
+  PauseScreen(this.user, {super.key});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -118,7 +120,22 @@ class PauseScreen extends StatelessWidget {
 
 void main() {
   runApp(MaterialApp(
-    home: PauseScreen(),
+    home: PauseScreen(
+        User(
+            id: "",
+            nick: "",
+            name: "",
+            surname: "",
+            email: "",
+            password: "",
+            rol: "",
+            coins: 0,
+            tournaments: [],
+            avatars: [],
+            rugs: [],
+            cards: [],
+            token: "")
+    ),
     debugShowCheckedModeBanner: false,
   ));
 }

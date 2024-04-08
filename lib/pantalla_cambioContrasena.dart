@@ -2,47 +2,52 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:psoft_07/colores.dart';
 import 'package:get/get.dart';
-
 import 'package:psoft_07/pantalla_victoria_partida.dart';
+
+import 'Usuario.dart';
 
 
 class changePasswordScreen extends StatelessWidget {
+  final User user;
 
-  changePasswordScreen({super.key});
-
+  changePasswordScreen(this.user, {super.key});
 
   TextEditingController passwdActual = TextEditingController();
   TextEditingController passwdNueva = TextEditingController();
   TextEditingController passwdNuevaConfirmar = TextEditingController();
   final getConnect = GetConnect();
 
-  void _cambioPasswd(String nombreActual, String nuevoNombre, String confirmarNuevoNombre) async {
+  void _cambioPasswd(String passwdActual, String passwdNueva, String passwdNuevaConfirmar, BuildContext context) async {
     // Comprobar si nombreActual es igual a nuevoNombre
-    if (nombreActual == nuevoNombre) {
+    if (passwdActual == passwdNueva) {
       // Mostrar mensaje de error para nombreActual igual a nuevoNombre
-      mostrarError("El nuevo nombre debe ser diferente al actual");
+      mostrarError("La nueva contraseña debe ser diferente de la actual", context);
       return;
     }
 
     // Comprobar si nuevoNombre y confirmarNuevoNombre son iguales
-    if (nuevoNombre != confirmarNuevoNombre) {
+    if (passwdNueva != passwdNuevaConfirmar) {
       // Mostrar mensaje de error para nuevoNombre diferente a confirmarNuevoNombre
-      mostrarError("Los campos de nuevo nombre no coinciden");
+      mostrarError("Los campos de nueva contraseña no coinciden", context);
       return;
     }
 
     // Ambas condiciones son correctas, realizar la petición a la API
-    final res = await getConnect.post('https://backend-uf65.onrender.com/api/user/login', {
-      "nick": nombreActual,
-      "password": nuevoNombre // Utilizamos nuevoNombre para la prueba, puedes cambiarlo según sea necesario
+    final res = await getConnect.post('https://backend-uf65.onrender.com/api/user/update', {
+      "nick": context.,
+      "password": passwdNuevaConfirmar // Utilizamos nuevoNombre para la prueba, puedes cambiarlo según sea necesario
     });
 
     // Manejar la respuesta de la API según sea necesario
   }
 
-  void mostrarError(String mensaje) {
+  void mostrarError(String mensaje, BuildContext context) {
     // Aquí puedes implementar la lógica para mostrar un pop-up con el mensaje de error
     // Por ejemplo, utilizando showDialog o ScaffoldMessenger.of(context).showSnackBar
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(mensaje),
+      duration: Duration(seconds: 3),
+    ));
   }
 
   @override
@@ -134,7 +139,7 @@ class changePasswordScreen extends StatelessWidget {
                           const SizedBox(height: 10.0),
                           ElevatedButton(
                             onPressed: () {
-                              _cambioPasswd(passwdActual.text, passwdNueva.text, passwdNuevaConfirmar.text);
+                              _cambioPasswd(passwdActual.text, passwdNueva.text, passwdNuevaConfirmar.text, context);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: ColoresApp.segundoColor,
@@ -169,6 +174,21 @@ class changePasswordScreen extends StatelessWidget {
 
 void main() {
   runApp(MaterialApp(
-    home: changePasswordScreen(),
+    home: changePasswordScreen(
+        User(
+            id: "",
+            nick: "",
+            name: "",
+            surname: "",
+            email: "",
+            password: "",
+            rol: "",
+            coins: 0,
+            tournaments: [],
+            avatars: [],
+            rugs: [],
+            cards: [],
+            token: "")
+    ),
   ));
 }

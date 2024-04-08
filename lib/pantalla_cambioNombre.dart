@@ -5,12 +5,14 @@ import 'package:get/get.dart';
 
 import 'package:psoft_07/pantalla_victoria_partida.dart';
 
+import 'Usuario.dart';
+
 
 class changeNameScreen extends StatelessWidget {
 
-  changeNameScreen({super.key});
+  final User user;
 
-
+  changeNameScreen(this.user, {super.key});
   TextEditingController nombreActual = TextEditingController();
   TextEditingController nuevoNombre = TextEditingController();
   TextEditingController confirmacionNuevoNombre = TextEditingController();
@@ -169,6 +171,21 @@ class changeNameScreen extends StatelessWidget {
 
 void main() {
   runApp(MaterialApp(
-    home: changeNameScreen(),
+    home: changeNameScreen(
+        User(
+            id: "",
+            nick: "",
+            name: "",
+            surname: "",
+            email: "",
+            password: "",
+            rol: "",
+            coins: 0,
+            tournaments: [],
+            avatars: [],
+            rugs: [],
+            cards: [],
+            token: "")
+    ),
   ));
 }
