@@ -2,7 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:psoft_07/colores.dart';
 import 'package:get/get.dart';
+import 'package:psoft_07/pantalla_cambioNombre.dart';
 import 'package:psoft_07/pantalla_victoria_partida.dart';
+
+import 'Usuario.dart';
 
 
 class settingsScreen extends StatelessWidget {
@@ -99,6 +102,21 @@ class settingsScreen extends StatelessWidget {
 
 void main() {
   runApp(MaterialApp(
-    home: changePasswordScreen(),
+    home: changeNameScreen(
+        User(
+            id: "",
+            nick: "",
+            name: "",
+            surname: "",
+            email: "",
+            password: "",
+            rol: "",
+            coins: 0,
+            tournaments: [],
+            avatars: [],
+            rugs: [],
+            cards: [],
+            token: "")
+    ),
   ));
 }
