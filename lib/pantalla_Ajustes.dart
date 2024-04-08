@@ -10,8 +10,9 @@ import 'Usuario.dart';
 
 class settingsScreen extends StatelessWidget {
 
-  settingsScreen({super.key});
+  final User user;
 
+  settingsScreen(this.user, {super.key});
   final getConnect = GetConnect();
 
   void mostrarError(String mensaje, BuildContext context) {
