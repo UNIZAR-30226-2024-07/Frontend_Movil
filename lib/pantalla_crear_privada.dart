@@ -18,15 +18,14 @@ class _CreatePrivateGameScreenState extends State<CreatePrivateGameScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 50,
         backgroundColor: ColoresApp.cabeceraColor,
-        elevation: 2,
+        elevation: 2, // Ajusta el valor según el tamaño de la sombra que desees
         leading: Padding(
-          padding: const EdgeInsets.all(6.0),
+          padding: const EdgeInsets.all(8.0),
           child: Image.asset(
-            'assets/logo.png',
-            width: 50,
-            height: 50,
+            'assets/logo.png', // Ruta de la imagen
+            width: 50, // Ancho de la imagen
+            height: 50, // Altura de la imagen
             fit: BoxFit.cover,
           ),
         ),
