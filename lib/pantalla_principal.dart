@@ -5,6 +5,7 @@ import 'package:psoft_07/pantalla_ajustes.dart';
 import 'package:psoft_07/pantalla_amigos.dart';
 import 'package:psoft_07/pantalla_partida_publica.dart';
 import 'package:psoft_07/pantalla_principal_partida_privada.dart';
+import 'package:psoft_07/pantalla_torneo.dart';
 
 import 'Usuario.dart';
 
@@ -149,7 +150,10 @@ class Principal extends StatelessWidget {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  // Acción para el botón de Torneo
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => TournamentGames(user)),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: ColoresApp.segundoColor,

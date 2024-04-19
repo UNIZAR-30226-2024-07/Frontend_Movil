@@ -37,9 +37,6 @@ class LoginScreen extends StatelessWidget {
 
       if (res.body['user']['rol'] == 'user') {
 
-        print(res.body['user']['avatars']);
-
-
         User user = User(
           id: res.body['user']['_id'],
           nick: res.body['user']['nick'],

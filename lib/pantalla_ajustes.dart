@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:psoft_07/colores.dart';
 import 'package:get/get.dart';
-import 'package:psoft_07/pantalla_cambiar_avatar.dart';
 import 'package:psoft_07/pantalla_cambioNombre.dart';
 import 'package:psoft_07/pantalla_victoria_partida.dart';
 
@@ -47,25 +46,6 @@ class SettingsScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ChangeAvatar(user)),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: ColoresApp.segundoColor,
-              ),
-              child: const Text(
-                'Cambiar avatar',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 // Acción para la segunda opción
