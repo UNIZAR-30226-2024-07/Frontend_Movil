@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_connect/connect.dart';
 import 'package:psoft_07/Usuario.dart';
+import 'package:psoft_07/pantalla_principal.dart';
 import 'colores.dart';
 
 class SelectSkinsScreen extends StatefulWidget {
-  final User user;
+  late final User user;
+  final getConnect = GetConnect();
 
   SelectSkinsScreen(this.user, {Key? key}) : super(key: key);
 
@@ -257,12 +259,81 @@ class _SelectSkinsState extends State<SelectSkinsScreen> {
     );
   }
 
+  void actualizarUsuario() async {
+    final res = await widget.getConnect.post('${EnlaceApp.enlaceBase}/api/user/verify', {},
+      headers: {
+        "Authorization": widget.user.token,
+      },
+    );
+
+    if (res.body['status'] == 'error') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(res.body['message'], textAlign: TextAlign.center,),
+        ),
+      );
+    } else {
+      User user = User(
+          id: res.body['user']['_id'],
+          nick: res.body['user']['nick'],
+          name: res.body['user']['name'],
+          surname: res.body['user']['surname'],
+          email: res.body['user']['email'],
+          password: res.body['user']['password'],
+          rol: res.body['user']['rol'],
+          tournaments: [],
+          coins: res.body['user']['coins'].toInt(),
+          avatars: [],
+          rugs: [],
+          cards: [],
+          token: res.body['token']);
+
+      // Bucle para agregar cada avatar a la lista de avatares del usuario
+      for (var tournamentData in res.body['user']['tournaments']) {
+        user.tournaments.add(TournamentEntry(
+          tournament: tournamentData['tournament'],
+          round: tournamentData['position'],
+        ));
+      }
+
+      // Bucle para agregar cada avatar a la lista de avatares del usuario
+      for (var avatarData in res.body['user']['avatars']) {
+        user.avatars.add(AvatarEntry(
+          avatar: avatarData['avatar'],
+          current: avatarData['current'],
+        ));
+      }
+
+      // Bucle para agregar cada avatar a la lista de avatares del usuario
+      for (var rugData in res.body['user']['rugs']) {
+        user.rugs.add(RugEntry(
+          rug: rugData['rug'],
+          current: rugData['current'],
+        ));
+      }
+
+      // Bucle para agregar cada avatar a la lista de avatares del usuario
+      for (var cardData in res.body['user']['cards']) {
+        user.cards.add(CardEntry(
+          card: cardData['card'],
+          current: cardData['current'],
+        ));
+      }
+      widget.user = user;
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
         onWillPop: () async  {
-          return false;
+          actualizarUsuario();
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => Principal(widget.user)),
+          );
+          return true;
         },
         child: Scaffold(
           backgroundColor: ColoresApp.fondoPantallaColor,
