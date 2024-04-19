@@ -3,8 +3,10 @@ import 'package:get/get_connect/connect.dart';
 import 'package:psoft_07/colores.dart';
 import 'package:psoft_07/pantalla_ajustes.dart';
 import 'package:psoft_07/pantalla_amigos.dart';
+import 'package:psoft_07/pantalla_eleccion_skins.dart';
 import 'package:psoft_07/pantalla_partida_publica.dart';
 import 'package:psoft_07/pantalla_principal_partida_privada.dart';
+import 'package:psoft_07/pantalla_tienda.dart';
 import 'package:psoft_07/pantalla_torneo.dart';
 
 import 'Usuario.dart';
@@ -103,7 +105,26 @@ class Principal extends StatelessWidget {
                       color: Colors.white,
                       fontWeight: FontWeight.bold
                   ),
-                )
+                ),
+                const SizedBox(height: 5),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => SelectSkinsScreen(user)),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ColoresApp.segundoColor,
+                  ),
+                  child: const Text(
+                    'Aspectos',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
 
             ],
           ),
@@ -166,6 +187,7 @@ class Principal extends StatelessWidget {
                     ),
                   ),
                 ),
+
               ],
             ),
             Column(
@@ -173,7 +195,10 @@ class Principal extends StatelessWidget {
               children: [
                 ElevatedButton(
                     onPressed: () {
-
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ShopScreen(user)),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: ColoresApp.segundoColor,

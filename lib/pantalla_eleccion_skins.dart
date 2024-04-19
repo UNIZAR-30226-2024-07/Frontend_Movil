@@ -260,38 +260,43 @@ class _SelectSkinsState extends State<SelectSkinsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: ColoresApp.fondoPantallaColor,
-      appBar: AppBar(
-        backgroundColor: ColoresApp.cabeceraColor,
-        elevation: 2,
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Image.asset(
-            'assets/logo.png',
-            width: 50,
-            height: 50,
-            fit: BoxFit.cover,
-          ),
-        ),
-      ),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  mostrarCategoria('Tapetes', widget._getAllRugs),
-                  mostrarCategoria('Cartas', widget._getAllCards),
-                  mostrarCategoria('Avatares', widget._getAllAvatars),
-                ],
+    return WillPopScope(
+        onWillPop: () async  {
+          return false;
+        },
+        child: Scaffold(
+          backgroundColor: ColoresApp.fondoPantallaColor,
+          appBar: AppBar(
+            backgroundColor: ColoresApp.cabeceraColor,
+            elevation: 2,
+            leading: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Image.asset(
+                'assets/logo.png',
+                width: 50,
+                height: 50,
+                fit: BoxFit.cover,
               ),
             ),
           ),
-        ],
-      ),
+          body: Stack(
+            children: [
+              SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      mostrarCategoria('Tapetes', widget._getAllRugs),
+                      mostrarCategoria('Cartas', widget._getAllCards),
+                      mostrarCategoria('Avatares', widget._getAllAvatars),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        )
     );
   }
 }
