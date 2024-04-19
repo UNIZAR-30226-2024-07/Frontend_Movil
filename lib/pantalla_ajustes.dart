@@ -4,6 +4,7 @@ import 'package:psoft_07/colores.dart';
 import 'package:get/get.dart';
 import 'package:psoft_07/pantalla_cambioContrasena.dart';
 import 'package:psoft_07/pantalla_cambioNombre.dart';
+import 'package:psoft_07/pantalla_estadisticasJugador.dart';
 import 'package:psoft_07/pantalla_victoria_partida.dart';
 
 import 'Usuario.dart';
@@ -88,6 +89,10 @@ class SettingsScreen extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 // Acción para la tercera opción
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => estadisticasJugador(user)),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColoresApp.segundoColor,
