@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:psoft_07/colores.dart';
 import 'package:get/get.dart';
+import 'package:psoft_07/pantalla_cambioContrasena.dart';
 import 'package:psoft_07/pantalla_cambioNombre.dart';
 import 'package:psoft_07/pantalla_victoria_partida.dart';
 
@@ -48,7 +49,10 @@ class SettingsScreen extends StatelessWidget {
           children: [
             ElevatedButton(
               onPressed: () {
-                // Acción para la segunda opción
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => changeNameScreen(user)),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColoresApp.segundoColor,
@@ -64,7 +68,10 @@ class SettingsScreen extends StatelessWidget {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Acción para la tercera opción
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => changePasswordScreen(user)),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColoresApp.segundoColor,
