@@ -6,6 +6,7 @@ import 'package:psoft_07/pantalla_amigos.dart';
 import 'package:psoft_07/pantalla_eleccion_skins.dart';
 import 'package:psoft_07/pantalla_partida_publica.dart';
 import 'package:psoft_07/pantalla_principal_partida_privada.dart';
+import 'package:psoft_07/pantalla_ranking.dart';
 import 'package:psoft_07/pantalla_tienda.dart';
 import 'package:psoft_07/pantalla_torneo.dart';
 
@@ -60,7 +61,10 @@ class Principal extends StatelessWidget {
           ),
           IconButton(
             onPressed: () {
-              // Acción para el botón de Ranking
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => RankingScreen(user)),
+              );
             },
             icon: const Icon(Icons.format_list_numbered, color: Colors.white,),
           ),
