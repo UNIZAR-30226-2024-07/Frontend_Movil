@@ -75,11 +75,13 @@ class _ShopScreenState extends State<ShopScreen> {
 
   Future<void> _buyItem(String item, String itemName) async {
     try {
+      String itemAux = item.toLowerCase();
       String url = '${EnlaceApp.enlaceBase}/api/user/buy$item';
       final getConnect = GetConnect();
       final response = await getConnect.put(
         url,
-        {"avatarName": itemName},
+        //{"avatarName": itemName}, // CAMBIAR
+        {"${itemAux}Name": itemName},
         headers: {
           "Authorization": widget.user.token,
         },
@@ -280,6 +282,16 @@ class _ShopScreenState extends State<ShopScreen> {
 
 
   Widget mostrarCategoria(String title, Future<List<dynamic>> Function() fetchDataFunction) {
+    String itemCompra = "";
+    if(title == "Avatares") {
+      itemCompra = "Avatar";
+    }
+    else if(title == "Tapetes") {
+      itemCompra = "Rug";
+    }
+    else if(title == "Cartas") {
+      itemCompra = "Card";
+    }
     return Column(
       children: [
         Center(
@@ -327,7 +339,7 @@ class _ShopScreenState extends State<ShopScreen> {
                       String urlImagen = "https://backend-uf65.onrender.com/images/" + itemList[index]['imageFileName'];
                       return GestureDetector(
                         onTap: () {
-                          _showConfirmationDialog(itemList[index], title, urlImagen);
+                          _showConfirmationDialog(itemList[index], itemCompra, urlImagen);
                         },
                         child: _buildRoundedImage(
                           urlImagen,
