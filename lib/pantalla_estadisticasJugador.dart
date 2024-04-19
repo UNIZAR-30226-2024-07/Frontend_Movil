@@ -103,49 +103,60 @@ class estadisticasJugador extends StatelessWidget {
               ]
             ),
             SizedBox(height: 20),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                FutureBuilder<List<dynamic>>(
-                  future: _getAllUserStats(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      // Mientras se espera la respuesta del servidor
-                      return CircularProgressIndicator(); // Por ejemplo, puedes mostrar un indicador de carga
-                    } else if (snapshot.hasError) {
-                      // Si hay un error durante la solicitud
-                      return Text('Error: ${snapshot.error}');
-                    } else {
-                      // Si la solicitud fue exitosa y se obtuvieron los datos
-                      final List<dynamic> userStats = snapshot.data!;
+          FutureBuilder<List<dynamic>>(
+            future: _getAllUserStats(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              } else if (snapshot.hasError) {
+                return Center(
+                  child: Text('Error: ${snapshot.error}'),
+                );
+              } else {
+                final statsList = snapshot.data;
 
-                      // Aquí puedes usar userStats para construir tu interfaz de usuario
-                      // Por ejemplo, si deseas mostrar los elementos en dos columnas:
-                      return Column(
-                        children: [
-                          // Columna 1
-                          Column(
-                            children: userStats.map<Widget>((stat) {
-                              // Aquí construyes los widgets para la primera columna
-                              // Por ejemplo:
-                              return Text(stat['nombre']); // Suponiendo que 'nombre' es un campo en tus estadísticas
-                            }).toList(),
-                          ),
-                          // Columna 2
-                          Column(
-                            children: userStats.map<Widget>((stat) {
-                              // Aquí construyes los widgets para la segunda columna
-                              // Por ejemplo:
-                              return Text(stat['valor'].toString()); // Suponiendo que 'valor' es un campo en tus estadísticas
-                            }).toList(),
-                          ),
-                        ],
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: statsList!.map<Widget>((statsMap) {
+                      final name = statsMap['name'];
+                      final value = statsMap['value'];
+                      return Container(
+                        margin: EdgeInsets.symmetric(horizontal: 5),
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              'Name: $name',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 5),
+                            Text(
+                              'Value: $value',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                       );
-                    }
-                  },
-                ),
-              ],
-            ),
+                    }).toList(),
+                  ),
+                );
+              }
+            },
+          ),
+
             SizedBox(height: 20),
 
           ],
