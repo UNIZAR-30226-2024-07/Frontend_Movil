@@ -34,25 +34,6 @@ class SearchFriendsScreen extends StatefulWidget {
     }
   }
 
-  Future<String> _getFriendAvatar(String avatarId) async {
-    try {
-      final getConnect = GetConnect();
-      final response = await getConnect.get(
-        '${EnlaceApp.enlaceBase}/api/avatar/avatarById/$avatarId',
-        headers: {
-          "Authorization": user.token,
-        },
-      );
-      return response.body['avatar']['imageFileName'];
-    } catch (e) {
-      throw Exception('Failed to load user data');
-    }
-  }
-
-  Future<String> _getImageUrl(String avatarId) async {
-    final imageName = await _getFriendAvatar(avatarId);
-    return "${EnlaceApp.enlaceBase}/images/$imageName";
-  }
 
   @override
   _SearchFriendsScreenState createState() => _SearchFriendsScreenState();
@@ -83,15 +64,21 @@ class _SearchFriendsScreenState extends State<SearchFriendsScreen> {
     }
   }
 
-  String currentAvatar(List<dynamic> avatars) {
-    String avatarId = '660316f09ea0caeffda7def9';
-    for (var avatar in avatars) {
-      if (avatar['current']) {
-        avatarId = avatar['avatar'];
-        break;
-      }
+
+  Future<String> _getAvatar(String _userId) async {
+    try {
+      final getConnect = GetConnect();
+      final response = await getConnect.get(
+        '${EnlaceApp.enlaceBase}/api/avatar/currentAvatarById/$_userId',
+        headers: {
+          "Authorization": widget.user.token,
+        },
+      );
+      String image = response.body['avatar']['imageFileName'];
+      return "${EnlaceApp.enlaceBase}/images/$image";
+    } catch (e) {
+      throw Exception('Failed to load user data');
     }
-    return avatarId;
   }
 
   @override
@@ -183,9 +170,6 @@ class _SearchFriendsScreenState extends State<SearchFriendsScreen> {
                     itemCount: users.length,
                     itemBuilder: (context, index) {
                       final user = users[index];
-                      final avatarId = user['avatars'].isEmpty
-                          ? '6603f0690c9c5706f2ebfb32'
-                          : currentAvatar(user['avatars']);
                       final isFriend = widget.friendList.any((friend) => friend['_id'] == user['_id']);
                       return Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -196,7 +180,7 @@ class _SearchFriendsScreenState extends State<SearchFriendsScreen> {
                           ),
                           child: ListTile(
                             leading: FutureBuilder<String>(
-                              future: widget._getImageUrl(avatarId),
+                              future: _getAvatar(user['_id']),
                               builder: (context, snapshot) {
                                 if (snapshot.connectionState == ConnectionState.waiting) {
                                   return const CircularProgressIndicator();

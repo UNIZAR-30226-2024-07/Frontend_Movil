@@ -34,40 +34,20 @@ class _FriendsScreenState extends State<FriendsScreen> {
     }
   }
 
-
-  Future<String> _getFriendAvatar(String avatarId) async {
+  Future<String> _getAvatar(String _userId) async {
     try {
       final getConnect = GetConnect();
       final response = await getConnect.get(
-        '${EnlaceApp.enlaceBase}/api/avatar/avatarById/$avatarId',
+        '${EnlaceApp.enlaceBase}/api/avatar/currentAvatarById/$_userId',
         headers: {
           "Authorization": widget.user.token,
         },
       );
-      return response.body['avatar']['imageFileName'];
+      String image = response.body['avatar']['imageFileName'];
+      return "${EnlaceApp.enlaceBase}/images/$image";
     } catch (e) {
       throw Exception('Failed to load user data');
     }
-  }
-
-  Future<String> _getImageUrl(String avatarId) async {
-    final imageName = await _getFriendAvatar(avatarId);
-    return "${EnlaceApp.enlaceBase}/images/$imageName";
-  }
-
-  String currentAvatar(List<dynamic> avatars) {
-    int i = 0;
-    String avatarId = '660316f09ea0caeffda7def9';
-    bool encontrado = false;
-
-    while (i < avatars.length && !encontrado) {
-      if (avatars[i]['current']) {
-        avatarId = avatars[i]['avatar'];
-        encontrado = true;
-      }
-      i++;
-    }
-    return avatarId;
   }
 
   void _refreshFriendsList() {
@@ -77,20 +57,33 @@ class _FriendsScreenState extends State<FriendsScreen> {
     });
   }
 
+  Future<void> _deleteFriend(String friendId) async {
+    try {
+      final getConnect = GetConnect();
+      await getConnect.delete(
+        'https://backend-uf65.onrender.com/api/friend/eliminateFriend/$friendId',
+        headers: {
+          "Authorization": widget.user.token,
+        },
+      );
+    } catch (e) {
+      throw Exception('Failed to reject friend request');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ColoresApp.fondoPantallaColor,
       appBar: AppBar(
-        toolbarHeight: 45,
         backgroundColor: ColoresApp.cabeceraColor,
-        elevation: 2,
+        elevation: 2, // Ajusta el valor según el tamaño de la sombra que desees
         leading: Padding(
-          padding: const EdgeInsets.all(3.0),
+          padding: const EdgeInsets.all(8.0),
           child: Image.asset(
-            'assets/logo.png',
-            width: 50,
-            height: 50,
+            'assets/logo.png', // Ruta de la imagen
+            width: 50, // Ancho de la imagen
+            height: 50, // Altura de la imagen
             fit: BoxFit.cover,
           ),
         ),
@@ -173,13 +166,6 @@ class _FriendsScreenState extends State<FriendsScreen> {
                     itemBuilder: (BuildContext context, int index) {
                       final friend = userData?[index];
 
-                      String avatarId;
-                      if (friend['avatars'].isEmpty) {
-                        avatarId = '6603f0690c9c5706f2ebfb32'; // avatar default
-                      } else {
-                        avatarId = currentAvatar(friend['avatars']);
-                      }
-
                       return Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Card(
@@ -189,7 +175,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
                           ),
                           child: ListTile(
                             leading: FutureBuilder<String>(
-                              future: _getImageUrl(avatarId),
+                              future: _getAvatar(friend['_id']),
                               builder: (context, snapshot) {
                                 if (snapshot.connectionState == ConnectionState.waiting) {
                                   return const CircularProgressIndicator();
@@ -213,8 +199,13 @@ class _FriendsScreenState extends State<FriendsScreen> {
                             ),
                             trailing: ElevatedButton(
                               onPressed: () {
-                                // Elimina el amigo y actualiza la lista
-                                // _deleteFriend(friend['_id']);
+                                // Elimina el amigo y actualiza la lista después de que se complete la eliminación
+                                _deleteFriend(friend['_id']).then((_) {
+                                  _refreshFriendsList();
+                                }).catchError((error) {
+                                  // Maneja cualquier error que pueda ocurrir durante la eliminación
+                                  print('Error al eliminar amigo: $error');
+                                });
                               },
                               style: ElevatedButton.styleFrom(
                                 foregroundColor: Colors.white,
@@ -222,6 +213,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
                               ),
                               child: const Text('Eliminar'),
                             ),
+
                           ),
                         ),
                       );

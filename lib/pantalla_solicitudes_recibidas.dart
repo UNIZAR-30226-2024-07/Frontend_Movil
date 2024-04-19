@@ -32,25 +32,7 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
     }
   }
 
-  Future<String> _getFriendAvatar(String avatarId) async {
-    try {
-      final getConnect = GetConnect();
-      final response = await getConnect.get(
-        '${EnlaceApp.enlaceBase}/api/avatar/avatarById/$avatarId',
-        headers: {
-          "Authorization": widget.user.token,
-        },
-      );
-      return response.body['avatar']['imageFileName'];
-    } catch (e) {
-      throw Exception('Failed to load user data');
-    }
-  }
 
-  Future<String> _getImageUrl(String avatarId) async {
-    final imageName = await _getFriendAvatar(avatarId);
-    return "${EnlaceApp.enlaceBase}/images/$imageName";
-  }
 
   Future<void> _acceptFriendRequest(String friendId) async {
     try {
@@ -71,9 +53,8 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
   Future<void> _rejectFriendRequest(String friendId) async {
     try {
       final getConnect = GetConnect();
-      await getConnect.put(
+      await getConnect.delete(
         '${EnlaceApp.enlaceBase}/api/friend/reject/$friendId',
-        '',
         headers: {
           "Authorization": widget.user.token,
         },
@@ -84,19 +65,21 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
     }
   }
 
-  String currentAvatar(List<dynamic> avatars) {
-    int i = 0;
-    String avatarId = '660316f09ea0caeffda7def9';
-    bool encontrado = false;
 
-    while (i < avatars.length && !encontrado) {
-      if (avatars[i]['current']) {
-        avatarId = avatars[i]['avatar'];
-        encontrado = true;
-      }
-      i++;
+  Future<String> _getAvatar(String _userId) async {
+    try {
+      final getConnect = GetConnect();
+      final response = await getConnect.get(
+        '${EnlaceApp.enlaceBase}/api/avatar/currentAvatarById/$_userId',
+        headers: {
+          "Authorization": widget.user.token,
+        },
+      );
+      String image = response.body['avatar']['imageFileName'];
+      return "${EnlaceApp.enlaceBase}/images/$image";
+    } catch (e) {
+      throw Exception('Failed to load user data');
     }
-    return avatarId;
   }
 
   @override
@@ -104,15 +87,14 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
     return Scaffold(
       backgroundColor: ColoresApp.fondoPantallaColor,
       appBar: AppBar(
-        toolbarHeight: 45,
         backgroundColor: ColoresApp.cabeceraColor,
-        elevation: 2,
+        elevation: 2, // Ajusta el valor según el tamaño de la sombra que desees
         leading: Padding(
-          padding: const EdgeInsets.all(3.0),
+          padding: const EdgeInsets.all(8.0),
           child: Image.asset(
-            'assets/logo.png',
-            width: 50,
-            height: 50,
+            'assets/logo.png', // Ruta de la imagen
+            width: 50, // Ancho de la imagen
+            height: 50, // Altura de la imagen
             fit: BoxFit.cover,
           ),
         ),
@@ -190,12 +172,6 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
                     itemCount: userData?['friend'].length,
                     itemBuilder: (BuildContext context, int index) {
                       final friend = userData?['friend'][index];
-                      String avatarId;
-                      if (friend['avatars'].isEmpty) {
-                        avatarId = '6603f0690c9c5706f2ebfb32'; // avatar default
-                      } else {
-                        avatarId = currentAvatar(friend['avatars']);
-                      }
                       return Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Card(
@@ -205,7 +181,7 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
                           ),
                           child: ListTile(
                             leading: FutureBuilder<String>(
-                              future: _getImageUrl(avatarId),
+                              future: _getAvatar(friend['_id']),
                               builder: (context, snapshot) {
                                 if (snapshot.connectionState == ConnectionState.waiting) {
                                   return const CircularProgressIndicator();
