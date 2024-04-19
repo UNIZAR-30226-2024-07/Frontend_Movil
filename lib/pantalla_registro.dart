@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:psoft_07/colores.dart';
+import 'package:psoft_07/pantalla_inicio.dart';
 import 'package:psoft_07/pantalla_login.dart';
 import 'package:psoft_07/pantalla_registro_password.dart';
 
@@ -95,7 +96,7 @@ class RegisterScreen extends StatelessWidget {
                                     onPressed: () {
                                       Navigator.push(
                                         context,
-                                        MaterialPageRoute(builder: (context) => LoginScreen()),
+                                        MaterialPageRoute(builder: (context) => const WelcomeScreen()),
                                       );
                                     },
                                     style: ElevatedButton.styleFrom(
