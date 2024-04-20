@@ -37,6 +37,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   get:
   get_storage:
+  socket_io_client:
 
 dev_dependencies:
   flutter_test:

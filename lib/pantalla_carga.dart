@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:psoft_07/colores.dart';
+import 'package:psoft_07/Usuario.dart';
+import 'package:psoft_07/pantalla_partida_publica.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class LoadingScreen extends StatefulWidget {
-  const LoadingScreen({super.key});
+  final String idMesa;
+  final User user;
+  const LoadingScreen(this.idMesa, this.user, {super.key});
 
   @override
   _LoadingScreenState createState() => _LoadingScreenState();
@@ -27,71 +33,92 @@ class _LoadingScreenState extends State<LoadingScreen> {
         _simulateLoading();
       } else {
         // Navegar a la siguiente pantalla una vez que la carga haya terminado
-        // Navigator.push(...)
+        // en este caso, a la pantalla de Partida pública
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => PublicGames(widget.user)),
+        );
       }
     });
+  }
+  
+
+  void conectarPartida(String partidaPublica) {
+
+    // Dart client
+    IO.Socket socket = IO.io(EnlaceApp.enlaceBase);
+
+
+    socket.emit("enter public board", [partidaPublica, widget.idMesa]);
+
+    socket.on("starting public board", (boardId) {
+        print(boardId);
+
+        if (boardId) {
+          socket.emit("players public ready", []);
+        }
+    });
+
+    socket.on("error", (args) {
+        // Campos de args: status, message
+    });
+
+
   }
 
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage("assets/tapete_fondo_pantalla.jpg"), // Reemplaza con la ruta de tu imagen
-            fit: BoxFit.cover,
-          ),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 300,
-                height: 120,
-                padding: const EdgeInsets.all(7.5),
-                decoration: BoxDecoration(
-                  color: Colors.red[800],
-                  borderRadius: BorderRadius.circular(10.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      spreadRadius: 2,
-                      blurRadius: 5,
-                      offset: const Offset(0, 3), // Cambia la posición de la sombra
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    const Text(
-                      'Cargando...',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-                    LinearProgressIndicator(
-                      value: _progressValue,
-                      backgroundColor: Colors.blue[100],
-                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
-                      minHeight: 10,
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      '${(_progressValue * 90.9).toStringAsFixed(1)}% completado',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 300,
+              height: 120,
+              padding: const EdgeInsets.all(7.5),
+              decoration: BoxDecoration(
+                color: Colors.red[800],
+                borderRadius: BorderRadius.circular(10.0),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                    offset: const Offset(0, 3), // Cambia la posición de la sombra
+                  ),
+                ],
               ),
-            ],
-          ),
+              child: Column(
+                children: [
+                  const Text(
+                    'Cargando...',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  LinearProgressIndicator(
+                    value: _progressValue,
+                    backgroundColor: Colors.blue[100],
+                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+                    minHeight: 10,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    '${(_progressValue * 90.9).toStringAsFixed(1)}% completado',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -99,7 +126,22 @@ class _LoadingScreenState extends State<LoadingScreen> {
 }
 
 void main() {
-  runApp(const MaterialApp(
-    home: LoadingScreen(),
+  runApp(MaterialApp(
+    home: LoadingScreen( "",
+      User(
+        id: "",
+        nick: "",
+        name: "",
+        surname: "",
+        email: "",
+        password: "",
+        rol: "",
+        coins: 0,
+        tournaments: [],
+        avatars: [],
+        rugs: [],
+        cards: [],
+        token: "",
+      ),),
   ));
 }

@@ -3,6 +3,7 @@ import 'package:get/get_connect/connect.dart';
 import 'package:psoft_07/Usuario.dart';
 //import 'package:psoft_07/funcionesAvatar.dart';
 import 'package:psoft_07/pantalla_buscar_amigos.dart';
+import 'package:psoft_07/pantalla_carga.dart';
 import 'package:psoft_07/pantalla_solicitudes_recibidas.dart'; // Importa la pantalla de FriendRequestsScreen
 import 'colores.dart';
 
@@ -204,6 +205,10 @@ class _PublicGamesState extends State<PublicGames> {
                                 ElevatedButton(
                                   onPressed: () {
                                     //Pantalla juego
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => LoadingScreen(mesa['_id'], widget.user)),
+                                    );
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: ColoresApp.segundoColor,
