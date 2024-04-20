@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:psoft_07/colores.dart';
 import 'package:get/get.dart';
+import 'package:psoft_07/pantalla_principal.dart';
 
 import 'package:psoft_07/pantalla_victoria_partida.dart';
 
@@ -21,24 +22,45 @@ class changeNameScreen extends StatelessWidget {
     // Comprobar si nuevoNombre y confirmarNuevoNombre son iguales
     if (nuevoNombre != confirmarNuevoNombre) {
       // Mostrar mensaje de error para nuevoNombre diferente a confirmarNuevoNombre
-      mostrarError(context, "Los campos de nuevo nombre no coinciden");
+      mostrarMsg(context, "Los campos de nuevo nombre no coinciden");
       return;
     }
 
     // Ambas condiciones son correctas, realizar la petición a la API
-    final res = await getConnect.put(
+    try {
+      // Realizar la petición a la API
+      final res = await getConnect.put(
         '${EnlaceApp.enlaceBase}/api/user/update',
-      headers: {
-        'Authorization': user.token, // Reemplaza con tu token de autorización
-      },
+        headers: {
+          'Authorization': user.token,
+        },
         {
-      "nick": nuevoNombre,
-    });
+          "nick": nuevoNombre,
+        },
+      );
 
-    // Manejar la respuesta de la API según sea necesario
+      // Verificar si la llamada a la API fue exitosa
+      if (res.statusCode == 200) {
+        // Mostrar mensaje de éxito
+        mostrarMsg(context, "Nombre actualizado correctamente");
+        // Cambiar el nombre del usuario en local
+        user.nick = nuevoNombre;
+        // Redirigr a la pantalla principal (no tiene sentido quedarnos aquí si se ha cambiado le nombre)
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => Principal(user)),
+        );
+      } else {
+        // Mostrar mensaje de error
+        mostrarMsg(context, "Error al actualizar el nombre. Por favor, inténtalo de nuevo.");
+      }
+    } catch (e) {
+      // Mostrar mensaje de error si ocurre un error durante la llamada a la API
+      mostrarMsg(context, "Error al conectar con el servidor. Por favor, verifica tu conexión a internet.");
+    }
   }
 
-  void mostrarError(BuildContext context, String mensaje) {
+  void mostrarMsg(BuildContext context, String mensaje) {
     // Aquí puedes implementar la lógica para mostrar un pop-up con el mensaje de error
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:psoft_07/colores.dart';
 import 'package:get/get.dart';
+import 'package:psoft_07/pantalla_inicio.dart';
+import 'package:psoft_07/pantalla_principal.dart';
 import 'package:psoft_07/pantalla_victoria_partida.dart';
 
 import 'Usuario.dart';
@@ -21,29 +23,67 @@ class changePasswordScreen extends StatelessWidget {
     // Comprobar si nuevoNombre y confirmarNuevoNombre son iguales
     if (passwdNueva != passwdNuevaConfirmar) {
       // Mostrar mensaje de error para nuevoNombre diferente a confirmarNuevoNombre
-      mostrarError("Los campos de nueva contraseña no coinciden", context);
+      mostrarMsg(context, "Los campos de nueva contraseña no coinciden");
       return;
     }
 
     // Ambas condiciones son correctas, realizar la petición a la API
-    final res = await getConnect.put( '${EnlaceApp.enlaceBase}/api/user/update',
+    try {
+      // Realizar la petición a la API
+      final res = await getConnect.put(
+        '${EnlaceApp.enlaceBase}/api/user/update',
         headers: {
-          'Authorization': user.token, // Reemplaza con tu token de autorización
-        }, {
-      "password": passwdNuevaConfirmar // Utilizamos nuevoNombre para la prueba, puedes cambiarlo según sea necesario
-    });
+          'Authorization': user.token,
+        },
+        {
+          "password": passwdNueva,
+        },
+      );
 
-    // Manejar la respuesta de la API según sea necesario
-  }
+      // Verificar si la llamada a la API fue exitosa
+      if (res.statusCode == 200) {
+        // Mostrar mensaje de éxito
+        mostrarMsg(context, "Contraseña actualizada correctamente");
+        //volver a hacer login con la nueva contraseña
+        final res = await getConnect.post('${EnlaceApp.enlaceBase}/api/user/login', {
+          "nick":user.nick,
+          "password":passwdNueva,
+          "rol": "user",
+        });
 
-  void mostrarError(String mensaje, BuildContext context) {
-    // Aquí puedes implementar la lógica para mostrar un pop-up con el mensaje de error
-    // Por ejemplo, utilizando showDialog o ScaffoldMessenger.of(context).showSnackBar
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(mensaje),
-      duration: Duration(seconds: 3),
-    ));
-  }
+        if (res.body['status'] == 'error') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(res.body['message'], textAlign: TextAlign.center,),
+            ),
+          );
+        }
+        else {
+        // Redirigr a la pantalla principal (no tiene sentido quedarnos aquí si se ha cambiado le nombre)
+        Navigator.push(
+          context, //Es seguro pasar el context? en principio sí, no hay info del usuario
+          MaterialPageRoute(builder: (context) => WelcomeScreen()),
+        );
+        }
+      } else {
+        // Mostrar mensaje de error
+        mostrarMsg(context, "Error al actualizar la contraseña. Por favor, inténtalo de nuevo.");
+      }
+    } catch (e) {
+      // Mostrar mensaje de error si ocurre un error durante la llamada a la API
+      mostrarMsg(context, "Error al conectar con el servidor. Por favor, verifica tu conexión a internet.");
+    }
+
+}
+
+void mostrarMsg(BuildContext context, String mensaje) {
+  // Aquí puedes implementar la lógica para mostrar un pop-up con el mensaje de error
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(mensaje), // Se debe envolver el mensaje en un widget Text
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
