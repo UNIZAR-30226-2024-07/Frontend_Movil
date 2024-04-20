@@ -23,7 +23,8 @@ class LoginScreen extends StatelessWidget {
   void _login(nombre, contrasenya, context) async {
     final res = await getConnect.post('${EnlaceApp.enlaceBase}/api/user/login', {
       "nick":nombre,
-      "password":contrasenya
+      "password":contrasenya,
+      "rol": "user",
     });
 
     if (res.body['status'] == 'error') {
@@ -34,10 +35,7 @@ class LoginScreen extends StatelessWidget {
       );
     }
     else {
-
-      if (res.body['user']['rol'] == 'user') {
-
-        User user = User(
+      User user = User(
           id: res.body['user']['_id'],
           nick: res.body['user']['nick'],
           name: res.body['user']['name'],
@@ -52,49 +50,42 @@ class LoginScreen extends StatelessWidget {
           cards: [],
           token: res.body['token']);
 
-        // Bucle para agregar cada avatar a la lista de avatares del usuario
-        for (var tournamentData in res.body['user']['tournaments']) {
-          user.tournaments.add(TournamentEntry(
-            tournament: tournamentData['tournament'],
-            round: tournamentData['position'],
-          ));
-        }
-
-        // Bucle para agregar cada avatar a la lista de avatares del usuario
-        for (var avatarData in res.body['user']['avatars']) {
-          user.avatars.add(AvatarEntry(
-            avatar: avatarData['avatar'],
-            current: avatarData['current'],
-          ));
-        }
-
-        // Bucle para agregar cada avatar a la lista de avatares del usuario
-        for (var rugData in res.body['user']['rugs']) {
-          user.rugs.add(RugEntry(
-            rug: rugData['rug'],
-            current: rugData['current'],
-          ));
-        }
-
-        // Bucle para agregar cada avatar a la lista de avatares del usuario
-        for (var cardData in res.body['user']['cards']) {
-          user.cards.add(CardEntry(
-            card: cardData['card'],
-            current: cardData['current'],
-          ));
-        }
-
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => Principal(user)),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Usuario no existe", textAlign: TextAlign.center,), // Para poner un mensaje
-          ),
-        );
+      // Bucle para agregar cada avatar a la lista de avatares del usuario
+      for (var tournamentData in res.body['user']['tournaments']) {
+        user.tournaments.add(TournamentEntry(
+          tournament: tournamentData['tournament'],
+          round: tournamentData['position'],
+        ));
       }
+
+      // Bucle para agregar cada avatar a la lista de avatares del usuario
+      for (var avatarData in res.body['user']['avatars']) {
+        user.avatars.add(AvatarEntry(
+          avatar: avatarData['avatar'],
+          current: avatarData['current'],
+        ));
+      }
+
+      // Bucle para agregar cada avatar a la lista de avatares del usuario
+      for (var rugData in res.body['user']['rugs']) {
+        user.rugs.add(RugEntry(
+          rug: rugData['rug'],
+          current: rugData['current'],
+        ));
+      }
+
+      // Bucle para agregar cada avatar a la lista de avatares del usuario
+      for (var cardData in res.body['user']['cards']) {
+        user.cards.add(CardEntry(
+          card: cardData['card'],
+          current: cardData['current'],
+        ));
+      }
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Principal(user)),
+      );
     }
   }
 
