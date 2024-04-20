@@ -43,13 +43,13 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
   
 
-  void conectarPartida(String partidaPublica) {
+  void conectarPartida() {
 
     // Dart client
     IO.Socket socket = IO.io(EnlaceApp.enlaceBase);
 
 
-    socket.emit("enter public board", [partidaPublica, widget.idMesa]);
+    socket.emit("enter public board", [widget.idMesa, widget.user.id]);
 
     socket.on("starting public board", (boardId) {
         print(boardId);
@@ -68,7 +68,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    
+    conectarPartida();
     return Scaffold(
       body: Center(
         child: Column(
