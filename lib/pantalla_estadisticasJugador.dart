@@ -117,38 +117,51 @@ class estadisticasJugador extends StatelessWidget {
               } else {
                 final statsList = snapshot.data;
 
+                // Dividir la lista de estadísticas en dos sublistas para hacer 2 rows
+                final int halfLength = (statsList!.length / 2).ceil();
+                final List<List<dynamic>> dividedStats = [
+                  statsList.sublist(0, halfLength),
+                  statsList.sublist(halfLength),
+                ];
+
                 return SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: statsList!.map<Widget>((statsMap) {
-                      final name = statsMap['name'];
-                      final value = statsMap['value'];
-                      return Container(
-                        margin: EdgeInsets.symmetric(horizontal: 5),
-                        padding: EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.blue,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Column(
-                          children: [
-                            Text(
-                              'Name: $name',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
+                  child: Column(
+                    children: dividedStats.map<Widget>((statsSublist) {
+                      return Row(
+                        children: statsSublist.map<Widget>((statsMap) {
+                          final name = statsMap['name'];
+                          final value = statsMap['value'];
+                          return Container(
+                            margin: EdgeInsets.all(5),
+                            padding: EdgeInsets.all(10),
+                            width: MediaQuery.of(context).size.width * 0.4,
+                            decoration: BoxDecoration(
+                              color: Colors.blue,
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                            SizedBox(height: 5),
-                            Text(
-                              'Value: $value',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Name: $name',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(height: 5),
+                                Text(
+                                  'Value: $value',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          );
+                        }).toList(),
                       );
                     }).toList(),
                   ),
@@ -156,7 +169,6 @@ class estadisticasJugador extends StatelessWidget {
               }
             },
           ),
-
             SizedBox(height: 20),
 
           ],
@@ -172,14 +184,14 @@ class estadisticasJugador extends StatelessWidget {
   runApp(MaterialApp(
     home: estadisticasJugador(
         User(
-            id: "",
-            nick: "",
-            name: "",
-            surname: "",
-            email: "",
-            password: "",
-            rol: "",
-            coins: 0,
+            id: "662005b2d914947a6b71d9c5",
+            nick: "U1",
+            name: "U1",
+            surname: "U1",
+            email: "U1",
+            password: "U1",
+            rol: "user",
+            coins: 98800,
             tournaments: [],
             avatars: [],
             rugs: [],

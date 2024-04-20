@@ -9,21 +9,14 @@ import 'Usuario.dart';
 
 class changePasswordScreen extends StatelessWidget {
   final User user;
-
   changePasswordScreen(this.user, {super.key});
 
-  TextEditingController passwdActual = TextEditingController();
   TextEditingController passwdNueva = TextEditingController();
   TextEditingController passwdNuevaConfirmar = TextEditingController();
   final getConnect = GetConnect();
 
-  void _cambioPasswd(String passwdActual, String passwdNueva, String passwdNuevaConfirmar, BuildContext context) async {
+  void _cambioPasswd(String passwdNueva, String passwdNuevaConfirmar, BuildContext context) async {
     // Comprobar si nombreActual es igual a nuevoNombre
-    if (passwdActual == passwdNueva) {
-      // Mostrar mensaje de error para nombreActual igual a nuevoNombre
-      mostrarError("La nueva contraseña debe ser diferente de la actual", context);
-      return;
-    }
 
     // Comprobar si nuevoNombre y confirmarNuevoNombre son iguales
     if (passwdNueva != passwdNuevaConfirmar) {
@@ -33,8 +26,10 @@ class changePasswordScreen extends StatelessWidget {
     }
 
     // Ambas condiciones son correctas, realizar la petición a la API
-    final res = await getConnect.post('https://backend-uf65.onrender.com/api/user/update', {
-      //"nick": context.,
+    final res = await getConnect.put( '${EnlaceApp.enlaceBase}/api/user/update',
+        headers: {
+          'Authorization': user.token, // Reemplaza con tu token de autorización
+        }, {
       "password": passwdNuevaConfirmar // Utilizamos nuevoNombre para la prueba, puedes cambiarlo según sea necesario
     });
 
@@ -83,23 +78,6 @@ class changePasswordScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 5.0),
-                          SizedBox(
-                            width: 300,
-                            height: 40,
-                            child: TextField(
-                              controller: passwdActual,
-                              keyboardType: TextInputType.text,
-                              decoration: const InputDecoration(
-                                hintText: 'Contraseña actual',
-                                icon: Icon(
-                                  Icons.lock,
-                                  color: Colors.white,
-                                ),
-                                filled: true,
-                                fillColor: Colors.white,
-                              ),
-                            ),
-                          ),
                           const SizedBox(height: 10.0),
                           SizedBox(
                             height: 40,
@@ -139,7 +117,7 @@ class changePasswordScreen extends StatelessWidget {
                           const SizedBox(height: 10.0),
                           ElevatedButton(
                             onPressed: () {
-                              _cambioPasswd(passwdActual.text, passwdNueva.text, passwdNuevaConfirmar.text, context);
+                              _cambioPasswd(passwdNueva.text, passwdNuevaConfirmar.text, context);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: ColoresApp.segundoColor,
