@@ -34,10 +34,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
       } else {
         // Navegar a la siguiente pantalla una vez que la carga haya terminado
         // en este caso, a la pantalla de Partida pública
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => PublicGames(widget.user)),
-        );
+
       }
     });
   }
@@ -48,8 +45,22 @@ class _LoadingScreenState extends State<LoadingScreen> {
     // Dart client
     IO.Socket socket = IO.io(EnlaceApp.enlaceBase);
 
+    Map<String, dynamic> body = {
+      'body': {
+        'typeId': widget.idMesa,
+        'userId': widget.user.id,
+      }
+    };
 
-    socket.emit("enter public board", [widget.idMesa, widget.user.id]);
+    socket.onConnect((_) {
+      print('connect');
+      socket.emit("enter public board", body);
+    });
+
+    
+
+
+
 
     socket.on("starting public board", (boardId) {
         print(boardId);
@@ -60,7 +71,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
     });
 
     socket.on("error", (args) {
-        // Campos de args: status, message
+        print(args);
     });
 
 
