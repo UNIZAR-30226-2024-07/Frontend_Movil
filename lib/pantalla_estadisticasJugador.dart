@@ -78,102 +78,114 @@ class estadisticasJugador extends StatelessWidget {
       ),
       backgroundColor: ColoresApp.fondoPantallaColor,
       body: Center(
-        child: Row( //Fila donde habrá dos columnas; una para foto perfil y otra para el texto de la segunda mitad de la pantalla
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 FutureBuilder<String>(
-                future: _getImageUrl(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator();
-                  } else if (snapshot.hasError) {
-                    return Icon(Icons.error);
-                  } else {
-                    final imageUrl = snapshot.data!;
-                    return CircleAvatar(
-                      backgroundImage: NetworkImage(imageUrl),
-                      radius: 50,
-                    );
-                  }
-                },
-              ),
-              ]
-            ),
-            SizedBox(height: 20),
-          FutureBuilder<List<dynamic>>(
-            future: _getAllUserStats(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              } else if (snapshot.hasError) {
-                return Center(
-                  child: Text('Error: ${snapshot.error}'),
-                );
-              } else {
-                final statsList = snapshot.data;
-
-                // Dividir la lista de estadísticas en dos sublistas para hacer 2 rows
-                final int halfLength = (statsList!.length / 2).ceil();
-                final List<List<dynamic>> dividedStats = [
-                  statsList.sublist(0, halfLength),
-                  statsList.sublist(halfLength),
-                ];
-
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Column(
-                    children: dividedStats.map<Widget>((statsSublist) {
-                      return Row(
-                        children: statsSublist.map<Widget>((statsMap) {
-                          final name = statsMap['name'];
-                          final value = statsMap['value'];
-                          return Container(
-                            margin: EdgeInsets.all(5),
-                            padding: EdgeInsets.all(10),
-                            width: MediaQuery.of(context).size.width * 0.4,
-                            decoration: BoxDecoration(
-                              color: Colors.blue,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Name: $name',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                SizedBox(height: 5),
-                                Text(
-                                  'Value: $value',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }).toList(),
+                  future: _getImageUrl(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    } else if (snapshot.hasError) {
+                      return Icon(Icons.error);
+                    } else {
+                      final imageUrl = snapshot.data!;
+                      return CircleAvatar(
+                        backgroundImage: NetworkImage(imageUrl),
+                        radius: 50,
                       );
-                    }).toList(),
+                    }
+                  },
+                ),
+                Text(
+                  user.nick,
+                  style: const TextStyle(
+                      fontSize: 24,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold
                   ),
-                );
-              }
-            },
-          ),
-            SizedBox(height: 20),
+                ),
+              ],
+            ),
+            SizedBox(width: 20), // Añade un espacio entre las columnas
+            SingleChildScrollView( // Envuelve solo la segunda columna con SingleChildScrollView
+              scrollDirection: Axis.horizontal,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  FutureBuilder<List<dynamic>>(
+                    future: _getAllUserStats(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      } else if (snapshot.hasError) {
+                        return Center(
+                          child: Text('Error: ${snapshot.error}'),
+                        );
+                      } else {
+                        final statsList = snapshot.data;
 
+                        // Dividir la lista de estadísticas en dos sublistas para hacer 2 rows
+                        final int halfLength = (statsList!.length / 2).ceil();
+                        final List<List<dynamic>> dividedStats = [
+                          statsList.sublist(0, halfLength),
+                          statsList.sublist(halfLength),
+                        ];
+
+                        return Row(
+                          children: dividedStats.map<Widget>((statsSublist) {
+                            return Column(
+                              children: statsSublist.map<Widget>((statsMap) {
+                                final name = statsMap['name'];
+                                final value = statsMap['value'];
+                                return Container(
+                                  margin: EdgeInsets.all(5),
+                                  padding: EdgeInsets.all(10),
+                                  width: MediaQuery.of(context).size.width * 0.4,
+                                  decoration: BoxDecoration(
+                                    color: ColoresApp.cabeceraColor,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '$name',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      SizedBox(height: 5),
+                                      Text(
+                                        '$value',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                            );
+                          }).toList(),
+                        );
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
+
     );
   }
 }
