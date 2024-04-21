@@ -82,10 +82,12 @@ class changePasswordScreen extends StatelessWidget {
           );
         }
         else {
+          //Actualizar contraseña usuario en local
+          user.password = res.body['user']['password'];
         // Redirigr a la pantalla principal (no tiene sentido quedarnos aquí si se ha cambiado le nombre)
         Navigator.push(
           context, //Es seguro pasar el context? en principio sí, no hay info del usuario
-          MaterialPageRoute(builder: (context) => WelcomeScreen()),
+          MaterialPageRoute(builder: (context) => Principal(user)),
         );
         }
       } else {
