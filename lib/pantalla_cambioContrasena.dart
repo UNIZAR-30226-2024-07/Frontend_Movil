@@ -26,6 +26,29 @@ class changePasswordScreen extends StatelessWidget {
       mostrarMsg(context, "Los campos de nueva contraseña no coinciden");
       return;
     }
+    bool contrasenaValida = true;
+    // Verificar la longitud mínima
+    if (passwdNueva.length < 6) {
+      contrasenaValida = false;
+    }
+    // Verificar al menos una mayúscula
+    else if (!passwdNueva.contains(RegExp(r'[A-Z]'))) {
+      contrasenaValida = false;
+    }
+    // Verificar al menos una minúscula
+    else if (!passwdNueva.contains(RegExp(r'[a-z]'))) {
+      contrasenaValida = false;
+    }
+    // Verificar al menos un número
+    else if (!passwdNueva.contains(RegExp(r'[0-9]'))) {
+      contrasenaValida = false;
+    }
+
+    //Si alguna de estas falla, mostrar mensaje de condiciones contraseña
+    if(!contrasenaValida){
+      mostrarMsg(context, "La contraseña debe tener al menos 6 caracteres, una mayúscula, una minúscula y un número.");
+      return;
+    }
 
     // Ambas condiciones son correctas, realizar la petición a la API
     try {
@@ -73,7 +96,6 @@ class changePasswordScreen extends StatelessWidget {
       // Mostrar mensaje de error si ocurre un error durante la llamada a la API
       mostrarMsg(context, "Error al conectar con el servidor. Por favor, verifica tu conexión a internet.");
     }
-
 }
 
 void mostrarMsg(BuildContext context, String mensaje) {
