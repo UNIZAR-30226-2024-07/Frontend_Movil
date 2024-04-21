@@ -38,7 +38,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
       }
     });
   }
-  
+
 
   void conectarPartida() {
 
@@ -57,7 +57,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
       socket.emit("enter public board", body);
     });
 
-    
+
 
 
 

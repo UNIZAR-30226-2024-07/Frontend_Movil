@@ -17,7 +17,7 @@ class ShopScreen extends StatefulWidget {
     try {
       final getConnect = GetConnect();
       final response = await getConnect.get(
-        '${EnlaceApp.enlaceBase}/api/avatar/getAllAvatars',
+        '${EnlaceApp.enlaceBase}/api/avatar/getAvatarStore',
         headers: {
           "Authorization": user.token,
         },
@@ -32,7 +32,7 @@ class ShopScreen extends StatefulWidget {
     try {
       final getConnect = GetConnect();
       final response = await getConnect.get(
-        '${EnlaceApp.enlaceBase}/api/rug/getAllRugs',
+        '${EnlaceApp.enlaceBase}/api/rug/getRugStore',
         headers: {
           "Authorization": user.token,
         },
@@ -47,14 +47,33 @@ class ShopScreen extends StatefulWidget {
     try {
       final getConnect = GetConnect();
       final response = await getConnect.get(
-        '${EnlaceApp.enlaceBase}/api/card/getAllCards',
+        '${EnlaceApp.enlaceBase}/api/card/getCardStore',
         headers: {
           "Authorization": user.token,
         },
       );
-      return response.body['card']; // Cambiar a 'card' en lugar de 'avatar'
+      return response.body['card'];
     } catch (e) {
       throw Exception('Failed to load user data');
+    }
+  }
+
+  Future<int> _getUserCoins() async {
+    try {
+
+      String url = '${EnlaceApp.enlaceBase}/api/user/verify';
+      final getConnect = GetConnect();
+      final response = await getConnect.get(
+        url,
+        headers: {
+          "Authorization": user.token,
+        },
+      );
+      int coins = response.body['user']['coins'];
+      return response.body['user']['coins'];
+
+    } catch (e) {
+      throw Exception('Failed to load user coins');
     }
   }
 
@@ -86,6 +105,7 @@ class _ShopScreenState extends State<ShopScreen> {
           "Authorization": widget.user.token,
         },
       );
+
 
       // Aquí puedes actualizar cualquier estado necesario
       // Llama a Navigator.pushReplacement para recargar la página
@@ -371,73 +391,103 @@ class _ShopScreenState extends State<ShopScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: ColoresApp.fondoPantallaColor,
-      appBar: AppBar(
-        backgroundColor: ColoresApp.cabeceraColor,
-        elevation: 2, // Ajusta el valor según el tamaño de la sombra que desees
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Image.asset(
-            'assets/logo.png', // Ruta de la imagen
-            width: 50, // Ancho de la imagen
-            height: 50, // Altura de la imagen
-            fit: BoxFit.cover,
-          ),
-        ),
-      ),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  mostrarCategoria('Tapetes', widget._getAllRugs),
-                  mostrarCategoria('Cartas', widget._getAllCards),
-                  mostrarCategoria('Avatares', widget._getAllAvatars),
-                ],
-              ),
-            ),
-          ),
-          Positioned(
-            top: 10,
-            right: 10,
-            child: Container(
-              width: 100,
-              height: 40,
-              decoration: BoxDecoration(
-                color: ColoresApp.segundoColor,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.monetization_on,
-                      color: Colors.red,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      widget.user.coins.toString(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
+    return FutureBuilder<int>(
+      future: widget._getUserCoins(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting || !snapshot.hasData) {
+          return Scaffold(
+            backgroundColor: ColoresApp.fondoPantallaColor,
+            appBar: AppBar(
+              backgroundColor: ColoresApp.cabeceraColor,
+              elevation: 2,
+              leading: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Image.asset(
+                  'assets/logo.png',
+                  width: 50,
+                  height: 50,
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
-          ),
-        ],
-      ),
+          );
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else {
+          int monedas = snapshot.data!;
+          return Scaffold(
+            backgroundColor: ColoresApp.fondoPantallaColor,
+            appBar: AppBar(
+              backgroundColor: ColoresApp.cabeceraColor,
+              elevation: 2,
+              leading: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Image.asset(
+                  'assets/logo.png',
+                  width: 50,
+                  height: 50,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            body: Stack(
+              children: [
+                SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        mostrarCategoria('Tapetes', widget._getAllRugs),
+                        mostrarCategoria('Cartas', widget._getAllCards),
+                        mostrarCategoria('Avatares', widget._getAllAvatars),
+                      ],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 10,
+                  right: 10,
+                  child: Container(
+                    width: 100,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: ColoresApp.segundoColor,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/moneda.png',
+                            width: 20,
+                            height: 20,
+                            fit: BoxFit.cover,
+                          ),
+                          SizedBox(width: 5),
+                          Text(
+                            monedas.toString(),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+      },
     );
   }
+
+
 
 }
 
