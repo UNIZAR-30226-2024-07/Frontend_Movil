@@ -232,12 +232,22 @@ class _SelectSkinsState extends State<SelectSkinsScreen> {
   }
 
   GestureDetector _buildRoundedImages(String imageUrl, double width, double height, String itemCambio, String nombreImagen) {
+    double c = 0.0;
+    if(itemCambio == "Avatar") {
+      c = 50.0;
+    }
+    else if(itemCambio == "Card"){
+      c = 12.0;
+    }
+    else if(itemCambio == "Rug"){
+      c = 12.0;
+    }
     return GestureDetector(
       onTap: () {
         // Acción a realizar al hacer clic en la imagen
       },
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: BorderRadius.circular(c),
         child: Material(
           color: Colors.transparent,
           child: Ink.image(

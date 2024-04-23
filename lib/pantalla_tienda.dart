@@ -80,9 +80,19 @@ class ShopScreen extends StatefulWidget {
 }
 
 class _ShopScreenState extends State<ShopScreen> {
-  Widget _buildRoundedImage(String imageUrl, double width, double height) {
+  Widget _buildRoundedImage(String imageUrl, double width, double height, String item) {
+    double c = 0.0;
+    if(item == "Avatar") {
+      c = 50.0;
+    }
+    else if(item == "Card"){
+      c = 12.0;
+    }
+    else if(item == "Rug"){
+      c = 12.0;
+    }
     return ClipRRect(
-      borderRadius: BorderRadius.circular(12.0),
+      borderRadius: BorderRadius.circular(c),
       child: Image.network(
         imageUrl,
         width: width,
@@ -164,6 +174,17 @@ class _ShopScreenState extends State<ShopScreen> {
   void _showConfirmationDialog(dynamic card, String item, String urlImagen) {
     String itemName = card['image'];
     int itemPrice = card['price'];
+    double c = 0.0;
+
+    if(item == "Avatar") {
+      c = 50.0;
+    }
+    else if(item == "Card"){
+      c = 12.0;
+    }
+    else if(item == "Rug"){
+      c = 12.0;
+    }
 
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
@@ -183,7 +204,7 @@ class _ShopScreenState extends State<ShopScreen> {
                     width: 100, // Ancho de la imagen
                     height: 100, // Alto de la imagen
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(50), // Redondear esquinas
+                      borderRadius: BorderRadius.circular(c), // Redondear esquinas
                       image: DecorationImage(
                         image: NetworkImage(urlImagen), // URL de la imagen
                         fit: BoxFit.cover,
@@ -303,8 +324,10 @@ class _ShopScreenState extends State<ShopScreen> {
 
   Widget mostrarCategoria(String title, Future<List<dynamic>> Function() fetchDataFunction) {
     String itemCompra = "";
+    bool esAvatar = false;
     if(title == "Avatares") {
       itemCompra = "Avatar";
+      esAvatar = true;
     }
     else if(title == "Tapetes") {
       itemCompra = "Rug";
@@ -365,6 +388,7 @@ class _ShopScreenState extends State<ShopScreen> {
                           urlImagen,
                           80,
                           80,
+                          itemCompra,
                         ),
                       );
                     },

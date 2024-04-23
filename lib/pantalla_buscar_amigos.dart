@@ -204,7 +204,7 @@ class _SearchFriendsScreenState extends State<SearchFriendsScreen> {
                             ),
                             trailing: ElevatedButton(
                               onPressed: () {
-                                if (!isFriend) {
+                                if (!isFriend && _sentRequests[user['_id']] != true) {
                                   _addFriend(user['_id']);
                                 } else {
                                   // Do something if already a friend
@@ -212,7 +212,7 @@ class _SearchFriendsScreenState extends State<SearchFriendsScreen> {
                               },
                               style: ElevatedButton.styleFrom(
                                 foregroundColor: Colors.white,
-                                backgroundColor: isFriend ? Colors.grey : ColoresApp.segundoColor,
+                                backgroundColor: isFriend || _sentRequests[user['_id']] == true ? Colors.grey : ColoresApp.segundoColor,
                               ),
                               child: Text(
                                 isFriend ? 'Ya es tu amigo' : (_sentRequests[user['_id']] == true ? 'Solicitud enviada' : 'Enviar Solicitud'),
