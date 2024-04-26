@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:psoft_07/colores.dart';
 import 'package:psoft_07/Usuario.dart';
@@ -7,7 +9,13 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 class LoadingScreen extends StatefulWidget {
   final String idMesa;
   final User user;
-  const LoadingScreen(this.idMesa, this.user, {super.key});
+
+  IO.Socket socket = IO.io(EnlaceApp.enlaceBase, <String, dynamic>{
+    'transports': ['websocket'],
+    'autoConnect': true
+  });
+
+  LoadingScreen(this.idMesa, this.user, {super.key});
 
   @override
   _LoadingScreenState createState() => _LoadingScreenState();
@@ -40,8 +48,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
 
-  void conectarPartida() {
-
+  void conectarPartida() async {
+    /*
     // Dart client
     IO.Socket socket = IO.io(EnlaceApp.enlaceBase);
 
@@ -70,9 +78,77 @@ class _LoadingScreenState extends State<LoadingScreen> {
     socket.on("error", (args) {
         print(args);
     });
+    */
+    /////////////////////////////////
 
 
+
+    bool kDebugMode = true;
+
+    widget.socket?.on("connect", (data) {
+      if (kDebugMode) {
+        print("Socket Connect Done");
+      }
+
+      updateSocketApi();
+    });
+
+    widget.socket?.on("starting public board", (data) {
+      if (kDebugMode) {
+        print("starting public board RECIBIDO :) --------------------");
+        print(data);
+      }
+
+    });
+
+    widget.socket?.on("connect_error", (data) {
+      if (kDebugMode) {
+        print("Socket connect_error");
+        print(data);
+      }
+    });
+
+    widget.socket?.on("error", (data) {
+      if (kDebugMode) {
+        print("Socket error");
+        print(data);
+      }
+    });
+
+    widget.socket?.on("UpdateSocket", (data) {
+      if (kDebugMode) {
+        print("UpdateSocket --------------------");
+        print(data);
+      }
+
+    });
+
+    widget.socket?.on("disconnect", (data) {
+      if (kDebugMode) {
+        print("Socket disconnect");
+        print(data);
+      }
+    });
   }
+
+  Future updateSocketApi() async {
+    try {
+
+      Map<String, dynamic> body = {
+        'body': {
+          'typeId': widget.idMesa,
+          'userId': widget.user.id,
+        }
+      };
+
+      widget.socket?.emit('enter public board', body);
+    }catch (err) {
+      if (true) {
+        print(err);
+    }
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
