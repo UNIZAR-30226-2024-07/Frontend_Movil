@@ -57,10 +57,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
       socket.emit("enter public board", body);
     });
 
-
-
-
-
+    socket.emit("enter public board", body);
 
     socket.on("starting public board", (boardId) {
         print(boardId);
