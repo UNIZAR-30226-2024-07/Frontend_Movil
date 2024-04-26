@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_connect/connect.dart';
 import 'package:psoft_07/Usuario.dart';
+import 'package:psoft_07/pantalla_principal.dart';
 //import 'package:psoft_07/funcionesAvatar.dart';
 import 'colores.dart';
 
@@ -419,18 +420,41 @@ class _ShopScreenState extends State<ShopScreen> {
       future: widget._getUserCoins(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting || !snapshot.hasData) {
-          return Scaffold(
-            backgroundColor: ColoresApp.fondoPantallaColor,
-            appBar: AppBar(
-              backgroundColor: ColoresApp.cabeceraColor,
-              elevation: 2,
-              leading: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Image.asset(
-                  'assets/logo.png',
-                  width: 50,
-                  height: 50,
-                  fit: BoxFit.cover,
+          return WillPopScope(
+            onWillPop: () async  {
+              final getConnect = GetConnect();
+              actualizarUsuario(context, getConnect, widget.user);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Principal(widget.user)),
+              );
+              return true;
+            },
+            child: Scaffold(
+              backgroundColor: ColoresApp.fondoPantallaColor,
+              appBar: AppBar(
+                backgroundColor: ColoresApp.cabeceraColor,
+                elevation: 2,
+                leading: GestureDetector(
+                  onTap: () {
+                    // Coloca aquí el código que deseas ejecutar cuando se haga tap en la imagen
+                    // Por ejemplo, puedes navegar a otra pantalla, mostrar un diálogo, etc.
+                    final getConnect = GetConnect();
+                    actualizarUsuario(context, getConnect, widget.user);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Principal(widget.user)),
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Image.asset(
+                      'assets/logo.png', // Ruta de la imagen
+                      width: 50, // Ancho de la imagen
+                      height: 50, // Altura de la imagen
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -439,71 +463,92 @@ class _ShopScreenState extends State<ShopScreen> {
           return Text('Error: ${snapshot.error}');
         } else {
           int monedas = snapshot.data!;
-          return Scaffold(
-            backgroundColor: ColoresApp.fondoPantallaColor,
-            appBar: AppBar(
-              backgroundColor: ColoresApp.cabeceraColor,
-              elevation: 2,
-              leading: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Image.asset(
-                  'assets/logo.png',
-                  width: 50,
-                  height: 50,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            body: Stack(
-              children: [
-                SingleChildScrollView(
+          return WillPopScope(
+              onWillPop: () async  {
+            final getConnect = GetConnect();
+            actualizarUsuario(context, getConnect, widget.user);
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => Principal(widget.user)),
+            );
+            return true;
+          },
+          child: Scaffold(
+              backgroundColor: ColoresApp.fondoPantallaColor,
+              appBar: AppBar(
+                backgroundColor: ColoresApp.cabeceraColor,
+                elevation: 2,
+                leading: GestureDetector(
+                  onTap: () {
+                    // Coloca aquí el código que deseas ejecutar cuando se haga tap en la imagen
+                    // Por ejemplo, puedes navegar a otra pantalla, mostrar un diálogo, etc.
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Principal(widget.user)),
+                    );
+                  },
                   child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        mostrarCategoria('Tapetes', widget._getAllRugs),
-                        mostrarCategoria('Cartas', widget._getAllCards),
-                        mostrarCategoria('Avatares', widget._getAllAvatars),
-                      ],
+                    padding: const EdgeInsets.all(8.0),
+                    child: Image.asset(
+                      'assets/logo.png', // Ruta de la imagen
+                      width: 50, // Ancho de la imagen
+                      height: 50, // Altura de la imagen
+                      fit: BoxFit.cover,
                     ),
                   ),
                 ),
-                Positioned(
-                  top: 10,
-                  right: 10,
-                  child: Container(
-                    width: 100,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: ColoresApp.segundoColor,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Center(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+              ),
+              body: Stack(
+                children: [
+                  SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Image.asset(
-                            'assets/moneda.png',
-                            width: 20,
-                            height: 20,
-                            fit: BoxFit.cover,
-                          ),
-                          SizedBox(width: 5),
-                          Text(
-                            monedas.toString(),
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
+                          mostrarCategoria('Tapetes', widget._getAllRugs),
+                          mostrarCategoria('Cartas', widget._getAllCards),
+                          mostrarCategoria('Avatares', widget._getAllAvatars),
                         ],
                       ),
                     ),
                   ),
-                ),
-              ],
+                  Positioned(
+                    top: 10,
+                    right: 10,
+                    child: Container(
+                      width: 100,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: ColoresApp.segundoColor,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset(
+                              'assets/moneda.png',
+                              width: 20,
+                              height: 20,
+                              fit: BoxFit.cover,
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              monedas.toString(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         }

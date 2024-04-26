@@ -4,6 +4,7 @@ import 'package:psoft_07/colores.dart';
 import 'package:psoft_07/pantalla_ajustes.dart';
 import 'package:psoft_07/pantalla_amigos.dart';
 import 'package:psoft_07/pantalla_eleccion_skins.dart';
+import 'package:psoft_07/pantalla_inicio.dart';
 import 'package:psoft_07/pantalla_partida_publica.dart';
 import 'package:psoft_07/pantalla_principal_partida_privada.dart';
 import 'package:psoft_07/pantalla_ranking.dart';
@@ -76,6 +77,15 @@ class Principal extends StatelessWidget {
               );
             },
             icon: const Icon(Icons.settings, color: Colors.white,),
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => WelcomeScreen()),
+              );
+            },
+            icon: const Icon(Icons.logout, color: Colors.white,),
           ),
         ],
       ),
@@ -158,7 +168,7 @@ class Principal extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const PrivateMatchScreen()),
+                    MaterialPageRoute(builder: (context) => PrivateMatchScreen(user)),
                   );
                 },
                 style: ElevatedButton.styleFrom(

@@ -269,76 +269,11 @@ class _SelectSkinsState extends State<SelectSkinsScreen> {
     );
   }
 
-  void actualizarUsuario() async {
-    final res = await widget.getConnect.post('${EnlaceApp.enlaceBase}/api/user/verify', {},
-      headers: {
-        "Authorization": widget.user.token,
-      },
-    );
-
-    if (res.body['status'] == 'error') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(res.body['message'], textAlign: TextAlign.center,),
-        ),
-      );
-    } else {
-      User user = User(
-          id: res.body['user']['_id'],
-          nick: res.body['user']['nick'],
-          name: res.body['user']['name'],
-          surname: res.body['user']['surname'],
-          email: res.body['user']['email'],
-          password: res.body['user']['password'],
-          rol: res.body['user']['rol'],
-          tournaments: [],
-          coins: res.body['user']['coins'].toInt(),
-          avatars: [],
-          rugs: [],
-          cards: [],
-          token: res.body['token']);
-
-      // Bucle para agregar cada avatar a la lista de avatares del usuario
-      for (var tournamentData in res.body['user']['tournaments']) {
-        user.tournaments.add(TournamentEntry(
-          tournament: tournamentData['tournament'],
-          round: tournamentData['position'],
-        ));
-      }
-
-      // Bucle para agregar cada avatar a la lista de avatares del usuario
-      for (var avatarData in res.body['user']['avatars']) {
-        user.avatars.add(AvatarEntry(
-          avatar: avatarData['avatar'],
-          current: avatarData['current'],
-        ));
-      }
-
-      // Bucle para agregar cada avatar a la lista de avatares del usuario
-      for (var rugData in res.body['user']['rugs']) {
-        user.rugs.add(RugEntry(
-          rug: rugData['rug'],
-          current: rugData['current'],
-        ));
-      }
-
-      // Bucle para agregar cada avatar a la lista de avatares del usuario
-      for (var cardData in res.body['user']['cards']) {
-        user.cards.add(CardEntry(
-          card: cardData['card'],
-          current: cardData['current'],
-        ));
-      }
-      widget.user = user;
-    }
-  }
-
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
         onWillPop: () async  {
-          actualizarUsuario();
+          actualizarUsuario(context, widget.getConnect, widget.user);
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => Principal(widget.user)),
@@ -350,13 +285,22 @@ class _SelectSkinsState extends State<SelectSkinsScreen> {
           appBar: AppBar(
             backgroundColor: ColoresApp.cabeceraColor,
             elevation: 2,
-            leading: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Image.asset(
-                'assets/logo.png',
-                width: 50,
-                height: 50,
-                fit: BoxFit.cover,
+            leading: GestureDetector(
+              onTap: () {
+                actualizarUsuario(context, widget.getConnect, widget.user);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Principal(widget.user)),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Image.asset(
+                  'assets/logo.png', // Ruta de la imagen
+                  width: 50, // Ancho de la imagen
+                  height: 50, // Altura de la imagen
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),

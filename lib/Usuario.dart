@@ -1,4 +1,70 @@
 import 'package:flutter/material.dart';
+import 'colores.dart';
+
+
+void actualizarUsuario(context, getConnect, user) async {
+  final res = await getConnect.post('${EnlaceApp.enlaceBase}/api/user/verify', {},
+    headers: {
+      "Authorization": user.token,
+    },
+  );
+
+  if (res.body['status'] == 'error') {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(res.body['message'], textAlign: TextAlign.center,),
+      ),
+    );
+  } else {
+    User NewUser = User(
+        id: res.body['user']['_id'],
+        nick: res.body['user']['nick'],
+        name: res.body['user']['name'],
+        surname: res.body['user']['surname'],
+        email: res.body['user']['email'],
+        password: res.body['user']['password'],
+        rol: res.body['user']['rol'],
+        tournaments: [],
+        coins: res.body['user']['coins'].toInt(),
+        avatars: [],
+        rugs: [],
+        cards: [],
+        token: res.body['token']);
+
+    // Bucle para agregar cada avatar a la lista de avatares del usuario
+    for (var tournamentData in res.body['user']['tournaments']) {
+      NewUser.tournaments.add(TournamentEntry(
+        tournament: tournamentData['tournament'],
+        round: tournamentData['position'],
+      ));
+    }
+
+    // Bucle para agregar cada avatar a la lista de avatares del usuario
+    for (var avatarData in res.body['user']['avatars']) {
+      NewUser.avatars.add(AvatarEntry(
+        avatar: avatarData['avatar'],
+        current: avatarData['current'],
+      ));
+    }
+
+    // Bucle para agregar cada avatar a la lista de avatares del usuario
+    for (var rugData in res.body['user']['rugs']) {
+      NewUser.rugs.add(RugEntry(
+        rug: rugData['rug'],
+        current: rugData['current'],
+      ));
+    }
+
+    // Bucle para agregar cada avatar a la lista de avatares del usuario
+    for (var cardData in res.body['user']['cards']) {
+      NewUser.cards.add(CardEntry(
+        card: cardData['card'],
+        current: cardData['current'],
+      ));
+    }
+    user = NewUser;
+  }
+}
 
 class User {
   String id;
