@@ -9,6 +9,7 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 class LoadingScreen extends StatefulWidget {
   final String idMesa;
   final User user;
+  bool hecho = false;
 
   IO.Socket socket = IO.io(EnlaceApp.enlaceBase, <String, dynamic>{
     'transports': ['websocket'],
@@ -89,8 +90,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
       if (kDebugMode) {
         print("Socket Connect Done");
       }
-
       updateSocketApi();
+
     });
 
     widget.socket?.on("starting public board", (data) {
@@ -98,6 +99,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
         print("starting public board RECIBIDO :) --------------------");
         print(data);
       }
+
 
     });
 
@@ -132,27 +134,34 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   Future updateSocketApi() async {
-    try {
+    if (!widget.hecho) {
+      try {
+        widget.hecho = true;
 
-      Map<String, dynamic> body = {
-        'body': {
-          'typeId': widget.idMesa,
-          'userId': widget.user.id,
+        Map<String, dynamic> body = {
+          'body': {
+            'typeId': widget.idMesa,
+            'userId': widget.user.id,
+          }
+        };
+
+        print("JODEER");
+
+        widget.socket?.emit('enter public board', body);
+      }catch (err) {
+        if (true) {
+          print(err);
         }
-      };
-
-      widget.socket?.emit('enter public board', body);
-    }catch (err) {
-      if (true) {
-        print(err);
+      }
     }
-  }
 }
 
 
   @override
   Widget build(BuildContext context) {
-    conectarPartida();
+    if (!widget.hecho) {
+      conectarPartida();
+    }
     return Scaffold(
       body: Center(
         child: Column(
