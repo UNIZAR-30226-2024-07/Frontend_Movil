@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:get/get_connect/connect.dart';
 import 'package:psoft_07/colores.dart';
 import 'package:psoft_07/Usuario.dart';
 import 'package:psoft_07/pantalla_partida_publica.dart';
@@ -9,6 +10,7 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 class LoadingScreen extends StatefulWidget {
   final String idMesa;
   final User user;
+  final getConnect = GetConnect();
   bool hecho = false;
 
   IO.Socket socket = IO.io(EnlaceApp.enlaceBase, <String, dynamic>{
@@ -48,41 +50,49 @@ class _LoadingScreenState extends State<LoadingScreen> {
     });
   }
 
+  Future<bool> conexionBoardId(boardId) async {
+    try {
+      final response = await widget.getConnect.get(
+        '${EnlaceApp.enlaceBase}/api/publicBoard/boardById/$boardId',
+        headers: {
+          "Authorization": widget.user.token,
+        },
+      );
+
+      if (response.body['status'] == 'error') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response.body['message'], textAlign: TextAlign.center,),
+          ),
+        );
+      }
+
+      for (var jugador in response.body['board']['players']) {
+        if(jugador['player'] == widget.user.id){
+          print("ID IGUAL");
+          print(jugador['guest']);
+          return jugador['guest'];
+        }
+        print("ID DIFERENTE");
+
+      }
+
+      return false;
+
+
+
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Error en la peticion de boardId", textAlign: TextAlign.center,),
+        ),
+      );
+      return false;
+    }
+  }
+
 
   void conectarPartida() async {
-    /*
-    // Dart client
-    IO.Socket socket = IO.io(EnlaceApp.enlaceBase);
-
-    Map<String, dynamic> body = {
-      'body': {
-        'typeId': widget.idMesa,
-        'userId': widget.user.id,
-      }
-    };
-
-    socket.onConnect((_) {
-      print('connect');
-      socket.emit("enter public board", body);
-    });
-
-    socket.emit("enter public board", body);
-
-    socket.on("starting public board", (boardId) {
-        print(boardId);
-
-        if (boardId) {
-          socket.emit("players public ready", []);
-        }
-    });
-
-    socket.on("error", (args) {
-        print(args);
-    });
-    */
-    /////////////////////////////////
-
-
 
     bool kDebugMode = true;
 
@@ -94,20 +104,25 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
     });
 
-    widget.socket?.on("starting public board", (data) {
+    widget.socket?.on("starting public board", (boardId) async {
       if (kDebugMode) {
         print("starting public board RECIBIDO :) --------------------");
-        print(data);
       }
 
+      if(await conexionBoardId(boardId)) {
 
+        Map<String, dynamic> body = {
+          'body': {
+            'boardId': boardId,
+          }
+        };
+        print("SE ha emitidoooooooooooooooooooo");
+        widget.socket.emit("players public ready", body);
+      }
     });
 
-    widget.socket?.on("connect_error", (data) {
-      if (kDebugMode) {
-        print("Socket connect_error");
+    widget.socket?.on("play hand", (data) {
         print(data);
-      }
     });
 
     widget.socket?.on("error", (data) {
@@ -117,20 +132,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
       }
     });
 
-    widget.socket?.on("UpdateSocket", (data) {
-      if (kDebugMode) {
-        print("UpdateSocket --------------------");
-        print(data);
-      }
-
-    });
-
-    widget.socket?.on("disconnect", (data) {
-      if (kDebugMode) {
-        print("Socket disconnect");
-        print(data);
-      }
-    });
   }
 
   Future updateSocketApi() async {

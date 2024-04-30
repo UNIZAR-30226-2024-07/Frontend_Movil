@@ -16,6 +16,8 @@ import 'Usuario.dart';
 class Principal extends StatelessWidget {
 
   final User user;
+  bool hayRecompensa = false;
+  int valorRecompensa = 0;
 
   Principal(this.user, {super.key});
 
@@ -34,8 +36,50 @@ class Principal extends StatelessWidget {
     }
   }
 
+  void apiHayRecompensa(context) async {
+    try {
+      final getConnect = GetConnect();
+      final response = await getConnect.get(
+        '${EnlaceApp.enlaceBase}/api/user/coinsDailyReward',
+        headers: {
+          "Authorization": user.token,
+        },
+      );
+      hayRecompensa = response.body['rewardDisponible'];
+      valorRecompensa = response.body['coins'];
+      (context as Element).markNeedsBuild();
+
+
+    } catch (e) {
+    }
+  }
+
+  void recogerRecompensa(context) async {
+    try {
+      final getConnect = GetConnect();
+      final response = await getConnect.put(
+        '${EnlaceApp.enlaceBase}/api/user/getDailyReward',
+        '',
+        headers: {
+          "Authorization": user.token,
+        },
+      );
+      if (response.body['status'] == 'error' || response.body['status'] == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response.body['message'], textAlign: TextAlign.center,),
+          ),
+        );
+      }
+      user.coins = response.body['user']['coins'];
+
+    } catch (e) {
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    apiHayRecompensa(context);
     return Scaffold(
       backgroundColor: ColoresApp.fondoPantallaColor,
       appBar: AppBar(
@@ -88,6 +132,28 @@ class Principal extends StatelessWidget {
             icon: const Icon(Icons.logout, color: Colors.white,),
           ),
         ],
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(width: 150,),
+            Text(
+              user.coins.toString(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Image.asset(
+                'assets/moneda.png', // Ruta de la imagen
+                width: 30, // Ancho de la imagen
+                height: 30, // Altura de la imagen
+                fit: BoxFit.cover,
+              ),
+            ),
+          ],
+        ),
       ),
       body: Center(
         child: Row(
@@ -201,12 +267,19 @@ class Principal extends StatelessWidget {
                     ),
                   ),
                 ),
-
               ],
             ),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                const Text(
+                  "Tienda",
+                  style: TextStyle(
+                      fontSize: 24,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold
+                  ),
+                ),
                 ElevatedButton(
                     onPressed: () {
                       Navigator.push(
@@ -229,14 +302,28 @@ class Principal extends StatelessWidget {
                       ),
                     )
                 ),
-                const Text(
-                  "Tienda",
-                  style: TextStyle(
-                      fontSize: 24,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold
+
+                if (hayRecompensa)
+                  ElevatedButton(
+                    onPressed: () {
+
+                        hayRecompensa = false;
+                        recogerRecompensa(context);
+                        (context as Element).markNeedsBuild();
+
+
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColoresApp.segundoColor,
+                    ),
+                    child: const Text(
+                      'Recompensa',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                )
               ],
             )
           ],
