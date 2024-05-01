@@ -92,15 +92,5 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
   assets:
-    - assets/tapete_fondo_pantalla.jpg
-    - assets/logo.png
-    - assets/victoria.png
-    - assets/derrota.png
-    - assets/trofeo.png
-    - assets/estrella.png
-    - assets/medalla.png
-    - assets/calavera.png
-    - assets/fotoRonda.jpeg
-    - assets/moneda.png
-    - assets/medalla_ganador.png
-    - assets/medalla_segundo.png
+    - assets/
+    - assets/valoresCartas/

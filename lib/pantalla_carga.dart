@@ -12,6 +12,13 @@ class LoadingScreen extends StatefulWidget {
   final User user;
   final getConnect = GetConnect();
   bool hecho = false;
+  bool UImesa = false;
+
+  dynamic ronda;
+
+  dynamic myHand;
+  dynamic bankHand;
+  dynamic otherHand;
 
   IO.Socket socket = IO.io(EnlaceApp.enlaceBase, <String, dynamic>{
     'transports': ['websocket'],
@@ -69,12 +76,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
       for (var jugador in response.body['board']['players']) {
         if(jugador['player'] == widget.user.id){
-          print("ID IGUAL");
-          print(jugador['guest']);
           return jugador['guest'];
         }
-        print("ID DIFERENTE");
-
       }
 
       return false;
@@ -123,6 +126,11 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
     widget.socket?.on("play hand", (data) {
         print(data);
+
+        setState(() {
+          widget.UImesa = true;
+          widget.ronda = data;
+        });
     });
 
     widget.socket?.on("error", (data) {
@@ -157,65 +165,158 @@ class _LoadingScreenState extends State<LoadingScreen> {
     }
 }
 
+void myHand () {
+  for (var mano in widget.ronda) {
+    if (mano['userId'] == widget.user.id) {
+        widget.myHand = mano;
+    }
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.hecho) {
-      conectarPartida();
-    }
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 300,
-              height: 120,
-              padding: const EdgeInsets.all(7.5),
-              decoration: BoxDecoration(
-                color: Colors.red[800],
-                borderRadius: BorderRadius.circular(10.0),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                    offset: const Offset(0, 3), // Cambia la posición de la sombra
-                  ),
-                ],
+    if (!widget.UImesa) {
+      if (!widget.hecho) {
+        conectarPartida();
+      }
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 300,
+                height: 120,
+                padding: const EdgeInsets.all(7.5),
+                decoration: BoxDecoration(
+                  color: Colors.red[800],
+                  borderRadius: BorderRadius.circular(10.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: const Offset(
+                          0, 3), // Cambia la posición de la sombra
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    const Text(
+                      'Cargando...',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                    LinearProgressIndicator(
+                      value: _progressValue,
+                      backgroundColor: Colors.blue[100],
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                          Colors.blue),
+                      minHeight: 10,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      '${(_progressValue * 90.9).toStringAsFixed(
+                          1)}% completado',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              child: Column(
-                children: [
-                  const Text(
-                    'Cargando...',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  LinearProgressIndicator(
-                    value: _progressValue,
-                    backgroundColor: Colors.blue[100],
-                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
-                    minHeight: 10,
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    '${(_progressValue * 90.9).toStringAsFixed(1)}% completado',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+            ],
+          ),
+        ),
+      );
+    }
+    else {
+      myHand(); // Cartas del Usuario
+      return Scaffold(
+        backgroundColor: ColoresApp.fondoPantallaColor,
+        appBar: AppBar(
+          backgroundColor: ColoresApp.cabeceraColor,
+          elevation: 2,
+          // Ajusta el valor según el tamaño de la sombra que desees
+          leading: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Image.asset(
+              'assets/logo.png', // Ruta de la imagen
+              width: 50, // Ancho de la imagen
+              height: 50, // Altura de la imagen
+              fit: BoxFit.cover,
+            ),
+          ),
+          actions: [
+            Text(
+              widget.user.coins.toString(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Image.asset(
+                'assets/moneda.png', // Ruta de la imagen
+                width: 30, // Ancho de la imagen
+                height: 30, // Altura de la imagen
+                fit: BoxFit.cover,
               ),
             ),
           ],
         ),
-      ),
-    );
+        body: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Column(   //Cartas Resto Jugadores
+
+            ),
+            Column (
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(  // Cartas Banca
+
+                ),
+                Column (  // Cartas Jugador
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Total: ' + widget.myHand['totalCards'].toString(),
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18
+                      ),
+                    ),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          for (var card in widget.myHand['cards'])
+                            Image.asset(
+                              'assets/valoresCartas/' + card['value'].toString() + '-' + card['suit'] + '.png',
+                              fit: BoxFit.contain,
+                            ),
+                      ],
+                    )
+                  ],
+                ),
+              ],
+            ),
+            Column(   // Botones de Interacción
+
+            ),
+          ],
+        ),
+      );
+    }
   }
 }
 
