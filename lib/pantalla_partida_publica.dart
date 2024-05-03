@@ -31,12 +31,37 @@ class _PublicGamesState extends State<PublicGames> {
           "Authorization": widget.user.token,
         },
       );
-      final mesas = List<dynamic>.from(response.body['publicBoardTypes']);
+      List<dynamic> mesas = List<dynamic>.from(response.body['publicBoardTypes']);
+
+      mesas.sort((mesa1, mesa2) {
+        String bankLevel1 = mesa1['bankLevel'];
+        String bankLevel2 = mesa2['bankLevel'];
+        int bet1 = mesa1['bet'];
+        int bet2 = mesa2['bet'];
+
+        if (bankLevel1 != bankLevel2) { // se ordena por dificultad
+          if (bankLevel1 == 'beginner') {
+            return -1;
+          } else if (bankLevel1 == 'medium') {
+            if (bankLevel2 == 'beginner') {
+              return 1;
+            } else {
+              return -1;
+            }
+          } else {
+            return 1;
+          }
+        } else { // si la dificultad es la misma, se ordena por dinero apostado
+          return bet1.compareTo(bet2);
+        }
+      });
+
       return mesas;
     } catch (e) {
-      throw Exception('Failed to load user data');
+      throw Exception('Failed to load board data');
     }
   }
+
 
 
   String dificultadMesa (mesa){
