@@ -51,7 +51,7 @@ class changeNameScreen extends StatelessWidget {
           MaterialPageRoute(builder: (context) => Principal(user)),
         );
       } else {
-        // Mostrar mensaje de error
+        // Mostrar mensaje de error4
         mostrarMsg(context, "Error al actualizar el nombre. Por favor, inténtalo de nuevo.");
       }
     } catch (e) {
@@ -61,10 +61,11 @@ class changeNameScreen extends StatelessWidget {
   }
 
   void mostrarMsg(BuildContext context, String mensaje) {
-    // Aquí puedes implementar la lógica para mostrar un pop-up con el mensaje de error
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(mensaje), // Se debe envolver el mensaje en un widget Text
+        content: Center( // Centra horizontalmente el contenido
+          child: Text(mensaje),
+        ),
       ),
     );
   }

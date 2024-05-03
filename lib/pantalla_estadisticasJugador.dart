@@ -9,16 +9,17 @@ class estadisticasJugador extends StatelessWidget {
 
   final User user;
   estadisticasJugador(this.user, {super.key});
-
   final getConnect = GetConnect();
-
   void mostrarError(String mensaje, BuildContext context) {
-    // Aquí puedes implementar la lógica para mostrar un pop-up con el mensaje de error
-    // Por ejemplo, utilizando showDialog o ScaffoldMessenger.of(context).showSnackBar
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(mensaje),
-      duration: Duration(seconds: 3),
-    ));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: Duration(seconds: 3),
+        content: Center( // Centra horizontalmente el contenido
+          child: Text(mensaje),
+        ),
+      ),
+
+    );
   }
 
   Future<String> _getImageUrl() async {

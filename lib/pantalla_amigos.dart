@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_connect/connect.dart';
 import 'package:psoft_07/Usuario.dart';
-//import 'package:psoft_07/funcionesAvatar.dart';
 import 'package:psoft_07/pantalla_buscar_amigos.dart';
 import 'package:psoft_07/pantalla_estadisticasJugador.dart';
 import 'package:psoft_07/pantalla_principal.dart';
@@ -11,13 +10,10 @@ import 'colores.dart';
 class FriendsScreen extends StatefulWidget {
   //final FuncionesAvatar fAvatar = FuncionesAvatar();
   final User user;
-
   FriendsScreen(this.user, {super.key});
-
   @override
   _FriendsScreenState createState() => _FriendsScreenState();
 }
-
 class _FriendsScreenState extends State<FriendsScreen> {
   List<dynamic>? userData;
   Future<List<dynamic>> _getAllFriends() async {

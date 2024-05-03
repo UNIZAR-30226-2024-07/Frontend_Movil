@@ -2,17 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:psoft_07/colores.dart';
 import 'package:get/get.dart';
-import 'package:psoft_07/pantalla_inicio.dart';
 import 'package:psoft_07/pantalla_principal.dart';
-import 'package:psoft_07/pantalla_victoria_partida.dart';
-
 import 'Usuario.dart';
-
 
 class changePasswordScreen extends StatelessWidget {
   final User user;
   changePasswordScreen(this.user, {super.key});
-
   TextEditingController passwdNueva = TextEditingController();
   TextEditingController passwdNuevaConfirmar = TextEditingController();
   final getConnect = GetConnect();
@@ -100,14 +95,16 @@ class changePasswordScreen extends StatelessWidget {
     }
 }
 
-void mostrarMsg(BuildContext context, String mensaje) {
-  // Aquí puedes implementar la lógica para mostrar un pop-up con el mensaje de error
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(mensaje), // Se debe envolver el mensaje en un widget Text
-    ),
-  );
-}
+  void mostrarMsg(BuildContext context, String mensaje) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Center( // Centra horizontalmente el contenido
+          child: Text(mensaje),
+        ),
+      ),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
