@@ -173,9 +173,8 @@ class _SelectSkinsState extends State<SelectSkinsScreen> {
                         ),
                       );
                     },
-                    itemBuilder: (context, index) {
-                      String urlImagen =
-                          "https://backend-uf65.onrender.com/images/" +
+                    itemBuilder: (context, index) {String urlImagen =
+                          "${EnlaceApp.enlaceBase}/images/" +
                               itemList[index]['imageFileName'];
                       return GestureDetector(
                         onTap: () {

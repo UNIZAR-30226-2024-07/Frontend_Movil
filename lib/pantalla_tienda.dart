@@ -380,7 +380,7 @@ class _ShopScreenState extends State<ShopScreen> {
                       return const SizedBox(width: 20.0, child: VerticalDivider(color: Colors.white, thickness: 5, indent: 10, endIndent: 10,));
                     },
                     itemBuilder: (context, index) {
-                      String urlImagen = "https://backend-uf65.onrender.com/images/" + itemList[index]['imageFileName'];
+                      String urlImagen = "${EnlaceApp.enlaceBase}/images/" + itemList[index]['imageFileName'];
                       return GestureDetector(
                         onTap: () {
                           _showConfirmationDialog(itemList[index], itemCompra, urlImagen);
