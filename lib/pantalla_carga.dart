@@ -1,6 +1,8 @@
+import 'dart:collection';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:get/get_connect/connect.dart';
 import 'package:psoft_07/colores.dart';
 import 'package:psoft_07/Usuario.dart';
@@ -12,9 +14,16 @@ class LoadingScreen extends StatefulWidget {
   final User user;
   final getConnect = GetConnect();
   bool hecho = false;
+
   bool UImesa = false;
+  bool resultadosRonda = false;
+  bool isChatActive = false;
 
   String boardId = "";
+
+  List<(String,String)> mensajes = [];
+  TextEditingController mensajeUsuario = TextEditingController();
+
 
   dynamic ronda;
 
@@ -22,6 +31,7 @@ class LoadingScreen extends StatefulWidget {
   bool myDefeat = false;
   bool plantado = false;
   bool myBlackjack = false;
+  bool puedoDoblar = true;
   dynamic bankHand;
   List<dynamic> otherHand = [];
 
@@ -133,15 +143,43 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
     widget.socket?.on("play hand", (data) {
         print(data);
+        if (data != null) {
+          setState(() {
+            widget.ronda = data;
+            myHand(); // Cartas del Usuario
+            bankHand();
+            othersHand();
+            widget.UImesa = true;
+            widget.myDefeat = false;
+            widget.plantado = false;
+            widget.myBlackjack = false;
+            widget.puedoDoblar = true;
+            widget.resultadosRonda = false;
+          });
+        }
 
+    });
+
+    widget.socket?.on("hand results", (data) {
+      print(data);
+      if (data != null) {
         setState(() {
-          widget.UImesa = true;
-          widget.ronda = data;
-          widget.myDefeat = false;
-          widget.plantado = false;
-          widget.myBlackjack = false;
-          widget.otherHand = [];
+          widget.resultadosRonda = true;
         });
+      }
+    });
+
+    widget.socket?.on("new message", (mensaje) {
+      
+      if (mensaje != null) {
+        setState(() {
+          if (mensaje['userId'] == widget.user.id) {
+            widget.mensajes.add(("Yo",mensaje['message']));
+          } else {
+            widget.mensajes.add((mensaje['name'],mensaje['message']));
+          }
+        });
+      }
     });
 
     widget.socket?.on("error", (data) {
@@ -200,6 +238,20 @@ void myHand () {
       && mano['userId'] != "Bank") {
         widget.otherHand.add(mano);
       }
+    }
+  }
+
+  Future<String> userById(idUsuario) async {
+    final response = await widget.getConnect.get(
+      '${EnlaceApp.enlaceBase}/api/user/userById/$idUsuario',
+      headers: {
+        "Authorization": widget.user.token,
+      }
+    );
+    if (!(response.body['status'] == 'error' || response.body['status'] == null)) {
+        return response.body['user']['nick'];
+    } else {
+      return "Usuario";
     }
   }
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -268,6 +320,45 @@ void myHand () {
           widget.myHand['totalCards'] = response.body['totalCards'];
           widget.myBlackjack = response.body['blackJack'];
           widget.myDefeat = response.body['defeat'];
+          widget.puedoDoblar = false;
+        });
+      }
+    } catch (e) {
+    }
+  }
+
+  void funcionDoblar () async {
+    try {
+      final response = await widget.getConnect.put(
+        '${EnlaceApp.enlaceBase}/api/publicBoard/drawCard',
+        {
+          "boardId": widget.boardId,
+          "cardsOnTable": widget.myHand['cards'],
+          "handIndex": 0,
+        },
+        headers: {
+          "Authorization": widget.user.token,
+        },
+      );
+      if (response.body['status'] == 'error' || response.body['status'] == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response.body['message'], textAlign: TextAlign.center,),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Has doblado apuesta", textAlign: TextAlign.center,),
+          ),
+        );
+        setState(() {
+          widget.myHand['cards'] = response.body['cardsOnTable'];
+          widget.myHand['totalCards'] = response.body['totalCards'];
+          widget.myBlackjack = response.body['blackJack'];
+          widget.myDefeat = response.body['defeat'];
+          widget.plantado = true;
+          widget.puedoDoblar = false;
         });
       }
     } catch (e) {
@@ -278,6 +369,180 @@ void myHand () {
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   @override
   Widget build(BuildContext context) {
+    if (widget.resultadosRonda)
+      return Scaffold(
+          backgroundColor: ColoresApp.fondoPantallaColor,
+          appBar: AppBar(
+            backgroundColor: ColoresApp.cabeceraColor,
+            elevation: 2,
+            // Ajusta el valor según el tamaño de la sombra que desees
+            leading: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Image.asset(
+                'assets/logo.png', // Ruta de la imagen
+                width: 50, // Ancho de la imagen
+                height: 50, // Altura de la imagen
+                fit: BoxFit.cover,
+              ),
+            ),
+            actions: [
+              Text(
+                widget.user.coins.toString(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Image.asset(
+                  'assets/moneda.png', // Ruta de la imagen
+                  width: 30, // Ancho de la imagen
+                  height: 30, // Altura de la imagen
+                  fit: BoxFit.cover,
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+
+                },
+                icon: const Icon(Icons.pause, color: Colors.white,),
+              ),
+              IconButton(
+                onPressed: () {
+
+                },
+                icon: const Icon(Icons.chat, color: Colors.white,),
+              ),
+              IconButton(
+                onPressed: () {
+
+                },
+                icon: const Icon(Icons.logout, color: Colors.white,),
+              ),
+            ],
+          ),
+
+      );
+
+    if(widget.isChatActive) {
+      return Scaffold(
+          backgroundColor: ColoresApp.fondoPantallaColor,
+          appBar: AppBar(
+            backgroundColor: ColoresApp.cabeceraColor,
+            elevation: 2,
+            // Ajusta el valor según el tamaño de la sombra que desees
+            leading: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Image.asset(
+                'assets/logo.png', // Ruta de la imagen
+                width: 50, // Ancho de la imagen
+                height: 50, // Altura de la imagen
+                fit: BoxFit.cover,
+              ),
+            ),
+            actions: [
+              Text(
+                widget.user.coins.toString(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Image.asset(
+                  'assets/moneda.png', // Ruta de la imagen
+                  width: 30, // Ancho de la imagen
+                  height: 30, // Altura de la imagen
+                  fit: BoxFit.cover,
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+
+                },
+                icon: const Icon(Icons.pause, color: Colors.white,),
+              ),
+              IconButton(
+                onPressed: () {
+
+                  setState(() {
+                    widget.isChatActive = !widget.isChatActive;
+                  });
+
+                },
+                icon: const Icon(Icons.chat, color: Colors.white,),
+              ),
+              IconButton(
+                onPressed: () {
+
+                },
+                icon: const Icon(Icons.logout, color: Colors.white,),
+              ),
+            ],
+          ),
+          body: Column(
+            children: [
+
+              Expanded(
+                child: ListView.builder(
+                  itemCount: widget.mensajes.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return ListTile(
+                      title: Text(widget.mensajes[index] as String),
+                      // Puedes personalizar el estilo de cada mensaje aquí
+                    );
+                  },
+                ),
+              ),
+
+
+              Row(
+                children: [
+                  TextField(
+                    controller: widget.mensajeUsuario,
+                    keyboardType: TextInputType.text,
+                    decoration: const InputDecoration(
+                      hintText: 'Mensaje',
+                      filled: true,
+                      fillColor: Colors.white,
+                    ),
+                  ),
+                  ElevatedButton(
+                      onPressed: () {
+                        Map<String, dynamic> body = {
+                          'body': {
+                            'boardId': widget.boardId,
+                            'userId': widget.user.id,
+                            'message': widget.mensajeUsuario.text,
+                          }
+                        };
+                        widget.socket.emit("new public message", body);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: ColoresApp.segundoColor,
+                        fixedSize: Size(10, 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5), // Ajusta el radio de esquinas según sea necesario
+                        ),
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.send,
+                          color: Colors.white,
+                          size: 5,
+                        ),
+                      )
+                  ),
+                ],
+              )
+            ],
+          )
+      );
+    }
+
+
     if (!widget.UImesa) {
       if (!widget.hecho) {
         conectarPartida();
@@ -340,9 +605,6 @@ void myHand () {
       );
     }
     else {
-      myHand(); // Cartas del Usuario
-      bankHand();
-      othersHand();
       return Scaffold(
         backgroundColor: ColoresApp.fondoPantallaColor,
         appBar: AppBar(
@@ -384,6 +646,16 @@ void myHand () {
             IconButton(
               onPressed: () {
 
+                setState(() {
+                  widget.isChatActive = !widget.isChatActive;
+                });
+
+              },
+              icon: const Icon(Icons.chat, color: Colors.white,),
+            ),
+            IconButton(
+              onPressed: () {
+
               },
               icon: const Icon(Icons.logout, color: Colors.white,),
             ),
@@ -397,18 +669,19 @@ void myHand () {
               children: [
                 if(widget.otherHand != [])
                   for (var mano in widget.otherHand)
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        for (var card in mano['cards'])
-                          Image.asset(
-                            'assets/valoresCartas/' + card['value'].toString() + '-' + card['suit'] + '.png',
-                            width: 50, // Establece un tamaño máximo solo para el ancho
-                            fit: BoxFit.scaleDown, // Ajusta automáticamente la altura según la proporción original de la imagen
-                          ),
-                      ],
-                    )
+
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          for (var card in mano['cards'])
+                            Image.asset(
+                              'assets/valoresCartas/' + card['value'].toString() + '-' + card['suit'] + '.png',
+                              width: 75, // Establece un tamaño máximo solo para el ancho
+                              fit: BoxFit.scaleDown, // Ajusta automáticamente la altura según la proporción original de la imagen
+                            ),
+                        ],
+                      )
               ],
             ),
             Column (
@@ -418,8 +691,8 @@ void myHand () {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Banca: ' + widget.bankHand['totalCards'].toString(),
-                      style: TextStyle(
+                      'Banca: ${widget.bankHand['totalCards']}',
+                      style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 18
@@ -502,36 +775,37 @@ void myHand () {
                     ),
                   ],
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                        onPressed: () {
-                          /////////////////////////////////////////////////////////////////////////////////////////////////////
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: ColoresApp.segundoColor,
-                          fixedSize: Size(40, 50),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15), // Ajusta el radio de esquinas según sea necesario
+                if(!(widget.myBlackjack || widget.myDefeat || widget.plantado || !widget.puedoDoblar))
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                        ElevatedButton(
+                            onPressed: () {
+                              funcionDoblar();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: ColoresApp.segundoColor,
+                            fixedSize: Size(40, 50),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15), // Ajusta el radio de esquinas según sea necesario
+                            ),
                           ),
-                        ),
-                        child: const Center(
-                          child: Icon(
-                            Icons.clear,
-                            color: Colors.white,
-                            size: 25,
-                          ),
-                        )
-                    ),
-                    const Text(
-                      "Doblar",
-                      style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold
+                          child: const Center(
+                            child: Icon(
+                              Icons.clear,
+                              color: Colors.white,
+                              size: 25,
+                            ),
+                          )
                       ),
-                    ),
+                      const Text(
+                        "Doblar",
+                        style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold
+                        ),
+                      ),
                   ],
                 ),
                 if(!(widget.myBlackjack || widget.myDefeat || widget.plantado))
@@ -542,7 +816,6 @@ void myHand () {
                       ElevatedButton(
                       onPressed: () {
                         funcionPedirCarta();
-
                       },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: ColoresApp.segundoColor,
@@ -577,7 +850,6 @@ void myHand () {
                         ElevatedButton(
                             onPressed: () {
                               funcionPlantarse();
-
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: ColoresApp.segundoColor,
