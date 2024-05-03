@@ -9,6 +9,8 @@ import 'package:psoft_07/Usuario.dart';
 import 'package:psoft_07/pantalla_partida_publica.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
+import 'Mano.dart';
+
 class LoadingScreen extends StatefulWidget {
   final String idMesa;
   final User user;
@@ -18,22 +20,18 @@ class LoadingScreen extends StatefulWidget {
   bool UImesa = false;
   bool resultadosRonda = false;
   bool isChatActive = false;
+  bool split = false;
 
   String boardId = "";
+  String currentcard = "";
 
   List<(String,String)> mensajes = [];
   TextEditingController mensajeUsuario = TextEditingController();
 
+  List<Mano> myHand = [];
+  List<Mano> otherHand = [];
+  Mano bankHand = Mano();
 
-  dynamic ronda;
-
-  dynamic myHand;
-  bool myDefeat = false;
-  bool plantado = false;
-  bool myBlackjack = false;
-  bool puedoDoblar = true;
-  dynamic bankHand;
-  List<dynamic> otherHand = [];
 
   IO.Socket socket = IO.io(EnlaceApp.enlaceBase, <String, dynamic>{
     'transports': ['websocket'],
@@ -97,8 +95,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
       return false;
 
-
-
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -128,6 +124,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
       }
 
       widget.boardId = boardId;
+      getCurrentCard();
 
       if(await conexionBoardId(boardId)) {
 
@@ -145,15 +142,11 @@ class _LoadingScreenState extends State<LoadingScreen> {
         print(data);
         if (data != null) {
           setState(() {
-            widget.ronda = data;
-            myHand(); // Cartas del Usuario
-            bankHand();
-            othersHand();
+            myHand(data); // Cartas del Usuario
+            bankHand(data);
+            othersHand(data);
             widget.UImesa = true;
-            widget.myDefeat = false;
-            widget.plantado = false;
-            widget.myBlackjack = false;
-            widget.puedoDoblar = true;
+            widget.split = false;
             widget.resultadosRonda = false;
           });
         }
@@ -214,29 +207,52 @@ class _LoadingScreenState extends State<LoadingScreen> {
     }
 }
 
-void myHand () {
-  for (var mano in widget.ronda) {
+void getCurrentCard() async {
+  try {
+    final response = await widget.getConnect.get(
+      '${EnlaceApp.enlaceBase}/api/card/currentCard',
+      headers: {
+        "Authorization": widget.user.token,
+      },
+    );
+
+    if (response.body['status'] == 'error') {
+      widget.currentcard = "13f36eb4-be1e-488d-8d5e-b2d45fb70203-1711535331655.png";
+    } else {
+      widget.currentcard = response.body['imageFileName'];
+    }
+  } catch (e) {
+    widget.currentcard = "13f36eb4-be1e-488d-8d5e-b2d45fb70203-1711535331655.png";
+  }
+}
+
+void myHand (data) {
+  widget.myHand = [];
+  for (var mano in data) {
     if (mano['userId'] == widget.user.id) {
-        widget.myHand = mano;
-        widget.myBlackjack = mano['blackJack'];
+      widget.myHand.add(Mano());
+      widget.myHand[0].initMano(mano['userId'], mano['cards'], mano['totalCards'], false, false, mano['blackJack'], true);
     }
   }
 }
 
-  void bankHand () {
-    for (var mano in widget.ronda) {
+  void bankHand (data) {
+    for (var mano in data) {
       if (mano['userId'] == "Bank") {
-        widget.bankHand = mano;
+        widget.bankHand.initMano(mano['userId'], mano['cards'], mano['totalCards'], false, false, mano['blackJack'], true);
       }
     }
   }
 
-  void othersHand () {
+  void othersHand (data) {
     widget.otherHand = [];
-    for (var mano in widget.ronda) {
+    int i = 0;
+    for (var mano in data) {
       if (mano['userId'] != widget.user.id
       && mano['userId'] != "Bank") {
-        widget.otherHand.add(mano);
+        widget.otherHand.add(Mano());
+        widget.otherHand[i].initMano(mano['userId'], mano['cards'], mano['totalCards'], false, false, mano['blackJack'], true);
+        i++;
       }
     }
   }
@@ -256,14 +272,14 @@ void myHand () {
   }
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  void funcionPlantarse () async {
+  void funcionPlantarse (int mano) async {
     try {
       final response = await widget.getConnect.put(
         '${EnlaceApp.enlaceBase}/api/publicBoard/stick',
         {
           "boardId": widget.boardId,
-          "cardsOnTable": widget.myHand['cards'],
-          "handIndex": 0,
+          "cardsOnTable": widget.myHand[mano].cartas,
+          "handIndex": mano,
         },
         headers: {
           "Authorization": widget.user.token,
@@ -282,22 +298,24 @@ void myHand () {
           ),
         );
         setState(() {
-          widget.myHand['cards'] = response.body['cardsOnTable'];
-          widget.plantado = true;
+          widget.myHand[mano].cartas = response.body['cardsOnTable'];
+          widget.myHand[mano].plantado = true;
+          widget.myHand[mano].firstHand = false;
+
         });
       }
     } catch (e) {
     }
 }
 
-  void funcionPedirCarta () async {
+  void funcionPedirCarta (int mano) async {
     try {
       final response = await widget.getConnect.put(
         '${EnlaceApp.enlaceBase}/api/publicBoard/drawCard',
         {
           "boardId": widget.boardId,
-          "cardsOnTable": widget.myHand['cards'],
-          "handIndex": 0,
+          "cardsOnTable": widget.myHand[mano].cartas,
+          "handIndex": mano,
         },
         headers: {
           "Authorization": widget.user.token,
@@ -316,25 +334,30 @@ void myHand () {
           ),
         );
         setState(() {
-          widget.myHand['cards'] = response.body['cardsOnTable'];
-          widget.myHand['totalCards'] = response.body['totalCards'];
-          widget.myBlackjack = response.body['blackJack'];
-          widget.myDefeat = response.body['defeat'];
-          widget.puedoDoblar = false;
+          widget.myHand[mano].cartas = response.body['cardsOnTable'];
+          widget.myHand[mano].totalCards = response.body['totalCards'];
+          widget.myHand[mano].myBlackjack = response.body['blackJack'];
+          widget.myHand[mano].myDefeat = response.body['defeat'];
+          widget.myHand[mano].firstHand = false;
         });
       }
     } catch (e) {
     }
   }
 
-  void funcionDoblar () async {
+  bool cartasIguales(){
+    return (widget.myHand[0].cartas[0]['value'] == widget.myHand[0].cartas[1]['value']);
+
+  }
+
+  void funcionDoblar (int mano) async {
     try {
       final response = await widget.getConnect.put(
-        '${EnlaceApp.enlaceBase}/api/publicBoard/drawCard',
+        '${EnlaceApp.enlaceBase}/api/publicBoard/double',
         {
           "boardId": widget.boardId,
-          "cardsOnTable": widget.myHand['cards'],
-          "handIndex": 0,
+          "cardsOnTable": widget.myHand[mano].cartas,
+          "handIndex": mano,
         },
         headers: {
           "Authorization": widget.user.token,
@@ -353,136 +376,210 @@ void myHand () {
           ),
         );
         setState(() {
-          widget.myHand['cards'] = response.body['cardsOnTable'];
-          widget.myHand['totalCards'] = response.body['totalCards'];
-          widget.myBlackjack = response.body['blackJack'];
-          widget.myDefeat = response.body['defeat'];
-          widget.plantado = true;
-          widget.puedoDoblar = false;
+          widget.myHand[mano].cartas = response.body['cardsOnTable'];
+          widget.myHand[mano].totalCards = response.body['totalCards'];
+          widget.myHand[mano].myBlackjack = response.body['blackJack'];
+          widget.myHand[mano].myDefeat = response.body['defeat'];
+          widget.myHand[mano].plantado = true;
+          widget.myHand[mano].firstHand = false;
+
         });
       }
     } catch (e) {
     }
   }
 
-
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  @override
-  Widget build(BuildContext context) {
-    if (widget.resultadosRonda)
-      return Scaffold(
-          backgroundColor: ColoresApp.fondoPantallaColor,
-          appBar: AppBar(
-            backgroundColor: ColoresApp.cabeceraColor,
-            elevation: 2,
-            // Ajusta el valor según el tamaño de la sombra que desees
-            leading: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Image.asset(
-                'assets/logo.png', // Ruta de la imagen
-                width: 50, // Ancho de la imagen
-                height: 50, // Altura de la imagen
-                fit: BoxFit.cover,
-              ),
-            ),
-            actions: [
-              Text(
-                widget.user.coins.toString(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Image.asset(
-                  'assets/moneda.png', // Ruta de la imagen
-                  width: 30, // Ancho de la imagen
-                  height: 30, // Altura de la imagen
-                  fit: BoxFit.cover,
-                ),
-              ),
-              IconButton(
-                onPressed: () {
-
-                },
-                icon: const Icon(Icons.pause, color: Colors.white,),
-              ),
-              IconButton(
-                onPressed: () {
-
-                },
-                icon: const Icon(Icons.chat, color: Colors.white,),
-              ),
-              IconButton(
-                onPressed: () {
-
-                },
-                icon: const Icon(Icons.logout, color: Colors.white,),
-              ),
-            ],
-          ),
-
+  void funcionSplit () async {
+    try {
+      final response = await widget.getConnect.put(
+        '${EnlaceApp.enlaceBase}/api/publicBoard/split',
+        {
+          "boardId": widget.boardId,
+          "cardsOnTable": widget.myHand[0].cartas,
+        },
+        headers: {
+          "Authorization": widget.user.token,
+        },
       );
+      if (response.body['status'] == 'error' || response.body['status'] == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response.body['message'], textAlign: TextAlign.center,),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Has dividido cartas", textAlign: TextAlign.center,),
+          ),
+        );
+        setState(() {
+          widget.myHand[0].cartas = response.body['cardsOnTableFirst'];
+          widget.myHand[0].totalCards = response.body['totalCardsFirst'];
+          widget.myHand[0].myBlackjack = response.body['blackJackFirst'];
+          widget.myHand[0].myDefeat = response.body['defeatFirst'];
+          widget.myHand[0].plantado = false;
+          widget.myHand[0].firstHand = true;
 
-    if(widget.isChatActive) {
-      return Scaffold(
-          backgroundColor: ColoresApp.fondoPantallaColor,
-          appBar: AppBar(
-            backgroundColor: ColoresApp.cabeceraColor,
-            elevation: 2,
-            // Ajusta el valor según el tamaño de la sombra que desees
-            leading: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Image.asset(
-                'assets/logo.png', // Ruta de la imagen
-                width: 50, // Ancho de la imagen
-                height: 50, // Altura de la imagen
-                fit: BoxFit.cover,
-              ),
-            ),
-            actions: [
-              Text(
-                widget.user.coins.toString(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+          widget.myHand.add(Mano());
+
+          widget.myHand[1].cartas = response.body['cardsOnTableSecond'];
+          widget.myHand[1].totalCards = response.body['totalCardsSecond'];
+          widget.myHand[1].myBlackjack = response.body['blackJackSecond'];
+          widget.myHand[1].myDefeat = response.body['defeatSecond'];
+          widget.myHand[1].plantado = false;
+          widget.myHand[1].firstHand = true;
+
+          widget.split = true;
+
+        });
+      }
+    } catch (e) {
+      print("ERRROOOOOR EN SPLIT" + e.toString());
+    }
+  }
+
+  Widget botones(int mano) {
+    return Column(   // Botones de Interacción
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        if(!(!widget.myHand[mano].firstHand || widget.split || widget.myHand[mano].myBlackjack))
+         if(cartasIguales())
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+                ElevatedButton(
+                    onPressed: () {
+                      funcionSplit();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColoresApp.segundoColor,
+                      fixedSize: Size(40, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15), // Ajusta el radio de esquinas según sea necesario
+                      ),
+                    ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.call_split_outlined,
+                        color: Colors.white,
+                        size: 25,
+                      ),
+                    )
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Image.asset(
-                  'assets/moneda.png', // Ruta de la imagen
-                  width: 30, // Ancho de la imagen
-                  height: 30, // Altura de la imagen
-                  fit: BoxFit.cover,
+              const Text(
+                "Dividir",
+                style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold
                 ),
-              ),
-              IconButton(
-                onPressed: () {
-
-                },
-                icon: const Icon(Icons.pause, color: Colors.white,),
-              ),
-              IconButton(
-                onPressed: () {
-
-                  setState(() {
-                    widget.isChatActive = !widget.isChatActive;
-                  });
-
-                },
-                icon: const Icon(Icons.chat, color: Colors.white,),
-              ),
-              IconButton(
-                onPressed: () {
-
-                },
-                icon: const Icon(Icons.logout, color: Colors.white,),
               ),
             ],
           ),
-          body: Column(
+        if(!(widget.myHand[mano].myBlackjack || !widget.myHand[mano].firstHand))
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                  onPressed: () {
+                    funcionDoblar(mano);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ColoresApp.segundoColor,
+                    fixedSize: Size(40, 50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15), // Ajusta el radio de esquinas según sea necesario
+                    ),
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.clear,
+                      color: Colors.white,
+                      size: 25,
+                    ),
+                  )
+              ),
+              const Text(
+                "Doblar",
+                style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold
+                ),
+              ),
+            ],
+          ),
+        if(!(widget.myHand[mano].myBlackjack || widget.myHand[mano].myDefeat || widget.myHand[mano].plantado))
+
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                  onPressed: () {
+                    funcionPedirCarta(mano);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ColoresApp.segundoColor,
+                    fixedSize: Size(40, 50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15), // Ajusta el radio de esquinas según sea necesario
+                    ),
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.exposure_plus_1,
+                      color: Colors.white,
+                      size: 25,
+                    ),
+                  )
+              ),
+              const Text(
+                "Otra carta",
+                style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold
+                ),
+              ),
+            ],
+          ),
+        if(!(widget.myHand[mano].myBlackjack || widget.myHand[mano].myDefeat || widget.myHand[mano].plantado))
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+
+              ElevatedButton(
+                  onPressed: () {
+                    funcionPlantarse(mano);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ColoresApp.segundoColor,
+                    fixedSize: const Size(40, 50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15), // Ajusta el radio de esquinas según sea necesario
+                    ),
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.pan_tool_rounded,
+                      color: Colors.white,
+                      size: 25,
+                    ),
+                  )
+              ),
+              const Text(
+                "Plantarse",
+                style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold
+                ),
+              ),
+            ],
+          ),
+        if(widget.isChatActive)
+          Column(
             children: [
 
               Expanded(
@@ -539,9 +636,73 @@ void myHand () {
               )
             ],
           )
+      ],
+    );
+  }
+
+  AppBar barra() {
+    return AppBar(
+      backgroundColor: ColoresApp.cabeceraColor,
+      elevation: 2,
+      // Ajusta el valor según el tamaño de la sombra que desees
+      leading: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Image.asset(
+          'assets/logo.png', // Ruta de la imagen
+          width: 50, // Ancho de la imagen
+          height: 50, // Altura de la imagen
+          fit: BoxFit.cover,
+        ),
+      ),
+      actions: [
+        Text(
+          widget.user.coins.toString(),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Image.asset(
+            'assets/moneda.png', // Ruta de la imagen
+            width: 30, // Ancho de la imagen
+            height: 30, // Altura de la imagen
+            fit: BoxFit.cover,
+          ),
+        ),
+        IconButton(
+          onPressed: () {
+
+          },
+          icon: const Icon(Icons.pause, color: Colors.white,),
+        ),
+        IconButton(
+          onPressed: () {
+
+          },
+          icon: const Icon(Icons.chat, color: Colors.white,),
+        ),
+        IconButton(
+          onPressed: () {
+
+          },
+          icon: const Icon(Icons.logout, color: Colors.white,),
+        ),
+      ],
+    );
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  @override
+  Widget build(BuildContext context) {
+    if (widget.resultadosRonda) {
+      return Scaffold(
+          backgroundColor: ColoresApp.fondoPantallaColor,
+          appBar: barra()
+
       );
     }
-
 
     if (!widget.UImesa) {
       if (!widget.hecho) {
@@ -607,65 +768,13 @@ void myHand () {
     else {
       return Scaffold(
         backgroundColor: ColoresApp.fondoPantallaColor,
-        appBar: AppBar(
-          backgroundColor: ColoresApp.cabeceraColor,
-          elevation: 2,
-          // Ajusta el valor según el tamaño de la sombra que desees
-          leading: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Image.asset(
-              'assets/logo.png', // Ruta de la imagen
-              width: 50, // Ancho de la imagen
-              height: 50, // Altura de la imagen
-              fit: BoxFit.cover,
-            ),
-          ),
-          actions: [
-            Text(
-              widget.user.coins.toString(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Image.asset(
-                'assets/moneda.png', // Ruta de la imagen
-                width: 30, // Ancho de la imagen
-                height: 30, // Altura de la imagen
-                fit: BoxFit.cover,
-              ),
-            ),
-            IconButton(
-              onPressed: () {
-
-              },
-              icon: const Icon(Icons.pause, color: Colors.white,),
-            ),
-            IconButton(
-              onPressed: () {
-
-                setState(() {
-                  widget.isChatActive = !widget.isChatActive;
-                });
-
-              },
-              icon: const Icon(Icons.chat, color: Colors.white,),
-            ),
-            IconButton(
-              onPressed: () {
-
-              },
-              icon: const Icon(Icons.logout, color: Colors.white,),
-            ),
-          ],
-        ),
+        appBar: barra(),
         body: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Column(   //Cartas Resto Jugadores
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if(widget.otherHand != [])
                   for (var mano in widget.otherHand)
@@ -674,16 +783,19 @@ void myHand () {
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          for (var card in mano['cards'])
-                            Image.asset(
-                              'assets/valoresCartas/' + card['value'].toString() + '-' + card['suit'] + '.png',
-                              width: 75, // Establece un tamaño máximo solo para el ancho
+                          for (var card in mano.cartas)
+                            Image.network(
+                              '${EnlaceApp.enlaceBase}/images/${widget.currentcard}',
+                              width: 50, // Establece un tamaño máximo solo para el ancho
                               fit: BoxFit.scaleDown, // Ajusta automáticamente la altura según la proporción original de la imagen
                             ),
                         ],
                       )
               ],
             ),
+
+            if(widget.split)
+              botones(1),
             Column (
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -691,7 +803,7 @@ void myHand () {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Banca: ${widget.bankHand['totalCards']}',
+                      'Banca: ${widget.bankHand.totalCards}',
                       style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -701,183 +813,88 @@ void myHand () {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        for (var card in widget.bankHand['cards'])
+                        for (var card in widget.bankHand.cartas)
                           Image.asset(
                             'assets/valoresCartas/' + card['value'].toString() + '-' + card['suit'] + '.png',
-                            width: 200, // Ancho de la imagen
-                            height: 100, // Altura de la imagen
-                            fit: BoxFit.contain,
+                            width: 60, // Establece un tamaño máximo solo para el ancho
+                            fit: BoxFit.scaleDown, // Ajusta automáticamente la altura según la proporción original de la imagen
                           ),
                       ],
                     )
                   ],
                 ),
-                Column (  // Cartas Jugador
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                Row(
                   children: [
-                    Text(
-                      'Total: ' + widget.myHand['totalCards'].toString(),
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18
-                      ),
-                    ),
-                    Row(
-                        mainAxisSize: MainAxisSize.min,
+                    if (widget.split)
+                      Column (  // Cartas Jugador
                         mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          for (var card in widget.myHand['cards'])
-                            Image.asset(
-                              'assets/valoresCartas/' + card['value'].toString() + '-' + card['suit'] + '.png',
-                              width: 100, // Establece un tamaño máximo solo para el ancho
-                              fit: BoxFit.scaleDown, // Ajusta automáticamente la altura según la proporción original de la imagen
-                            ),
-                      ],
-                    )
-                  ],
-                ),
-              ],
-            ),
-            Column(   // Botones de Interacción
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                        onPressed: () {
-                          /////////////////////////////////////////////////////////////////////////////////////////////////////
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: ColoresApp.segundoColor,
-                          fixedSize: Size(40, 50),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15), // Ajusta el radio de esquinas según sea necesario
-                          ),
-                        ),
-                        child: const Center(
-                          child: Icon(
-                            Icons.call_split_outlined,
-                            color: Colors.white,
-                            size: 25,
-                          ),
-                        )
-                    ),
-                    const Text(
-                      "Dividir",
-                      style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold
-                      ),
-                    ),
-                  ],
-                ),
-                if(!(widget.myBlackjack || widget.myDefeat || widget.plantado || !widget.puedoDoblar))
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                        ElevatedButton(
-                            onPressed: () {
-                              funcionDoblar();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: ColoresApp.segundoColor,
-                            fixedSize: Size(40, 50),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15), // Ajusta el radio de esquinas según sea necesario
+                          Text(
+                            'Total: ${widget.myHand[1].totalCards}',
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18
                             ),
                           ),
-                          child: const Center(
-                            child: Icon(
-                              Icons.clear,
-                              color: Colors.white,
-                              size: 25,
-                            ),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              for (var card in widget.myHand[1].cartas)
+                                Image.asset(
+                                  'assets/valoresCartas/' + card['value'].toString() + '-' + card['suit'] + '.png',
+                                  width: 90, // Establece un tamaño máximo solo para el ancho
+                                  fit: BoxFit.scaleDown, // Ajusta automáticamente la altura según la proporción original de la imagen
+                                ),
+                            ],
                           )
+                        ],
                       ),
-                      const Text(
-                        "Doblar",
-                        style: TextStyle(
-                            fontSize: 14,
+                    if (widget.split)
+                      Row(
+                        children: [
+                          SizedBox(width: 5,),
+                          Container(
+                            width: 1.0,
                             color: Colors.white,
-                            fontWeight: FontWeight.bold
-                        ),
+                          ),
+                          SizedBox(width: 5,),
+                        ],
                       ),
-                  ],
-                ),
-                if(!(widget.myBlackjack || widget.myDefeat || widget.plantado))
-
-                  Column(
+                    Column (  // Cartas Jugador
+                      mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                      ElevatedButton(
-                      onPressed: () {
-                        funcionPedirCarta();
-                      },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: ColoresApp.segundoColor,
-                            fixedSize: Size(40, 50),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15), // Ajusta el radio de esquinas según sea necesario
-                            ),
-                          ),
-                          child: const Center(
-                            child: Icon(
-                              Icons.exposure_plus_1,
+                        Text(
+                          'Total: ${widget.myHand[0].totalCards}',
+                          style: const TextStyle(
                               color: Colors.white,
-                              size: 25,
-                            ),
-                          )
-                      ),
-                      const Text(
-                      "Otra carta",
-                      style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold
-                      ),
-                    ),
-                    ],
-                  ),
-                if(!(widget.myBlackjack || widget.myDefeat || widget.plantado))
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-
-                        ElevatedButton(
-                            onPressed: () {
-                              funcionPlantarse();
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: ColoresApp.segundoColor,
-                              fixedSize: Size(40, 50),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15), // Ajusta el radio de esquinas según sea necesario
-                              ),
-                            ),
-                            child: const Center(
-                              child: Icon(
-                                Icons.pan_tool_rounded,
-                                color: Colors.white,
-                                size: 25,
-                              ),
-                            )
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18
+                          ),
                         ),
-                        const Text(
-                          "Plantarse",
-                          style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold
-                          ),
-                      ),
-                    ],
-                  ),
-              ],
-            ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            for (var card in widget.myHand[0].cartas)
+                              Image.asset(
+                                'assets/valoresCartas/' + card['value'].toString() + '-' + card['suit'] + '.png',
+                                width: 90, // Establece un tamaño máximo solo para el ancho
+                                fit: BoxFit.scaleDown, // Ajusta automáticamente la altura según la proporción original de la imagen
+                              ),
+                          ],
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+
+                ],
+              ),
+            botones(0),
           ],
         ),
       );
