@@ -44,6 +44,8 @@ class estadisticasJugador extends StatelessWidget {
         '${EnlaceApp.enlaceBase}/api/stat/getAllUserStats',
         headers: {
           'Authorization': user.token, // Reemplaza con tu token de autorización
+          'nick': user.nick,
+          'id': user.id
         },
       );
 

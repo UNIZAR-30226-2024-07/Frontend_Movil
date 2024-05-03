@@ -3,6 +3,7 @@ import 'package:get/get_connect/connect.dart';
 import 'package:psoft_07/Usuario.dart';
 //import 'package:psoft_07/funcionesAvatar.dart';
 import 'package:psoft_07/pantalla_buscar_amigos.dart';
+import 'package:psoft_07/pantalla_estadisticasJugador.dart';
 import 'package:psoft_07/pantalla_principal.dart';
 import 'package:psoft_07/pantalla_solicitudes_recibidas.dart'; // Importa la pantalla de FriendRequestsScreen
 import 'colores.dart';
@@ -49,6 +50,25 @@ class _FriendsScreenState extends State<FriendsScreen> {
     } catch (e) {
       throw Exception('Failed to load user data');
     }
+  }
+
+  _getUserFromMapString( Map friend, User userForToken){
+    User amiguito = User(
+        id: friend['_id'],
+        nick: friend['nick'],
+        name: friend['name'],
+        surname: friend['surname'],
+        email: friend['email'],
+        password: friend['password'],
+        rol: friend['rol'],
+        tournaments: [],
+        coins: friend['coins'].toInt(),
+        avatars: [],
+        rugs: [],
+        cards: [],
+        token: userForToken.token);
+
+    return amiguito;
   }
 
   void _refreshFriendsList() {
@@ -185,6 +205,13 @@ class _FriendsScreenState extends State<FriendsScreen> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: ListTile(
+                            onTap: () {
+                              User amigoBuscado = _getUserFromMapString(friend, widget.user);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => estadisticasJugador(amigoBuscado)),
+                              );
+                            },
                             leading: FutureBuilder<String>(
                               future: _getAvatar(friend['_id']),
                               builder: (context, snapshot) {
