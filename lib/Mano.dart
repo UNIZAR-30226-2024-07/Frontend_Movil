@@ -30,3 +30,41 @@ class Mano {
     this.firstHand = _firstHand;
   }
 }
+
+class ResultadosMano {
+  String userId;
+  String userNick;
+  dynamic cartas = [];
+  List<dynamic> total = [];
+  int totalBanca = 0;
+  List<dynamic> coinsEarned = [];
+  int currentCoins;
+
+  ResultadosMano({
+    this.userId = "",
+    this.userNick = "",
+    this.cartas = const [],
+    this.total = const [],
+    this.coinsEarned = const [],
+    this.currentCoins = 0,
+  });
+
+
+  void initResultadoMano(_userId,_nick,_cartas,_total,_coinsEarned,_currentCoins){
+    this.userId = _userId;
+    this.userNick = _nick;
+    this.cartas = _cartas;
+    this.total = _total;
+    this.coinsEarned = _coinsEarned;
+    this.currentCoins = _currentCoins;
+  }
+
+  void initResultadoManoBanca(_userId,_nick,_cartas,_total){
+    this.userId = _userId;
+    this.userNick = _nick;
+    this.cartas = _cartas;
+    this.totalBanca = _total;
+  }
+
+
+}

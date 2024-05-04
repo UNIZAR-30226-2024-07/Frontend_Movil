@@ -29,8 +29,14 @@ class LoadingScreen extends StatefulWidget {
   TextEditingController mensajeUsuario = TextEditingController();
 
   List<Mano> myHand = [];
+  ResultadosMano myResultadosHand = ResultadosMano();
+
   List<Mano> otherHand = [];
+  List<ResultadosMano> otherResultadosHand = [];
+
   Mano bankHand = Mano();
+  ResultadosMano bankResultadosHand = ResultadosMano();
+
 
 
   IO.Socket socket = IO.io(EnlaceApp.enlaceBase, <String, dynamic>{
@@ -68,6 +74,25 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
       }
     });
+  }
+
+  void getCurrentCard() async {
+    try {
+      final response = await widget.getConnect.get(
+        '${EnlaceApp.enlaceBase}/api/card/currentCard',
+        headers: {
+          "Authorization": widget.user.token,
+        },
+      );
+
+      if (response.body['status'] == 'error') {
+        widget.currentcard = "13f36eb4-be1e-488d-8d5e-b2d45fb70203-1711535331655.png";
+      } else {
+        widget.currentcard = response.body['imageFileName'];
+      }
+    } catch (e) {
+      widget.currentcard = "13f36eb4-be1e-488d-8d5e-b2d45fb70203-1711535331655.png";
+    }
   }
 
   Future<bool> conexionBoardId(boardId) async {
@@ -114,7 +139,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
       if (kDebugMode) {
         print("Socket Connect Done");
       }
-      updateSocketApi();
+      emitEntrar();
 
     });
 
@@ -157,6 +182,10 @@ class _LoadingScreenState extends State<LoadingScreen> {
       print(data);
       if (data != null) {
         setState(() {
+          myResultadosHand(data);
+          bankResultadosHand(data);
+          othersResutadosHand(data);
+          widget.user.coins = widget.myResultadosHand.currentCoins;
           widget.resultadosRonda = true;
         });
       }
@@ -184,7 +213,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   }
 
-  Future updateSocketApi() async {
+  Future emitEntrar() async {
     if (!widget.hecho) {
       try {
         widget.hecho = true;
@@ -205,25 +234,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
         }
       }
     }
-}
-
-void getCurrentCard() async {
-  try {
-    final response = await widget.getConnect.get(
-      '${EnlaceApp.enlaceBase}/api/card/currentCard',
-      headers: {
-        "Authorization": widget.user.token,
-      },
-    );
-
-    if (response.body['status'] == 'error') {
-      widget.currentcard = "13f36eb4-be1e-488d-8d5e-b2d45fb70203-1711535331655.png";
-    } else {
-      widget.currentcard = response.body['imageFileName'];
-    }
-  } catch (e) {
-    widget.currentcard = "13f36eb4-be1e-488d-8d5e-b2d45fb70203-1711535331655.png";
-  }
 }
 
 void myHand (data) {
@@ -257,19 +267,35 @@ void myHand (data) {
     }
   }
 
-  Future<String> userById(idUsuario) async {
-    final response = await widget.getConnect.get(
-      '${EnlaceApp.enlaceBase}/api/user/userById/$idUsuario',
-      headers: {
-        "Authorization": widget.user.token,
+  void myResultadosHand (data) {
+    for (var mano in data) {
+      if (mano['userId'] == widget.user.id) {
+        widget.myResultadosHand.initResultadoMano(mano['userId'], mano['userNick'], mano['cards'], mano['total'], mano['coinsEarned'], mano['currentCoins']);
       }
-    );
-    if (!(response.body['status'] == 'error' || response.body['status'] == null)) {
-        return response.body['user']['nick'];
-    } else {
-      return "Usuario";
     }
   }
+
+  void bankResultadosHand (data) {
+    for (var mano in data) {
+      if (mano['userId'] == "Bank") {
+        widget.bankResultadosHand.initResultadoManoBanca(mano['userId'], mano['userNick'], mano['cards'], mano['total']);
+      }
+    }
+  }
+
+  void othersResutadosHand (data) {
+    widget.otherResultadosHand = [];
+    int i = 0;
+    for (var mano in data) {
+      if (mano['userId'] != widget.user.id
+          && mano['userId'] != "Bank") {
+        widget.otherResultadosHand.add(ResultadosMano());
+        widget.otherResultadosHand[i].initResultadoMano(mano['userId'], mano['userNick'], mano['cards'], mano['total'], mano['coinsEarned'], mano['currentCoins']);
+        i++;
+      }
+    }
+  }
+
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   void funcionPlantarse (int mano) async {
@@ -699,8 +725,150 @@ void myHand (data) {
     if (widget.resultadosRonda) {
       return Scaffold(
           backgroundColor: ColoresApp.fondoPantallaColor,
-          appBar: barra()
+          appBar: barra(),
+          body: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              if(widget.otherResultadosHand != [])
+                for (var mano in widget.otherResultadosHand)
+                  Column(   //Cartas Resto Jugadores
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Usuario: ${mano.userNick}',
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18
+                        ),
+                      ),
+                      for (var i = 0; i < mano.cartas.length; i++)
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                              if (mano.cartas[i].length !=0)
+                                Text(
+                                'Total: ${mano.total[i]}. Monedas ganadas: ${mano.coinsEarned[i]}',
+                                style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14
+                                ),
+                              ),
 
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                for (var j = 0; j < mano.cartas[i].length; j++)
+                                  Image.asset(
+                                    'assets/valoresCartas/' + mano.cartas[i][j]['value'].toString() + '-' + mano.cartas[i][j]['suit'] + '.png',
+                                    width: 50, // Establece un tamaño máximo solo para el ancho
+                                    fit: BoxFit.scaleDown, // Ajusta automáticamente la altura según la proporción original de la imagen
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ),
+                ],
+              ),
+              Column (
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column (  // Cartas Banca
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Banca: ${widget.bankResultadosHand.totalBanca}',
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          for (var card in widget.bankResultadosHand.cartas)
+                            Image.asset(
+                              'assets/valoresCartas/' + card['value'].toString() + '-' + card['suit'] + '.png',
+                              width: 60, // Establece un tamaño máximo solo para el ancho
+                              fit: BoxFit.scaleDown, // Ajusta automáticamente la altura según la proporción original de la imagen
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      if (widget.split)
+                        ...[
+                        Column (  // Cartas Jugador
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Total: ${widget.myResultadosHand.total[1]}. Monedas ganadas: ${widget.myResultadosHand.coinsEarned[1]}',
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18
+                              ),
+                            ),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                for (var card in widget.myResultadosHand.cartas[1])
+                                  Image.asset(
+                                    'assets/valoresCartas/' + card['value'].toString() + '-' + card['suit'] + '.png',
+                                    width: 90, // Establece un tamaño máximo solo para el ancho
+                                    fit: BoxFit.scaleDown, // Ajusta automáticamente la altura según la proporción original de la imagen
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                      if (widget.split)
+                        const Row(
+                          children: [
+                            SizedBox(width: 10)
+                          ],
+                        ),
+                      Column (  // Cartas Jugador
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Total: ${widget.myResultadosHand.total[0]}. Monedas ganadas: ${widget.myResultadosHand.coinsEarned[0]}',
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18
+                            ),
+                          ),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              for (var card in widget.myResultadosHand.cartas[0])
+                                Image.asset(
+                                  'assets/valoresCartas/' + card['value'].toString() + '-' + card['suit'] + '.png',
+                                  width: 90, // Establece un tamaño máximo solo para el ancho
+                                  fit: BoxFit.scaleDown, // Ajusta automáticamente la altura según la proporción original de la imagen
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          ],
+        ),
       );
     }
 
