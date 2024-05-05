@@ -8,6 +8,7 @@ import 'package:psoft_07/colores.dart';
 import 'package:psoft_07/Usuario.dart';
 import 'package:psoft_07/pantalla_partida_publica.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:tuple/tuple.dart';
 
 import 'Mano.dart';
 
@@ -25,7 +26,8 @@ class LoadingScreen extends StatefulWidget {
   String boardId = "";
   String currentcard = "";
 
-  List<(String,String)> mensajes = [];
+  //List<(String,String)> mensajes = [];
+  List<Tuple3<String, String, String>> mensajes = [];
   TextEditingController mensajeUsuario = TextEditingController();
 
   List<Mano> myHand = [];
@@ -44,6 +46,10 @@ class LoadingScreen extends StatefulWidget {
     'autoConnect': true
   });
 
+  late Widget _chatWidget;
+  bool _chatVisible = false;
+  Map<String, String> urlAvatares = {};
+
   LoadingScreen(this.idMesa, this.user, {super.key});
 
   @override
@@ -52,6 +58,7 @@ class LoadingScreen extends StatefulWidget {
 
 class _LoadingScreenState extends State<LoadingScreen> {
   double _progressValue = 0.0;
+  TextEditingController _messageController = TextEditingController();
 
   @override
   void initState() {
@@ -74,6 +81,22 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
       }
     });
+  }
+
+  Future<String> getAvatar(String _userId) async {
+    try {
+      final getConnect = GetConnect();
+      final response = await getConnect.get(
+        '${EnlaceApp.enlaceBase}/api/avatar/currentAvatarById/$_userId',
+        headers: {
+          "Authorization": widget.user.token,
+        },
+      );
+      String image = response.body['avatar']['imageFileName'];
+      return "${EnlaceApp.enlaceBase}/images/$image";
+    } catch (e) {
+      throw Exception('Failed to load user data');
+    }
   }
 
   void getCurrentCard() async {
@@ -164,17 +187,17 @@ class _LoadingScreenState extends State<LoadingScreen> {
     });
 
     widget.socket?.on("play hand", (data) {
-        print(data);
-        if (data != null) {
-          setState(() {
-            myHand(data); // Cartas del Usuario
-            bankHand(data);
-            othersHand(data);
-            widget.UImesa = true;
-            widget.split = false;
-            widget.resultadosRonda = false;
-          });
-        }
+      print(data);
+      if (data != null) {
+        setState(() {
+          myHand(data); // Cartas del Usuario
+          bankHand(data);
+          othersHand(data);
+          widget.UImesa = true;
+          widget.split = false;
+          widget.resultadosRonda = false;
+        });
+      }
 
     });
 
@@ -191,18 +214,30 @@ class _LoadingScreenState extends State<LoadingScreen> {
       }
     });
 
+    Future<void> actualizarEstado(dynamic mensaje) async {
+      if (widget.urlAvatares[mensaje['userId']] == null) {
+        String avatarUrl = await getAvatar(mensaje['userId']);
+        widget.urlAvatares[mensaje['userId']] = avatarUrl;
+      }
+
+      setState(() {
+        if (mensaje['userId'] == widget.user.id) {
+          widget.mensajes.add(Tuple3("Yo", mensaje['message'], mensaje['userId']));
+          print("Yo envio el mensaje");
+        } else {
+          print("Me envian el mensaje");
+          widget.mensajes.add(Tuple3(mensaje['name'], mensaje['message'], mensaje['userId']));
+        }
+        widget._chatWidget = crearChat(widget.mensajes);
+      });
+    }
+
     widget.socket?.on("new message", (mensaje) {
-      
       if (mensaje != null) {
-        setState(() {
-          if (mensaje['userId'] == widget.user.id) {
-            widget.mensajes.add(("Yo",mensaje['message']));
-          } else {
-            widget.mensajes.add((mensaje['name'],mensaje['message']));
-          }
-        });
+        actualizarEstado(mensaje);
       }
     });
+
 
     widget.socket?.on("error", (data) {
       if (kDebugMode) {
@@ -234,17 +269,17 @@ class _LoadingScreenState extends State<LoadingScreen> {
         }
       }
     }
-}
+  }
 
-void myHand (data) {
-  widget.myHand = [];
-  for (var mano in data) {
-    if (mano['userId'] == widget.user.id) {
-      widget.myHand.add(Mano());
-      widget.myHand[0].initMano(mano['userId'], mano['cards'], mano['totalCards'], false, false, mano['blackJack'], true);
+  void myHand (data) {
+    widget.myHand = [];
+    for (var mano in data) {
+      if (mano['userId'] == widget.user.id) {
+        widget.myHand.add(Mano());
+        widget.myHand[0].initMano(mano['userId'], mano['cards'], mano['totalCards'], false, false, mano['blackJack'], true);
+      }
     }
   }
-}
 
   void bankHand (data) {
     for (var mano in data) {
@@ -259,7 +294,7 @@ void myHand (data) {
     int i = 0;
     for (var mano in data) {
       if (mano['userId'] != widget.user.id
-      && mano['userId'] != "Bank") {
+          && mano['userId'] != "Bank") {
         widget.otherHand.add(Mano());
         widget.otherHand[i].initMano(mano['userId'], mano['cards'], mano['totalCards'], false, false, mano['blackJack'], true);
         i++;
@@ -332,7 +367,7 @@ void myHand (data) {
       }
     } catch (e) {
     }
-}
+  }
 
   void funcionPedirCarta (int mano) async {
     try {
@@ -465,15 +500,148 @@ void myHand (data) {
     }
   }
 
+
+
+  Widget crearChat(List<Tuple3<String, String, String>> mensajes) {
+    return SizedBox(
+      width: 250,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.grey[300],
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                itemCount: mensajes.length,
+                itemBuilder: (context, index) {
+                  return crearChatAux(
+                    usuario: mensajes[index].item1,
+                    contenido: mensajes[index].item2,
+                    urlAvatar: widget.urlAvatares[mensajes[index].item3]!.toString(),
+                  );
+                },
+              ),
+            ),
+            campoMensaje(),
+          ],
+        ),
+      ),
+    );
+  }
+
+
+  Widget campoMensaje() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: TextField(
+                controller: _messageController,
+                decoration: const InputDecoration(
+                  hintText: 'Escribe un mensaje...',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              _sendMessage();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ColoresApp.segundoColor,
+            ),
+            child: const Text(
+              'Enviar',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget crearChatAux({required String usuario, required String contenido, required String urlAvatar}) {
+    bool esUsuarioActual = usuario == widget.user.id;
+    print("La url es:");
+    print(urlAvatar);
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CircleAvatar(
+            backgroundImage: NetworkImage(urlAvatar),
+            radius: 15,
+          ),
+          SizedBox(width: 5),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: esUsuarioActual ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              children: [
+                Text(
+                  usuario,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 3),
+                Container(
+                  padding: EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: esUsuarioActual ? Colors.blue[100] : Colors.grey[200],
+                    borderRadius: BorderRadius.circular(5),
+                    border: Border.all(color: Colors.grey[300]!),
+                  ),
+                  child: Text(contenido),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _sendMessage() {
+    String message = _messageController.text;
+    if (message.isNotEmpty) {
+      Map<String, dynamic> body = {
+        'body': {
+          'boardId': widget.boardId,
+          'userId': widget.user.id,
+          'message': message,
+        }
+      };
+      print("El body enviado es:");
+      print(body);
+      widget.socket.emit("new public message", body);
+
+      _messageController.clear();
+    }
+  }
+
+
+
+
+
+
+
   Widget botones(int mano) {
     return Column(   // Botones de Interacción
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         if(!(!widget.myHand[mano].firstHand || widget.split || widget.myHand[mano].myBlackjack))
-         if(cartasIguales())
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
+          if(cartasIguales())
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
                 ElevatedButton(
                     onPressed: () {
                       funcionSplit();
@@ -493,16 +661,16 @@ void myHand (data) {
                       ),
                     )
                 ),
-              const Text(
-                "Dividir",
-                style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold
+                const Text(
+                  "Dividir",
+                  style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
         if(!(widget.myHand[mano].myBlackjack || !widget.myHand[mano].firstHand))
           Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -705,7 +873,17 @@ void myHand (data) {
         ),
         IconButton(
           onPressed: () {
-
+            print("Lista de mensajes antes de llamar a la funcion");
+            print(widget.mensajes);
+            setState(() {
+              widget._chatWidget = crearChat(widget.mensajes);
+              if(widget._chatVisible) {
+                widget._chatVisible = false;
+              }
+              else {
+                widget._chatVisible = true;
+              }
+            });
           },
           icon: const Icon(Icons.chat, color: Colors.white,),
         ),
@@ -722,88 +900,90 @@ void myHand (data) {
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   @override
   Widget build(BuildContext context) {
+    Widget chatWidget = widget._chatVisible ? Expanded(child: widget._chatWidget) : SizedBox();
     if (widget.resultadosRonda) {
       return Scaffold(
-          backgroundColor: ColoresApp.fondoPantallaColor,
-          appBar: barra(),
-          body: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              if(widget.otherResultadosHand != [])
-                for (var mano in widget.otherResultadosHand)
-                  Column(   //Cartas Resto Jugadores
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Usuario: ${mano.userNick}',
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18
-                        ),
+        backgroundColor: ColoresApp.fondoPantallaColor,
+        appBar: barra(),
+        body: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            chatWidget,
+            if(widget.otherResultadosHand != [])
+              for (var mano in widget.otherResultadosHand)
+                Column(   //Cartas Resto Jugadores
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Usuario: ${mano.userNick}',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18
                       ),
-                      for (var i = 0; i < mano.cartas.length; i++)
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                              if (mano.cartas[i].length !=0)
-                                Text(
-                                'Total: ${mano.total[i]}. Monedas ganadas: ${mano.coinsEarned[i]}',
-                                style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14
-                                ),
-                              ),
-
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                for (var j = 0; j < mano.cartas[i].length; j++)
-                                  Image.asset(
-                                    'assets/valoresCartas/' + mano.cartas[i][j]['value'].toString() + '-' + mano.cartas[i][j]['suit'] + '.png',
-                                    width: 50, // Establece un tamaño máximo solo para el ancho
-                                    fit: BoxFit.scaleDown, // Ajusta automáticamente la altura según la proporción original de la imagen
-                                  ),
-                              ],
-                            ),
-                          ],
-                        ),
-                ],
-              ),
-              Column (
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Column (  // Cartas Banca
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Banca: ${widget.bankResultadosHand.totalBanca}',
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18
-                        ),
-                      ),
-                      Row(
+                    ),
+                    for (var i = 0; i < mano.cartas.length; i++)
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          for (var card in widget.bankResultadosHand.cartas)
-                            Image.asset(
-                              'assets/valoresCartas/' + card['value'].toString() + '-' + card['suit'] + '.png',
-                              width: 60, // Establece un tamaño máximo solo para el ancho
-                              fit: BoxFit.scaleDown, // Ajusta automáticamente la altura según la proporción original de la imagen
+                          if (mano.cartas[i].length !=0)
+                            Text(
+                              'Total: ${mano.total[i]}. Monedas ganadas: ${mano.coinsEarned[i]}',
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14
+                              ),
                             ),
+
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              for (var j = 0; j < mano.cartas[i].length; j++)
+                                Image.asset(
+                                  'assets/valoresCartas/' + mano.cartas[i][j]['value'].toString() + '-' + mano.cartas[i][j]['suit'] + '.png',
+                                  width: 50, // Establece un tamaño máximo solo para el ancho
+                                  fit: BoxFit.scaleDown, // Ajusta automáticamente la altura según la proporción original de la imagen
+                                ),
+                            ],
+                          ),
                         ],
                       ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      if (widget.split)
-                        ...[
+                  ],
+                ),
+            Column (
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Column (  // Cartas Banca
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Banca: ${widget.bankResultadosHand.totalBanca}',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        for (var card in widget.bankResultadosHand.cartas)
+                          Image.asset(
+                            'assets/valoresCartas/' + card['value'].toString() + '-' + card['suit'] + '.png',
+                            width: 60, // Establece un tamaño máximo solo para el ancho
+                            fit: BoxFit.scaleDown, // Ajusta automáticamente la altura según la proporción original de la imagen
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    if (widget.split)
+                      ...[
                         Column (  // Cartas Jugador
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -831,47 +1011,46 @@ void myHand (data) {
                           ],
                         ),
                       ],
-                      if (widget.split)
-                        const Row(
-                          children: [
-                            SizedBox(width: 10)
-                          ],
-                        ),
-                      Column (  // Cartas Jugador
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                    if (widget.split)
+                      const Row(
                         children: [
-                          Text(
-                            'Total: ${widget.myResultadosHand.total[0]}. Monedas ganadas: ${widget.myResultadosHand.coinsEarned[0]}',
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18
-                            ),
-                          ),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              for (var card in widget.myResultadosHand.cartas[0])
-                                Image.asset(
-                                  'assets/valoresCartas/' + card['value'].toString() + '-' + card['suit'] + '.png',
-                                  width: 90, // Establece un tamaño máximo solo para el ancho
-                                  fit: BoxFit.scaleDown, // Ajusta automáticamente la altura según la proporción original de la imagen
-                                ),
-                            ],
-                          ),
+                          SizedBox(width: 10)
                         ],
                       ),
-                    ],
-                  ),
+                    Column (  // Cartas Jugador
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Total: ${widget.myResultadosHand.total[0]}. Monedas ganadas: ${widget.myResultadosHand.coinsEarned[0]}',
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18
+                          ),
+                        ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            for (var card in widget.myResultadosHand.cartas[0])
+                              Image.asset(
+                                'assets/valoresCartas/' + card['value'].toString() + '-' + card['suit'] + '.png',
+                                width: 90, // Establece un tamaño máximo solo para el ancho
+                                fit: BoxFit.scaleDown, // Ajusta automáticamente la altura según la proporción original de la imagen
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ],
             ),
           ],
         ),
       );
     }
-
     if (!widget.UImesa) {
       if (!widget.hecho) {
         conectarPartida();
@@ -940,6 +1119,7 @@ void myHand (data) {
         body: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
+            chatWidget,
             Column(   //Cartas Resto Jugadores
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -947,18 +1127,18 @@ void myHand (data) {
                 if(widget.otherHand != [])
                   for (var mano in widget.otherHand)
 
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          for (var card in mano.cartas)
-                            Image.network(
-                              '${EnlaceApp.enlaceBase}/images/${widget.currentcard}',
-                              width: 50, // Establece un tamaño máximo solo para el ancho
-                              fit: BoxFit.scaleDown, // Ajusta automáticamente la altura según la proporción original de la imagen
-                            ),
-                        ],
-                      )
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        for (var card in mano.cartas)
+                          Image.network(
+                            '${EnlaceApp.enlaceBase}/images/${widget.currentcard}',
+                            width: 50, // Establece un tamaño máximo solo para el ancho
+                            fit: BoxFit.scaleDown, // Ajusta automáticamente la altura según la proporción original de la imagen
+                          ),
+                      ],
+                    )
               ],
             ),
 
@@ -1059,9 +1239,8 @@ void myHand (data) {
                     ),
                   ],
                 ),
-
-                ],
-              ),
+              ],
+            ),
             botones(0),
           ],
         ),

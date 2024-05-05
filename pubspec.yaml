@@ -38,6 +38,7 @@ dependencies:
   get:
   get_storage:
   socket_io_client:
+  tuple: ^2.0.2
 
 dev_dependencies:
   flutter_test:
