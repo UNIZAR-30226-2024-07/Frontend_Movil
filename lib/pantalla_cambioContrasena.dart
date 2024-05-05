@@ -5,14 +5,17 @@ import 'package:get/get.dart';
 import 'package:psoft_07/pantalla_principal.dart';
 import 'Usuario.dart';
 
-class changePasswordScreen extends StatelessWidget {
+class changePasswordScreen extends StatefulWidget {
   final User user;
+
   changePasswordScreen(this.user, {super.key});
-  TextEditingController passwdNueva = TextEditingController();
-  TextEditingController passwdNuevaConfirmar = TextEditingController();
   final getConnect = GetConnect();
 
-  void _cambioPasswd(String passwdNueva, String passwdNuevaConfirmar, BuildContext context) async {
+  @override
+  _PasswdVisiblityState createState() => _PasswdVisiblityState();
+
+  void _cambioPasswd(String passwdNueva, String passwdNuevaConfirmar,
+      BuildContext context) async {
     // Comprobar si nombreActual es igual a nuevoNombre
 
     // Comprobar si nuevoNombre y confirmarNuevoNombre son iguales
@@ -40,8 +43,9 @@ class changePasswordScreen extends StatelessWidget {
     }
 
     //Si alguna de estas falla, mostrar mensaje de condiciones contraseña
-    if(!contrasenaValida){
-      mostrarMsg(context, "La contraseña debe tener al menos 6 caracteres, una mayúscula, una minúscula y un número.");
+    if (!contrasenaValida) {
+      mostrarMsg(context,
+          "La contraseña debe tener al menos 6 caracteres, una mayúscula, una minúscula y un número.");
       return;
     }
 
@@ -63,9 +67,10 @@ class changePasswordScreen extends StatelessWidget {
         // Mostrar mensaje de éxito
         mostrarMsg(context, "Contraseña actualizada correctamente");
         //volver a hacer login con la nueva contraseña
-        final res = await getConnect.post('${EnlaceApp.enlaceBase}/api/user/login', {
-          "nick":user.nick,
-          "password":passwdNueva,
+        final res = await getConnect.post(
+            '${EnlaceApp.enlaceBase}/api/user/login', {
+          "nick": user.nick,
+          "password": passwdNueva,
           "rol": "user",
         });
 
@@ -79,21 +84,24 @@ class changePasswordScreen extends StatelessWidget {
         else {
           //Actualizar contraseña usuario en local
           user.password = res.body['user']['password'];
-        // Redirigr a la pantalla principal (no tiene sentido quedarnos aquí si se ha cambiado le nombre)
-        Navigator.push(
-          context, //Es seguro pasar el context? en principio sí, no hay info del usuario
-          MaterialPageRoute(builder: (context) => Principal(user)),
-        );
+          // Redirigr a la pantalla principal (no tiene sentido quedarnos aquí si se ha cambiado le nombre)
+          Navigator.push(
+            context,
+            //Es seguro pasar el context? en principio sí, no hay info del usuario
+            MaterialPageRoute(builder: (context) => Principal(user)),
+          );
         }
       } else {
         // Mostrar mensaje de error
-        mostrarMsg(context, "Error al actualizar la contraseña. Por favor, inténtalo de nuevo.");
+        mostrarMsg(context,
+            "Error al actualizar la contraseña. Por favor, inténtalo de nuevo.");
       }
     } catch (e) {
       // Mostrar mensaje de error si ocurre un error durante la llamada a la API
-      mostrarMsg(context, "Error al conectar con el servidor. Por favor, verifica tu conexión a internet.");
+      mostrarMsg(context,
+          "Error al conectar con el servidor. Por favor, verifica tu conexión a internet.");
     }
-}
+  }
 
   void mostrarMsg(BuildContext context, String mensaje) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -105,6 +113,18 @@ class changePasswordScreen extends StatelessWidget {
     );
   }
 
+}
+
+class _PasswdVisiblityState extends State<changePasswordScreen> {
+  bool showPasswd = true;
+  bool showPasswdConfirmar = true;
+  TextEditingController passwdNueva = TextEditingController();
+  TextEditingController passwdNuevaConfirmar = TextEditingController();
+
+  @override
+  void initState() {
+  super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -138,47 +158,78 @@ class changePasswordScreen extends StatelessWidget {
                                 fontSize: 25
                             ),
                           ),
-                          const SizedBox(height: 5.0),
-                          const SizedBox(height: 10.0),
+                          const SizedBox(height: 15.0),
                           SizedBox(
                             height: 40,
                             width: 300,
                             child: TextField(
                               controller: passwdNueva,
-                              keyboardType: TextInputType.text,
-                              decoration: const InputDecoration(
-                                hintText: 'Nueva contraseña',
+                              obscureText: showPasswd,
+                              decoration: InputDecoration(
+                                hintText: "Nueva Contraseña",
                                 icon: Icon(
                                   Icons.password,
                                   color: Colors.white,
                                 ),
+                                //labelText: "Password",
+                                suffixIcon: IconButton(
+                                  icon: Icon(showPasswd
+                                      ? Icons.visibility
+                                      : Icons.visibility_off),
+                                  onPressed: () {
+                                    setState(
+                                          () {
+                                        showPasswd = !showPasswd;
+                                      },
+                                    );
+                                  },
+                                ),
+                                alignLabelWithHint: false,
                                 filled: true,
                                 fillColor: Colors.white,
                               ),
+                              keyboardType: TextInputType.visiblePassword,
+                              textInputAction: TextInputAction.done,
                             ),
-                          ),
+                          ), // Contraseña nueva
                           const SizedBox(height: 10.0),
                           SizedBox(
                             height: 40,
                             width: 300,
                             child: TextField(
                               controller: passwdNuevaConfirmar,
-                              keyboardType: TextInputType.text,
-                              decoration: const InputDecoration(
-                                hintText: 'Confirmar contraseña',
+                              obscureText: showPasswdConfirmar,
+                              decoration: InputDecoration(
+                                hintText: "Confirmar Contraseña",
                                 icon: Icon(
                                   Icons.password,
                                   color: Colors.white,
                                 ),
+                                //labelText: "Password",
+                                suffixIcon: IconButton(
+                                  icon: Icon(showPasswdConfirmar
+                                      ? Icons.visibility
+                                      : Icons.visibility_off),
+                                  onPressed: () {
+                                    setState(
+                                          () {
+                                            showPasswdConfirmar = !showPasswdConfirmar;
+                                      },
+                                    );
+                                  },
+                                ),
+                                alignLabelWithHint: false,
                                 filled: true,
                                 fillColor: Colors.white,
                               ),
+                              keyboardType: TextInputType.visiblePassword,
+                              textInputAction: TextInputAction.done,
                             ),
-                          ),
+                          ), // Contraseña confirmar
                           const SizedBox(height: 10.0),
                           ElevatedButton(
                             onPressed: () {
-                              _cambioPasswd(passwdNueva.text, passwdNuevaConfirmar.text, context);
+                              widget._cambioPasswd(passwdNueva.text, passwdNuevaConfirmar.text, context);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: ColoresApp.segundoColor,
@@ -209,6 +260,7 @@ class changePasswordScreen extends StatelessWidget {
       ),
     );
   }
+
 }
 
 void main() {
