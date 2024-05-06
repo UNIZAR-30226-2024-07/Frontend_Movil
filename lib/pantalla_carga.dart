@@ -9,7 +9,7 @@ import 'package:psoft_07/Usuario.dart';
 import 'package:psoft_07/pantalla_partida_publica.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:tuple/tuple.dart';
-
+import 'package:psoft_07/pantalla_pausa.dart' as pause;
 import 'Mano.dart';
 
 class LoadingScreen extends StatefulWidget {
@@ -40,15 +40,19 @@ class LoadingScreen extends StatefulWidget {
   ResultadosMano bankResultadosHand = ResultadosMano();
 
 
-
   IO.Socket socket = IO.io(EnlaceApp.enlaceBase, <String, dynamic>{
     'transports': ['websocket'],
     'autoConnect': true
   });
 
+  //Variables chatWidget
   late Widget _chatWidget;
   bool _chatVisible = false;
   Map<String, String> urlAvatares = {};
+
+  //Variables pauseWidget
+  late Widget _pauseWidget;
+  bool _pauseVisible = false;
 
   LoadingScreen(this.idMesa, this.user, {super.key});
 
@@ -867,7 +871,12 @@ class _LoadingScreenState extends State<LoadingScreen> {
         ),
         IconButton(
           onPressed: () {
-
+            //Mostrar menú de pausa de forma dinámica (flotando)
+            print("Toggle menú de pausa (mostrar / ocultar");
+            setState(() {
+              widget._pauseWidget = pause.crearPantallaPausa(context);
+              widget._pauseVisible = !widget._pauseVisible;
+            });
           },
           icon: const Icon(Icons.pause, color: Colors.white,),
         ),
@@ -877,18 +886,16 @@ class _LoadingScreenState extends State<LoadingScreen> {
             print(widget.mensajes);
             setState(() {
               widget._chatWidget = crearChat(widget.mensajes);
-              if(widget._chatVisible) {
-                widget._chatVisible = false;
-              }
-              else {
-                widget._chatVisible = true;
-              }
+              widget._chatVisible = ! widget._chatVisible;
             });
           },
           icon: const Icon(Icons.chat, color: Colors.white,),
         ),
         IconButton(
           onPressed: () {
+          //Abandonar partida (leaveBoard) y redirigir a principal
+
+
 
           },
           icon: const Icon(Icons.logout, color: Colors.white,),
@@ -900,7 +907,10 @@ class _LoadingScreenState extends State<LoadingScreen> {
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   @override
   Widget build(BuildContext context) {
+    //variables internas de este widget
     Widget chatWidget = widget._chatVisible ? Expanded(child: widget._chatWidget) : SizedBox();
+    Widget pauseWidget = widget._pauseVisible ? Expanded(child: widget._pauseWidget) : SizedBox();
+    //codigo
     if (widget.resultadosRonda) {
       return Scaffold(
         backgroundColor: ColoresApp.fondoPantallaColor,
@@ -909,6 +919,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             chatWidget,
+            pauseWidget,
             if(widget.otherResultadosHand != [])
               for (var mano in widget.otherResultadosHand)
                 Column(   //Cartas Resto Jugadores
@@ -1120,6 +1131,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             chatWidget,
+            pauseWidget,
             Column(   //Cartas Resto Jugadores
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,42 +1,7 @@
 import 'package:flutter/material.dart';
-import 'Usuario.dart';
 
-class PauseScreen extends StatelessWidget {
-  final User user;
-
-  PauseScreen(this.user, {super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.red[800],
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 16.0, top: 0.0, bottom: 0.0),
-          child: Image.asset(
-            'assets/logo.png',
-            width: 40,
-            height: 40,
-            fit: BoxFit.cover,
-          ),
-        ),
-      ),
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          // Widget para mostrar el fondo de la pantalla anterior
-          // Supongamos que este es el Widget de la pantalla anterior
-          Container(
-            color: Colors.blue, // Cambiar al color de fondo deseado
-            child: Center(
-              child: Text(
-                'Contenido de la pantalla anterior',
-                style: TextStyle(fontSize: 24, color: Colors.white),
-              ),
-            ),
-          ),
-          // Cuadrado blanco con bordes redondeados y efecto de relieve
-          Center(
-            child: FractionallySizedBox(
+  Widget crearPantallaPausa(BuildContext context) {
+    return FractionallySizedBox(
               widthFactor: 0.8,
               heightFactor: 0.8,
               child: Container(
@@ -110,32 +75,5 @@ class PauseScreen extends StatelessWidget {
                   ],
                 ),
               ),
-            ),
-          ),
-        ],
-      ),
-    );
+            );
   }
-}
-
-void main() {
-  runApp(MaterialApp(
-    home: PauseScreen(
-        User(
-            id: "",
-            nick: "",
-            name: "",
-            surname: "",
-            email: "",
-            password: "",
-            rol: "",
-            coins: 0,
-            tournaments: [],
-            avatars: [],
-            rugs: [],
-            cards: [],
-            token: "")
-    ),
-    debugShowCheckedModeBanner: false,
-  ));
-}
