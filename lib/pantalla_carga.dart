@@ -874,7 +874,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
             //Mostrar menú de pausa de forma dinámica (flotando)
             print("Toggle menú de pausa (mostrar / ocultar");
             setState(() {
-              widget._pauseWidget = pause.crearPantallaPausa(context);
+              widget._pauseWidget = pause.crearPantallaPausa(context, "partidaPublica", widget.user.id);
               widget._pauseVisible = !widget._pauseVisible;
             });
           },

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_connect/connect.dart';
 
-  Widget crearPantallaPausa(BuildContext context) {
+import 'colores.dart';
+
+  Widget crearPantallaPausa(BuildContext context, String tipoPartida, String userID) {
     return FractionallySizedBox(
               widthFactor: 0.8,
               heightFactor: 0.8,
@@ -33,8 +36,36 @@ import 'package:flutter/material.dart';
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         ElevatedButton(
-                          onPressed: () {
-                            // Acción para la primera opción
+                          onPressed: () async {
+                            final getConnect = GetConnect();
+                            // Abandonar de una forma u otra ne función del tipo d epartida
+                            if (tipoPartida == "partidaPublica"){
+                              final res = await getConnect.put(
+                                '${EnlaceApp.enlaceBase}/api/publicBoard/leaveBoard',
+                                headers: {
+                                  'id': userID, //revisar se con esto se realiza bien o el nombre del parámetro es otro
+                                },
+                                {}, //Esto sería el body pero en este caso no lo usamos
+                              );
+                            } else if (tipoPartida == "partidaPrivada") {
+                              final res = await getConnect.put(
+                                '${EnlaceApp.enlaceBase}/api/privateBoard/leaveBoard',
+                                headers: {
+                                  'id': userID, //revisar se con esto se realiza bien o el nombre del parámetro es otro
+                                },
+                                {}, //Esto sería el body pero en este caso no lo usamos
+                              );
+                            } else if (tipoPartida == "partidaPractica") {
+                              //esperar respuesta compis para ver cómo gestionar esto
+                            } else if (tipoPartida == "partidaTorneo") { ///api/tournamentBoard/leaveBoard
+                              final res = await getConnect.put(
+                                '${EnlaceApp.enlaceBase}/api/tournamentBoard/leaveBoard',
+                                headers: {
+                                  'id': userID, //revisar se con esto se realiza bien o el nombre del parámetro es otro
+                                },
+                                {}, //Esto sería el body pero en este caso no lo usamos
+                              );
+                            }
                           },
                           child: Text(
                             'Abandonar Partida',
