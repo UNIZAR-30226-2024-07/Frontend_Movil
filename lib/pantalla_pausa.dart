@@ -3,7 +3,7 @@ import 'package:get/get_connect/connect.dart';
 
 import 'colores.dart';
 
-  Widget crearPantallaPausa(BuildContext context, String tipoPartida, String userID) {
+  Widget crearPantallaPausa(BuildContext context, String tipoPartida, String boardID, String userToken) {
     return FractionallySizedBox(
               widthFactor: 0.8,
               heightFactor: 0.8,
@@ -37,13 +37,24 @@ import 'colores.dart';
                       children: [
                         ElevatedButton(
                           onPressed: () async {
+                            //Hagamos lo que hagmaos, al abandonar guardar la partida en el servidor para que se pueda reanudar desde otro dispositivo
                             final getConnect = GetConnect();
                             // Abandonar de una forma u otra ne función del tipo d epartida
                             if (tipoPartida == "partidaPublica"){
                               final res = await getConnect.put(
                                 '${EnlaceApp.enlaceBase}/api/publicBoard/leaveBoard',
                                 headers: {
-                                  'id': userID, //revisar se con esto se realiza bien o el nombre del parámetro es otro
+                                  "Authorization": userToken,
+                                  'id': boardID, //revisar se con esto se realiza bien o el nombre del parámetro es otro
+                                },
+                                {}, //Esto sería el body pero en este caso no lo usamos
+                              );
+
+                              final resPausa = await getConnect.put(
+                                '${EnlaceApp.enlaceBase}/api/publicBoard/pause',
+                                headers: {
+                                  "Authorization": userToken,
+                                  'id': boardID, //revisar se con esto se realiza bien o el nombre del parámetro es otro
                                 },
                                 {}, //Esto sería el body pero en este caso no lo usamos
                               );
@@ -51,7 +62,17 @@ import 'colores.dart';
                               final res = await getConnect.put(
                                 '${EnlaceApp.enlaceBase}/api/privateBoard/leaveBoard',
                                 headers: {
-                                  'id': userID, //revisar se con esto se realiza bien o el nombre del parámetro es otro
+                                  "Authorization": userToken,
+                                  'id': boardID, //revisar se con esto se realiza bien o el nombre del parámetro es otro
+                                },
+                                {}, //Esto sería el body pero en este caso no lo usamos
+                              );
+
+                              final resPausa = await getConnect.put(
+                                '${EnlaceApp.enlaceBase}/api/privateBoard/pause',
+                                headers: {
+                                  "Authorization": userToken,
+                                  'id': boardID, //revisar se con esto se realiza bien o el nombre del parámetro es otro
                                 },
                                 {}, //Esto sería el body pero en este caso no lo usamos
                               );
@@ -61,11 +82,23 @@ import 'colores.dart';
                               final res = await getConnect.put(
                                 '${EnlaceApp.enlaceBase}/api/tournamentBoard/leaveBoard',
                                 headers: {
-                                  'id': userID, //revisar se con esto se realiza bien o el nombre del parámetro es otro
+                                  "Authorization": userToken,
+                                  'id': boardID, //revisar se con esto se realiza bien o el nombre del parámetro es otro
+                                },
+                                {}, //Esto sería el body pero en este caso no lo usamos
+                              );
+
+                              final resPausa = await getConnect.put(
+                                '${EnlaceApp.enlaceBase}/api/tournamentBoard/pause',
+                                headers: {
+                                  "Authorization": userToken,
+                                  'id': boardID, //revisar se con esto se realiza bien o el nombre del parámetro es otro
                                 },
                                 {}, //Esto sería el body pero en este caso no lo usamos
                               );
                             }
+
+
                           },
                           child: Text(
                             'Abandonar Partida',
@@ -85,7 +118,10 @@ import 'colores.dart';
                         SizedBox(height: 20),
                         ElevatedButton(
                           onPressed: () {
-                            // Acción para la tercera opción
+                            //El navigator es una pila de pantallas en el orden en el que se llaman.
+                            //Haciendo pop, volvemos a la nterior
+                            //Context en este caso es el sizedboc del menú pausa, que desaparecerá
+                            Navigator.pop(context);
                           },
                           child: Text(
                             'Reanudar partida',
