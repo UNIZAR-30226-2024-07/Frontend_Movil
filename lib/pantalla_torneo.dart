@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_connect/connect.dart';
 import 'package:psoft_07/Usuario.dart';
-//import 'package:psoft_07/funcionesAvatar.dart';
-import 'package:psoft_07/pantalla_buscar_amigos.dart';
 import 'package:psoft_07/pantalla_principal.dart';
-import 'package:psoft_07/pantalla_solicitudes_recibidas.dart'; // Importa la pantalla de FriendRequestsScreen
+import 'package:psoft_07/pantalla_rondas_torneo.dart';
 import 'colores.dart';
 
 class TournamentGames extends StatefulWidget {
   //final FuncionesAvatar fAvatar = FuncionesAvatar();
   final User user;
-
-
   TournamentGames(this.user, {super.key});
 
   @override
@@ -36,6 +32,8 @@ class _TournamentGamesState extends State<TournamentGames> {
       throw Exception('Failed to load user data');
     }
   }
+
+
 
 
   String dificultadTorneo (torneo){
@@ -251,34 +249,16 @@ class _TournamentGamesState extends State<TournamentGames> {
                                         )
                                       ],
                                     ),
-
-                                    /*
-                                    Center(
-                                      child: Text(
-                                        "Campeón: ${torneo["coins_winner"]}\t Subcampeón: ${torneo["coins_subwinner"]}",
-                                        style: const TextStyle(
-                                          fontSize: 16, // Tamaño del texto
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        ),
-                                      )
-                                    ),
-                                    Center(
-                                        child: Text(
-                                          "Subcampeón: ${torneo["coins_subwinner"]}",
-                                          style: const TextStyle(
-                                            fontSize: 16, // Tamaño del texto
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                          ),
-                                        )
-                                    ),
-                                    */
                                   ],
                                 ),
                                 ElevatedButton(
-                                  onPressed: () {
-                                    //Pantalla juego
+                                  onPressed: () async {
+                                    //Entramos a la pantalla de rondas para ese torneo
+                                    //Para cada torneo tenemos nuestro progreso, pudiendo participar en varios torneos simultáneamente
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => TournamentRoundsScreen(widget.user, torneo)),
+                                    );
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: ColoresApp.segundoColor,
