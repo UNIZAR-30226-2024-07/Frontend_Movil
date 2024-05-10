@@ -18,6 +18,8 @@ class Principal extends StatelessWidget {
   final User user;
   bool hayRecompensa = false;
   int valorRecompensa = 0;
+  bool imagenCargada = false;
+  String imagenUrl = "";
 
   Principal(this.user, {super.key});
 
@@ -77,8 +79,17 @@ class Principal extends StatelessWidget {
     }
   }
 
+  Future<void> cargaImagen() async {
+    if (!imagenCargada) {
+      imagenUrl = await _getImageUrl();
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
+   cargaImagen();
+
     apiHayRecompensa(context);
     return Scaffold(
       backgroundColor: ColoresApp.fondoPantallaColor,
@@ -162,7 +173,7 @@ class Principal extends StatelessWidget {
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                FutureBuilder<String>(
+                /*FutureBuilder<String>(
                   future: _getImageUrl(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
@@ -177,6 +188,10 @@ class Principal extends StatelessWidget {
                       );
                     }
                   },
+                ),*/
+                CircleAvatar(
+                  backgroundImage: NetworkImage(imagenUrl),
+                  radius: 50, // Tamaño deseado del CircleAvatar
                 ),
                 Text(
                   user.nick,
