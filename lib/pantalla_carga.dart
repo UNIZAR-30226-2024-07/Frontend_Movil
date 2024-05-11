@@ -7,10 +7,12 @@ import 'package:get/get_connect/connect.dart';
 import 'package:psoft_07/colores.dart';
 import 'package:psoft_07/Usuario.dart';
 import 'package:psoft_07/pantalla_partida_publica.dart';
+import 'package:psoft_07/pantalla_principal.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:tuple/tuple.dart';
 import 'package:psoft_07/pantalla_pausa.dart' as pause;
 import 'Mano.dart';
+import 'dart:async';
 
 class LoadingScreen extends StatefulWidget {
   final String idMesa;
@@ -50,6 +52,13 @@ class LoadingScreen extends StatefulWidget {
   bool _chatVisible = false;
   Map<String, String> urlAvatares = {};
 
+  //Variables contadorWidget
+  late Widget _timeWidget;
+  bool _timeVisible = false;
+
+  late int _secondsRemaining;
+  late Timer? _timer;
+
   //Variables pauseWidget
   late Widget _pauseWidget;
   bool _pauseVisible = false;
@@ -68,7 +77,21 @@ class _LoadingScreenState extends State<LoadingScreen> {
   void initState() {
     super.initState();
     // Simulación de carga de datos
+    //widget._secondsRemaining = 30;
+    //_startCountdown();
     _simulateLoading();
+  }
+  void _startCountdown() {
+    // Inicia un temporizador que actualiza el contador cada segundo
+    widget._timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        if (widget._secondsRemaining == 0) {
+          widget._timer?.cancel();
+        } else {
+          widget._secondsRemaining--;
+        }
+      });
+    });
   }
 
   void _simulateLoading() {
@@ -158,6 +181,27 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
 
+  Widget crearContador() {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.access_time, color: ColoresApp.segundoColor),
+          SizedBox(width: 8.0),
+          Text(
+            widget._secondsRemaining.toString(),
+            style: TextStyle(fontSize: 24.0, color: ColoresApp.segundoColor),
+          ),
+        ],
+      ),
+    );
+  }
+
   void conectarPartida() async {
 
     bool kDebugMode = true;
@@ -200,8 +244,13 @@ class _LoadingScreenState extends State<LoadingScreen> {
           widget.UImesa = true;
           widget.split = false;
           widget.resultadosRonda = false;
+          //widget._timeVisible = true;
+          //widget._timeWidget = crearContador();
+          widget._secondsRemaining = 30;
+          _startCountdown();
         });
       }
+
 
     });
 
@@ -215,6 +264,58 @@ class _LoadingScreenState extends State<LoadingScreen> {
           widget.user.coins = widget.myResultadosHand.currentCoins;
           widget.resultadosRonda = true;
         });
+      }
+    });
+
+    widget.socket?.on("players deleted", (data) {
+      print(data);
+      if (data != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              "Ha sido expulsado de la partida por inactividad",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        widget.socket.disconnect();
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => Principal(widget.user)),
+        );
+
+      }
+    });
+
+    widget.socket?.on("finish board", (data) {
+      print(data);
+      if (data != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              "Ha terminado la partida",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        widget.socket.disconnect();
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => Principal(widget.user)),
+        );
+
       }
     });
 
@@ -853,6 +954,9 @@ class _LoadingScreenState extends State<LoadingScreen> {
         ),
       ),
       actions: [
+        Spacer(), // Espaciador flexible para empujar el contador al centro
+        crearContador(), // Widget crearContador() en el medio
+        Spacer(),
         Text(
           widget.user.coins.toString(),
           style: const TextStyle(
@@ -910,6 +1014,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
     //variables internas de este widget
     Widget chatWidget = widget._chatVisible ? Expanded(child: widget._chatWidget) : SizedBox();
     Widget pauseWidget = widget._pauseVisible ? Expanded(child: widget._pauseWidget) : SizedBox();
+    //Widget timeWidget = widget._timeVisible ? Expanded(child: widget._timeWidget) : SizedBox();
+
     //codigo
     if (widget.resultadosRonda) {
       return Scaffold(
@@ -918,6 +1024,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
         body: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
+            //crearContador(),
             chatWidget,
             pauseWidget,
             if(widget.otherResultadosHand != [])
@@ -1130,6 +1237,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
         body: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
+            //crearContador(),
             chatWidget,
             pauseWidget,
             Column(   //Cartas Resto Jugadores
