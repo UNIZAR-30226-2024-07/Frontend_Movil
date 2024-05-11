@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_connect/connect.dart';
+import 'package:psoft_07/pantalla_cargaYTablero_torneo.dart';
 
 import 'Usuario.dart';
 import 'colores.dart';
@@ -124,6 +125,8 @@ class _TournamentRoundsScreenNachoState extends State<TournamentRoundsScreenNach
             child: FloatingActionButton(
               onPressed: () {
                 // Acción al presionar el botón de volver
+                //Simplemente vuelve a pantalla principal poruqe no está buscando partida
+                Navigator.pop(context);
               },
               backgroundColor: Colors.blue.shade300,
               child: const Icon(Icons.arrow_back),
@@ -133,7 +136,12 @@ class _TournamentRoundsScreenNachoState extends State<TournamentRoundsScreenNach
             padding: const EdgeInsets.only(right: 10.0, bottom: 10.0),
             child: FloatingActionButton(
               onPressed: () {
-
+                // Por hacer: Navegar a la siguiente pantalla o ejecutar alguna acción
+                // En este caso, el botón de continuar implica buscar una nueva partida de torneo, por lo que vamos a la página correspondiente
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoadingScreenTournament(widget.user, widget.idTorneo)),//mesa['_id'], widget.user)),
+                );
               },
               backgroundColor: Colors.red.shade300,
               child: const Icon(Icons.arrow_forward),

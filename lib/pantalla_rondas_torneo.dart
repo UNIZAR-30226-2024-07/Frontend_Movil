@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_connect/connect.dart';
 import 'package:psoft_07/pantalla_carga.dart';
+import 'package:psoft_07/pantalla_cargaYTablero_torneo.dart';
 import 'Usuario.dart';
 import 'colores.dart';
 
@@ -13,10 +14,9 @@ class TournamentRoundsScreen extends StatelessWidget {
   Future<Map<String, dynamic>> _getTournamentInfoForUser(User user, dynamic tournament) async {
     final getConnect = GetConnect();
     final response = await getConnect.get(
-      '${EnlaceApp.enlaceBase}/api/tournament/isUserInTournament',
+      '${EnlaceApp.enlaceBase}/api/tournament/isUserInTournament/'+tournament["_id"],
       headers: {
         "Authorization": user.token,
-        "id": tournament["_id"],
       },
     );
 
@@ -183,7 +183,7 @@ class TournamentRoundsScreen extends StatelessWidget {
                 // En este caso, el botón de continuar implica buscar una nueva partida de torneo, por lo que vamos a la página correspondiente
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => LoadingScreen("idinventado", user)),//mesa['_id'], widget.user)),
+                  MaterialPageRoute(builder: (context) => LoadingScreenTournament(user, torneo["_id"])),//mesa['_id'], widget.user)),
                 );
               },
               backgroundColor: Colors.red.shade300,

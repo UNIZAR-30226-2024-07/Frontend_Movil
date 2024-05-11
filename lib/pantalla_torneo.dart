@@ -3,6 +3,7 @@ import 'package:get/get_connect/connect.dart';
 import 'package:psoft_07/Usuario.dart';
 import 'package:psoft_07/pantalla_principal.dart';
 import 'package:psoft_07/pantalla_rondas_torneo.dart';
+import 'package:psoft_07/pantalla_rondas_torneo_nacho.dart';
 import 'colores.dart';
 
 class TournamentGames extends StatefulWidget {
@@ -257,7 +258,8 @@ class _TournamentGamesState extends State<TournamentGames> {
                                     //Para cada torneo tenemos nuestro progreso, pudiendo participar en varios torneos simultáneamente
                                     Navigator.push(
                                       context,
-                                      MaterialPageRoute(builder: (context) => TournamentRoundsScreen(widget.user, torneo)),
+                                      MaterialPageRoute(builder: (context) => TournamentRoundsScreenNacho(widget.user, torneo['_id'])),
+                                      //MaterialPageRoute(builder: (context) => TournamentRoundsScreen(widget.user, torneo)),
                                     );
                                   },
                                   style: ElevatedButton.styleFrom(
