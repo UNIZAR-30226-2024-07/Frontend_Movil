@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:psoft_07/pantalla_principal.dart';
+import 'package:psoft_07/pantalla_privada_juego.dart';
 
 import 'Usuario.dart';
 import 'colores.dart';
@@ -15,6 +16,8 @@ class JoinPrivateMatchScreen extends StatelessWidget {
 
     final TextEditingController nombreController = TextEditingController();
     final TextEditingController contrasenaController = TextEditingController();
+    String _name = '';
+    String _password = '';
 
     return Scaffold(
       backgroundColor: ColoresApp.fondoPantallaColor,
@@ -23,8 +26,6 @@ class JoinPrivateMatchScreen extends StatelessWidget {
         elevation: 2, // Ajusta el valor según el tamaño de la sombra que desees
         leading: GestureDetector(
           onTap: () {
-            // Coloca aquí el código que deseas ejecutar cuando se haga tap en la imagen
-            // Por ejemplo, puedes navegar a otra pantalla, mostrar un diálogo, etc.
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => Principal(user)),
@@ -119,8 +120,46 @@ class JoinPrivateMatchScreen extends StatelessWidget {
             const SizedBox(height: 30), // Espacio entre los campos de texto y el botón
             ElevatedButton(
               onPressed: () {
-                // Acción para el primer botón
+                if (nombreController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("El nombre no es válido"),
+                    ),
+                  );
+                } else if (contrasenaController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("La contraseña no es válida"),
+                    ),
+                  );
+                } else {
+                  // Lógica para crear la partida
+                  Map<String, dynamic> body = {
+                    'body': {
+                      'name': '',
+                      'password': '',
+                      'bankLevel': '',
+                      'numPlayers': '',
+                      'bet': '',
+                      'userId': '',
+                    }
+                  };
+                  Map<String, dynamic> bodyUnirse = {
+                    'body': {
+                      'name': nombreController.text,
+                      'password': contrasenaController.text,
+                      'userId': user.id,
+                    }
+                  };
+                  print("BODY UNIRSEEEEEEEEEEEEE");
+                  print(bodyUnirse);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => PrivateGameScreen("", user, body, bodyUnirse, false)),
+                  );
+                }
               },
+
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColoresApp.segundoColor,
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
