@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_connect/connect.dart';
 import 'package:psoft_07/pantalla_principal.dart';
-
 import 'Usuario.dart';
 import 'colores.dart';
 
-  Widget crearPantallaPausa(BuildContext context, String tipoPartida, String boardID, String userToken, User user) {
+  Widget crearPantallaPausa(BuildContext context, String tipoPartida, String boardID, User user) {
     return FractionallySizedBox(
               widthFactor: 0.8,
               heightFactor: 0.8,
@@ -47,7 +46,7 @@ import 'colores.dart';
                               final res = await getConnect.put(
                                 '${EnlaceApp.enlaceBase}/api/publicBoard/leaveBoard/$boardID',
                                 headers: {
-                                  "Authorization": userToken,
+                                  "Authorization": user.token,
                                 },
                                 {}, //Esto sería el body pero en este caso no lo usamos
                               );
@@ -56,7 +55,7 @@ import 'colores.dart';
                               final res = await getConnect.put(
                                 '${EnlaceApp.enlaceBase}/api/publicBoard/leaveBoard/$boardID',
                                 headers: {
-                                  "Authorization": userToken,
+                                  "Authorization": user.token,
                                 },
                                 {}, //Esto sería el body pero en este caso no lo usamos
                               );
@@ -66,7 +65,7 @@ import 'colores.dart';
                               final res = await getConnect.put(
                                 '${EnlaceApp.enlaceBase}/api/publicBoard/leaveBoard/$boardID',
                                 headers: {
-                                  "Authorization": userToken,
+                                  "Authorization": user.token,
                                 },
                                 {}, //Esto sería el body pero en este caso no lo usamos
                               );
@@ -88,7 +87,7 @@ import 'colores.dart';
                               final resPausa = await getConnect.put(
                                 '${EnlaceApp.enlaceBase}/api/publicBoard/pause/$boardID',
                                 headers: {
-                                  "Authorization": userToken,
+                                  "Authorization": user.token,
                                 },
                                 {}, //Esto sería el body pero en este caso no lo usamos
                               );
@@ -100,7 +99,7 @@ import 'colores.dart';
                               final resPausa = await getConnect.put(
                                 '${EnlaceApp.enlaceBase}/api/publicBoard/pause/$boardID',
                                 headers: {
-                                  "Authorization": userToken,
+                                  "Authorization": user.token,
                                 },
                                 {}, //Esto sería el body pero en este caso no lo usamos
                               );

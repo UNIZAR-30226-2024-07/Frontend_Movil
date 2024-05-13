@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_connect/connect.dart';
 import 'package:psoft_07/pantalla_cargaYTablero_torneo.dart';
+import 'package:psoft_07/pantalla_estadisticasJugador.dart';
 
 import 'Usuario.dart';
 import 'colores.dart';
@@ -73,6 +74,33 @@ class _TournamentRoundsScreenNachoState extends State<TournamentRoundsScreenNach
     }
   }
 
+  _enterTournamentForCurrentUser(User user, String tournamentId) async {
+    try {
+      final getConnect = GetConnect();
+      final response = await getConnect.put(
+        '${EnlaceApp.enlaceBase}/api/tournament/enterTournament/$tournamentId', //TODO: preguntar si se pone aquí o en cuerpo el toruneamentID
+        {
+          "id": user.id
+        },
+        headers: {
+          "Authorization": widget.user.token,
+        },
+      );
+        ScaffoldMessenger.of(context).showSnackBar( //mostramos mensaje de error o
+          SnackBar(
+            duration: Duration(seconds: 3),
+            content: Center( // Centra horizontalmente el contenido
+              child: Text(response.body["message"]),
+            ),
+          ),
+        );
+    } catch (e) {
+      print('Error al enlistar al usuario $user en el torneo con Id: $tournamentId');
+      return 0;
+    }
+    _loadData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -92,8 +120,8 @@ class _TournamentRoundsScreenNachoState extends State<TournamentRoundsScreenNach
       ),
       body: _userInTournament
           ? Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
@@ -108,14 +136,41 @@ class _TournamentRoundsScreenNachoState extends State<TournamentRoundsScreenNach
           ),
         ],
       )
-          : const Center(
-        child: Padding(
-          padding: EdgeInsets.all(20.0),
-          child: Text(
-            '¡Has sido eliminado del torneo!',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-        ),
+          : Center(
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.all(20.0),
+                      child: Text(
+                        '¡Has sido eliminado del torneo!',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                            fontSize: 20
+                        ),
+                      ),
+                    ),
+                    FloatingActionButton.extended(
+                      onPressed: () async {
+                        // Llamar a tu función para volver a entrar al torneo
+                        // Una vez finalizada, puedes recargar la página
+                        _enterTournamentForCurrentUser(widget.user, widget.idTorneo);
+                        setState(() {}); //recargar página para que los widgets se vuelvan a dibujar
+                        //si va all ok, debería estar userInTorunament y mostrarse correctamente las rondas
+                      },
+                      label: Text(
+                        'Volver a entrar',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      icon: Icon(Icons.refresh),
+                      backgroundColor: ColoresApp.segundoColor, // Puedes ajustar el color de fondo según tus necesidades
+                    ),
+                  ],
+                )
       ),
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -128,7 +183,7 @@ class _TournamentRoundsScreenNachoState extends State<TournamentRoundsScreenNach
                 //Simplemente vuelve a pantalla principal poruqe no está buscando partida
                 Navigator.pop(context);
               },
-              backgroundColor: Colors.blue.shade300,
+              backgroundColor: ColoresApp.segundoColor,//Colors.blue.shade300,
               child: const Icon(Icons.arrow_back),
             ),
           ),
@@ -223,14 +278,6 @@ class _TournamentRoundsScreenNachoState extends State<TournamentRoundsScreenNach
       ],
     );
   }
-
-
-
-
-
-
-
-
 }
 
 void main() {

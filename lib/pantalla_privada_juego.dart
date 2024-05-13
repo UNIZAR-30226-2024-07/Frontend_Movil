@@ -920,7 +920,7 @@ class _PrivateGameScreenState extends State<PrivateGameScreen> {
             //Mostrar menú de pausa de forma dinámica (flotando)
             print("Toggle menú de pausa (mostrar / ocultar");
             setState(() {
-              widget._pauseWidget = pause.crearPantallaPausa(context, "partidaPrivada", widget.boardId, widget.user.token);
+              widget._pauseWidget = pause.crearPantallaPausa(context, "partidaPrivada", widget.boardId, widget.user);
               widget._pauseVisible = !widget._pauseVisible;
             });
           },

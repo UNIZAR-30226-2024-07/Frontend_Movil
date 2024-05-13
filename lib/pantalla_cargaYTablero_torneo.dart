@@ -41,7 +41,7 @@ class LoadingScreenTournament extends StatefulWidget {
 
   IO.Socket socket = IO.io(EnlaceApp.enlaceBase, <String, dynamic>{
     'transports': ['websocket'],
-    'autoConnect': true
+    'autoConnect': false
   });
 
   //Variables chatWidget
@@ -124,18 +124,21 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
   Future<bool> conexionBoardId(boardId) async {
     try {
       final response = await widget.getConnect.get(
-        '${EnlaceApp.enlaceBase}/api/tournament/tournamentById/$boardId',
+        '${EnlaceApp.enlaceBase}/api/tournament/boardById/$boardId',
         headers: {
           "Authorization": widget.user.token,
         },
       );
-
+      print ('$response');
       if (response.body['status'] == 'error') {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(response.body['message'], textAlign: TextAlign.center,),
           ),
         );
+        print("Error al obtener tournamentById con idTorneo: $boardId");
+      } else {
+
       }
 
       for (var jugador in response.body['board']['players']) {
@@ -156,10 +159,12 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
     }
   }
 
-
   void conectarPartida() async {
 
     bool kDebugMode = true;
+    setState(() {
+      widget.socket.connect();
+    });
 
     widget.socket?.on("connect", (data) {
       if (kDebugMode) {
@@ -169,14 +174,14 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
 
     });
 
-    widget.socket?.on("starting tournament board", (boardId) async {
+    widget.socket?.on("starting tournament board", (boardId) async { //Aquí recibo del socket el boardId
       if (kDebugMode) {
         print("starting tournament board RECIBIDO :) --------------------");
       }
 
       widget.boardId = boardId;
       getCurrentCard();
-
+      //TODO: llaar aqui con tournamentId y no boardID (creo)
       if(await conexionBoardId(boardId)) {
 
         Map<String, dynamic> body = {
@@ -248,7 +253,6 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
         print(data);
       }
     });
-
   }
 
   Future emitEntrar() async {
@@ -262,7 +266,6 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
             'userId': widget.user.id,
           }
         };
-
         print("Debug: estamos emitiendo entrada en torneo con datos: usuario ${widget.user.id}y idTorneo: ${widget.tournamentID}");
 
         widget.socket?.emit('enter tournament board', body ); //Revisado: emit correcto
@@ -411,99 +414,7 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
 
   bool cartasIguales(){
     return (widget.myHand[0].cartas[0]['value'] == widget.myHand[0].cartas[1]['value']);
-
   }
-
-  // void funcionDoblar (int mano) async {
-  //   try {
-  //     final response = await widget.getConnect.put(
-  //       '${EnlaceApp.enlaceBase}/api/publicBoard/double', //TODO: eliminar double porqu een torneos no se pude doblar
-  //       {
-  //         "boardId": widget.boardId,
-  //         "cardsOnTable": widget.myHand[mano].cartas,
-  //         "handIndex": mano,
-  //       },
-  //       headers: {
-  //         "Authorization": widget.user.token,
-  //       },
-  //     );
-  //     if (response.body['status'] == 'error' || response.body['status'] == null) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(
-  //           content: Text(response.body['message'], textAlign: TextAlign.center,),
-  //         ),
-  //       );
-  //     } else {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         const SnackBar(
-  //           content: Text("Has doblado apuesta", textAlign: TextAlign.center,),
-  //         ),
-  //       );
-  //       setState(() {
-  //         widget.myHand[mano].cartas = response.body['cardsOnTable'];
-  //         widget.myHand[mano].totalCards = response.body['totalCards'];
-  //         widget.myHand[mano].myBlackjack = response.body['blackJack'];
-  //         widget.myHand[mano].myDefeat = response.body['defeat'];
-  //         widget.myHand[mano].plantado = true;
-  //         widget.myHand[mano].firstHand = false;
-
-  //       });
-  //     }
-  //   } catch (e) {
-  //   }
-  // }
-
-  // void funcionSplit () async {
-  //   try {
-  //     final response = await widget.getConnect.put(
-  //       '${EnlaceApp.enlaceBase}/api/publicBoard/split', //TODO: eliminar split que en torneo no hay tampoco (consultar con jefes antes)
-  //       {
-  //         "boardId": widget.boardId,
-  //         "cardsOnTable": widget.myHand[0].cartas,
-  //       },
-  //       headers: {
-  //         "Authorization": widget.user.token,
-  //       },
-  //     );
-  //     if (response.body['status'] == 'error' || response.body['status'] == null) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(
-  //           content: Text(response.body['message'], textAlign: TextAlign.center,),
-  //         ),
-  //       );
-  //     } else {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         const SnackBar(
-  //           content: Text("Has dividido cartas", textAlign: TextAlign.center,),
-  //         ),
-  //       );
-  //       setState(() {
-  //         widget.myHand[0].cartas = response.body['cardsOnTableFirst'];
-  //         widget.myHand[0].totalCards = response.body['totalCardsFirst'];
-  //         widget.myHand[0].myBlackjack = response.body['blackJackFirst'];
-  //         widget.myHand[0].myDefeat = response.body['defeatFirst'];
-  //         widget.myHand[0].plantado = false;
-  //         widget.myHand[0].firstHand = true;
-
-  //         widget.myHand.add(Mano());
-
-  //         widget.myHand[1].cartas = response.body['cardsOnTableSecond'];
-  //         widget.myHand[1].totalCards = response.body['totalCardsSecond'];
-  //         widget.myHand[1].myBlackjack = response.body['blackJackSecond'];
-  //         widget.myHand[1].myDefeat = response.body['defeatSecond'];
-  //         widget.myHand[1].plantado = false;
-  //         widget.myHand[1].firstHand = true;
-
-  //         widget.split = true;
-
-  //       });
-  //     }
-  //   } catch (e) {
-  //     print("ERRROOOOOR EN SPLIT" + e.toString());
-  //   }
-  // }
-
-
 
   Widget crearChat(List<Tuple3<String, String, String>> mensajes) {
     return SizedBox(
@@ -533,7 +444,6 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
       ),
     );
   }
-
 
   Widget campoMensaje() {
     return Padding(
@@ -629,12 +539,6 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
       _messageController.clear();
     }
   }
-
-
-
-
-
-
 
   Widget botones(int mano) {
     return Column(   // Botones de Interacción
@@ -873,7 +777,7 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
             //Mostrar menú de pausa de forma dinámica (flotando)
             print("Toggle menú de pausa (mostrar / ocultar");
             setState(() {
-              widget._pauseWidget = pause.crearPantallaPausa(context, "partidaTorneo", widget.boardId, widget.user.token);
+              widget._pauseWidget = pause.crearPantallaPausa(context, "partidaTorneo", widget.boardId, widget.user); //TODO: dar solamente usuario como argumento y cambiar en pausa, partida publica, partida privada y partida practica
               widget._pauseVisible = !widget._pauseVisible;
             });
           },
