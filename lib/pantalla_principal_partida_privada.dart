@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:psoft_07/pantalla_crear_privada.dart';
+import 'package:psoft_07/pantalla_eleccion_modo_practica.dart';
 import 'package:psoft_07/pantalla_principal.dart';
 import 'package:psoft_07/pantalla_unirse_privada.dart';
 import 'Usuario.dart';
@@ -82,7 +83,10 @@ class PrivateMatchScreen extends StatelessWidget {
             const SizedBox(height: 15),
             ElevatedButton(
               onPressed: () {
-                // Acción para el primer botón
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => PracticeModeElection(user)),
+                );
               },
               style: ElevatedButton.styleFrom(
                   backgroundColor: ColoresApp.segundoColor
