@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_connect/connect.dart';
+import 'package:psoft_07/pantalla_principal.dart';
 
+import 'Usuario.dart';
 import 'colores.dart';
 
-  Widget crearPantallaPausa(BuildContext context, String tipoPartida, String boardID, String userToken) {
+  Widget crearPantallaPausa(BuildContext context, String tipoPartida, String boardID, String userToken, User user) {
     return FractionallySizedBox(
               widthFactor: 0.8,
               heightFactor: 0.8,
@@ -39,40 +41,22 @@ import 'colores.dart';
                           onPressed: () async {
                             //Hagamos lo que hagmaos, al abandonar guardar la partida en el servidor para que se pueda reanudar desde otro dispositivo
                             final getConnect = GetConnect();
+
                             // Abandonar de una forma u otra ne función del tipo d epartida
                             if (tipoPartida == "partidaPublica"){
                               final res = await getConnect.put(
-                                '${EnlaceApp.enlaceBase}/api/publicBoard/leaveBoard',
+                                '${EnlaceApp.enlaceBase}/api/publicBoard/leaveBoard/$boardID',
                                 headers: {
                                   "Authorization": userToken,
-                                  'id': boardID, //revisar se con esto se realiza bien o el nombre del parámetro es otro
                                 },
                                 {}, //Esto sería el body pero en este caso no lo usamos
                               );
-
-                              final resPausa = await getConnect.put(
-                                '${EnlaceApp.enlaceBase}/api/publicBoard/pause',
-                                headers: {
-                                  "Authorization": userToken,
-                                  'id': boardID, //revisar se con esto se realiza bien o el nombre del parámetro es otro
-                                },
-                                {}, //Esto sería el body pero en este caso no lo usamos
-                              );
+                              int a = 1;
                             } else if (tipoPartida == "partidaPrivada") {
                               final res = await getConnect.put(
-                                '${EnlaceApp.enlaceBase}/api/privateBoard/leaveBoard',
+                                '${EnlaceApp.enlaceBase}/api/publicBoard/leaveBoard/$boardID',
                                 headers: {
                                   "Authorization": userToken,
-                                  'id': boardID, //revisar se con esto se realiza bien o el nombre del parámetro es otro
-                                },
-                                {}, //Esto sería el body pero en este caso no lo usamos
-                              );
-
-                              final resPausa = await getConnect.put(
-                                '${EnlaceApp.enlaceBase}/api/privateBoard/pause',
-                                headers: {
-                                  "Authorization": userToken,
-                                  'id': boardID, //revisar se con esto se realiza bien o el nombre del parámetro es otro
                                 },
                                 {}, //Esto sería el body pero en este caso no lo usamos
                               );
@@ -80,28 +64,55 @@ import 'colores.dart';
                               //esperar respuesta compis para ver cómo gestionar esto
                             } else if (tipoPartida == "partidaTorneo") { ///api/tournamentBoard/leaveBoard
                               final res = await getConnect.put(
-                                '${EnlaceApp.enlaceBase}/api/tournamentBoard/leaveBoard',
+                                '${EnlaceApp.enlaceBase}/api/publicBoard/leaveBoard/$boardID',
                                 headers: {
                                   "Authorization": userToken,
-                                  'id': boardID, //revisar se con esto se realiza bien o el nombre del parámetro es otro
                                 },
                                 {}, //Esto sería el body pero en este caso no lo usamos
                               );
-
+                            }
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => Principal(user)), // ir a la pantalla principal
+                            );
+                          },
+                          child: Text(
+                            'Abandonar Partida',
+                            style: TextStyle(fontSize: 20),
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () async {
+                            final getConnect = GetConnect();
+                            if (tipoPartida == "partidaPublica"){
                               final resPausa = await getConnect.put(
-                                '${EnlaceApp.enlaceBase}/api/tournamentBoard/pause',
+                                '${EnlaceApp.enlaceBase}/api/publicBoard/pause/$boardID',
                                 headers: {
                                   "Authorization": userToken,
-                                  'id': boardID, //revisar se con esto se realiza bien o el nombre del parámetro es otro
+                                },
+                                {}, //Esto sería el body pero en este caso no lo usamos
+                              );
+                            }
+                            else if (tipoPartida == "partidaPractica") {
+                              //esperar respuesta compis para ver cómo gestionar esto
+                            }
+                            else if (tipoPartida == "partidaTorneo") {
+                              final resPausa = await getConnect.put(
+                                '${EnlaceApp.enlaceBase}/api/publicBoard/pause/$boardID',
+                                headers: {
+                                  "Authorization": userToken,
                                 },
                                 {}, //Esto sería el body pero en este caso no lo usamos
                               );
                             }
 
-
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => Principal(user)), // ir a la pantalla principal
+                            );
                           },
                           child: Text(
-                            'Abandonar Partida',
+                            'Pausar Partida',
                             style: TextStyle(fontSize: 20),
                           ),
                         ),
