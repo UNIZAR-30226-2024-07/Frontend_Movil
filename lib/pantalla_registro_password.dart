@@ -54,7 +54,8 @@ class RegisterScreenPassword extends StatelessWidget {
       "name":name,
       "surname":surname,
       "email":mail,
-      "password":password
+      "password":password,
+      "rol": "user"
     });
 
     if (res.body['status'] == 'error') {
