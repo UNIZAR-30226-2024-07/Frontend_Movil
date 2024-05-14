@@ -53,17 +53,18 @@ import 'colores.dart';
                               int a = 1;
                             } else if (tipoPartida == "partidaPrivada") {
                               final res = await getConnect.put(
-                                '${EnlaceApp.enlaceBase}/api/publicBoard/leaveBoard/$boardID',
+                                '${EnlaceApp.enlaceBase}/api/privateBoard/leaveBoard/$boardID',
                                 headers: {
                                   "Authorization": user.token,
                                 },
                                 {}, //Esto sería el body pero en este caso no lo usamos
                               );
+                              int a = 0;
                             } else if (tipoPartida == "partidaPractica") {
                               //esperar respuesta compis para ver cómo gestionar esto
                             } else if (tipoPartida == "partidaTorneo") { ///api/tournamentBoard/leaveBoard
                               final res = await getConnect.put(
-                                '${EnlaceApp.enlaceBase}/api/publicBoard/leaveBoard/$boardID',
+                                '${EnlaceApp.enlaceBase}/api/tournamentBoard/leaveBoard/$boardID',
                                 headers: {
                                   "Authorization": user.token,
                                 },
@@ -92,12 +93,22 @@ import 'colores.dart';
                                 {}, //Esto sería el body pero en este caso no lo usamos
                               );
                             }
+                            else if (tipoPartida == "partidaPrivada") {
+                              final res = await getConnect.put(
+                                '${EnlaceApp.enlaceBase}/api/privateBoard/pause/$boardID',
+                                headers: {
+                                  "Authorization": user.token,
+                                },
+                                {}, //Esto sería el body pero en este caso no lo usamos
+                              );
+                              int a = 0;
+                            }
                             else if (tipoPartida == "partidaPractica") {
                               //esperar respuesta compis para ver cómo gestionar esto
                             }
                             else if (tipoPartida == "partidaTorneo") {
                               final resPausa = await getConnect.put(
-                                '${EnlaceApp.enlaceBase}/api/publicBoard/pause/$boardID',
+                                '${EnlaceApp.enlaceBase}/api/tournamentBoard/pause/$boardID',
                                 headers: {
                                   "Authorization": user.token,
                                 },

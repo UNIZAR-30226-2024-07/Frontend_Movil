@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 
@@ -8,6 +9,7 @@ import 'package:psoft_07/colores.dart';
 import 'package:psoft_07/Usuario.dart';
 import 'package:psoft_07/pantalla_crear_privada.dart';
 import 'package:psoft_07/pantalla_partida_publica.dart';
+import 'package:psoft_07/pantalla_principal.dart';
 import 'package:psoft_07/pantalla_unirse_privada.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:tuple/tuple.dart';
@@ -47,7 +49,7 @@ class PrivateGameScreen extends StatefulWidget {
 
   IO.Socket socket = IO.io(EnlaceApp.enlaceBase, <String, dynamic>{
     'transports': ['websocket'],
-    'autoConnect': true
+    'autoConnect': false
   });
 
   //Variables chatWidget
@@ -58,6 +60,9 @@ class PrivateGameScreen extends StatefulWidget {
   //Variables pauseWidget
   late Widget _pauseWidget;
   bool _pauseVisible = false;
+
+  late int _secondsRemaining;
+  late Timer? _timer;
 
   PrivateGameScreen(this.idMesa, this.user, this.bodyCrear, this.bodyUnirse, this.esCrear, {super.key});
 
@@ -75,6 +80,19 @@ class _PrivateGameScreenState extends State<PrivateGameScreen> {
     // Simulación de carga de datos
     print("LLEGO A INITSTATE");
     _simulateLoading();
+  }
+
+  void _startCountdown() {
+    // Inicia un temporizador que actualiza el contador cada segundo
+    widget._timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        if (widget._secondsRemaining == 0) {
+          widget._timer?.cancel();
+        } else {
+          widget._secondsRemaining--;
+        }
+      });
+    });
   }
 
   void _simulateLoading() {
@@ -163,10 +181,34 @@ class _PrivateGameScreenState extends State<PrivateGameScreen> {
     }
   }
 
+  Widget crearContador() {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.access_time, color: ColoresApp.segundoColor),
+          SizedBox(width: 8.0),
+          Text(
+            widget._secondsRemaining.toString(),
+            style: TextStyle(fontSize: 24.0, color: ColoresApp.segundoColor),
+          ),
+        ],
+      ),
+    );
+  }
 
   void conectarPartida() async {
     print("LLEGO A CONECTARPARTIDA");
     bool kDebugMode = true;
+
+    setState(() {
+      widget.socket.connect();
+    });
 
     widget.socket?.on("connect", (data) {
       if (kDebugMode) {
@@ -206,6 +248,8 @@ class _PrivateGameScreenState extends State<PrivateGameScreen> {
           widget.UImesa = true;
           widget.split = false;
           widget.resultadosRonda = false;
+          widget._secondsRemaining = 30;
+          _startCountdown();
         });
       }
 
@@ -249,6 +293,63 @@ class _PrivateGameScreenState extends State<PrivateGameScreen> {
     });
 
 
+    widget.socket?.on("players deleted", (data) {
+      print(data);
+      if (data != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              "Ha sido expulsado de la partida por inactividad",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        setState(() {
+          widget.socket.disconnect();
+        });
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => Principal(widget.user)),
+        );
+
+      }
+    });
+
+    widget.socket?.on("finish board", (data) {
+      print(data);
+      if (data != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              "Ha terminado la partida",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        setState(() {
+          widget.socket.disconnect();
+        });
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => Principal(widget.user)),
+        );
+
+      }
+    });
+
+
     widget.socket?.on("error", (data) {
       if (kDebugMode) {
         String mensaje = "";
@@ -276,7 +377,10 @@ class _PrivateGameScreenState extends State<PrivateGameScreen> {
             duration: Duration(seconds: 2),
           ),
         );
-        widget.socket.disconnect();
+        setState(() {
+          widget.socket.disconnect();
+        });
+
         if (widget.esCrear) {
           Navigator.push(
             context,
@@ -305,8 +409,6 @@ class _PrivateGameScreenState extends State<PrivateGameScreen> {
             'userId': widget.user.id,
           }
         };*/
-
-        print("JODEER");
         print("LLEGO A EMITENTRAR");
         if (!widget.esCrear) {
           widget.socket?.emit('enter private board', widget.bodyUnirse);
@@ -899,6 +1001,9 @@ class _PrivateGameScreenState extends State<PrivateGameScreen> {
         ),
       ),
       actions: [
+        Spacer(), // Espaciador flexible para empujar el contador al centro
+        crearContador(), // Widget crearContador() en el medio
+        Spacer(),
         Text(
           widget.user.coins.toString(),
           style: const TextStyle(
