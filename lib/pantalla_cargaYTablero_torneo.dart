@@ -122,23 +122,22 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
   }
 
   Future<bool> conexionBoardId(boardId) async {
+   // await Future.delayed(Duration(seconds: 2));
     try {
       final response = await widget.getConnect.get(
-        '${EnlaceApp.enlaceBase}/api/tournament/boardById/$boardId',
+        '${EnlaceApp.enlaceBase}/api/tournamentBoard/boardById/$boardId', //era tournamentBoard, no tournament
         headers: {
           "Authorization": widget.user.token,
         },
       );
-      print ('$response');
-      if (response.body['status'] == 'error') {
+      //print ('$response');
+      if (response.statusCode != 200) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(response.body['message'], textAlign: TextAlign.center,),
           ),
         );
-        print("Error al obtener tournamentById con idTorneo: $boardId");
-      } else {
-
+        print("Error al obtener mesa de torneo con boardId: $boardId");
       }
 
       for (var jugador in response.body['board']['players']) {
@@ -181,16 +180,15 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
 
       widget.boardId = boardId;
       getCurrentCard();
-      //TODO: llaar aqui con tournamentId y no boardID (creo)
-      if(await conexionBoardId(boardId)) {
+      if(await conexionBoardId(boardId)) { //esperamos a que nos den el objeto mesa como tal
 
         Map<String, dynamic> body = {
           'body': {
             'boardId': boardId,
           }
         };
-        print("SE ha emitidoooooooooooooooooooo");
-        widget.socket.emit("players torunament ready", body); //TODO: revisar que este sea el mensaje a enviar
+        print("SE ha emitido players tournament ready desde el socket");
+        widget.socket.emit("players tournament ready", body);
       }
     });
 
@@ -810,6 +808,12 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   @override
   Widget build(BuildContext context) {
+        onWillPop: () async {
+          // Aquí cierras el socket antes de regresar
+          widget.socket.close();
+          // Devuelve true para permitir que la pantalla retroceda
+          return true;
+        };
     //variables internas de este widget
     Widget chatWidget = widget._chatVisible ? Expanded(child: widget._chatWidget) : SizedBox();
     Widget pauseWidget = widget._pauseVisible ? Expanded(child: widget._pauseWidget) : SizedBox();

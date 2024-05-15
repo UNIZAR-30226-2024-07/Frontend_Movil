@@ -146,6 +146,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   Future<bool> conexionBoardId(boardId) async {
+    await Future.delayed(Duration(seconds: 2));
     try {
       final response = await widget.getConnect.get(
         '${EnlaceApp.enlaceBase}/api/publicBoard/boardById/$boardId',

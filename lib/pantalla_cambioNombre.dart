@@ -3,11 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:psoft_07/colores.dart';
 import 'package:get/get.dart';
 import 'package:psoft_07/pantalla_principal.dart';
-
-import 'package:psoft_07/pantalla_victoria_partida.dart';
-
 import 'Usuario.dart';
-
 
 class changeNameScreen extends StatelessWidget {
 
