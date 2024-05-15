@@ -14,8 +14,8 @@ import 'package:psoft_07/pantalla_pausa.dart' as pause;
 import 'Mano.dart';
 import 'dart:async';
 
-class LoadingScreen extends StatefulWidget {
-  final String idMesa;
+class LoadingScreenResume extends StatefulWidget {
+  //final String idMesa;
   final User user;
   final getConnect = GetConnect();
   bool hecho = false;
@@ -25,7 +25,7 @@ class LoadingScreen extends StatefulWidget {
   bool isChatActive = false;
   bool split = false;
 
-  String boardId = "";
+  final String boardId;
   String currentcard = "";
 
   //List<(String,String)> mensajes = [];
@@ -63,13 +63,13 @@ class LoadingScreen extends StatefulWidget {
   late Widget _pauseWidget;
   bool _pauseVisible = false;
 
-  LoadingScreen(this.idMesa, this.user, {super.key});
+  LoadingScreenResume(this.boardId, this.user, {super.key});
 
   @override
-  _LoadingScreenState createState() => _LoadingScreenState();
+  _LoadingScreenResumeState createState() => _LoadingScreenResumeState();
 }
 
-class _LoadingScreenState extends State<LoadingScreen> {
+class _LoadingScreenResumeState extends State<LoadingScreenResume> {
   double _progressValue = 0.0;
   TextEditingController _messageController = TextEditingController();
 
@@ -134,7 +134,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
           "Authorization": widget.user.token,
         },
       );
-
+      print("EL ESTADO DE GETCURRENTCARD ES: " + response.body['status']);
       if (response.body['status'] == 'error') {
         widget.currentcard = "13f36eb4-be1e-488d-8d5e-b2d45fb70203-1711535331655.png";
       } else {
@@ -146,7 +146,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   Future<bool> conexionBoardId(boardId) async {
-    await Future.delayed(Duration(seconds: 2));
     try {
       final response = await widget.getConnect.get(
         '${EnlaceApp.enlaceBase}/api/publicBoard/boardById/$boardId',
@@ -206,6 +205,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
   void conectarPartida() async {
 
     bool kDebugMode = true;
+
     setState(() {
       widget.socket.connect();
     });
@@ -218,23 +218,23 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
     });
 
-    widget.socket?.on("starting public board", (boardId) async {
+    widget.socket?.on("resume accepted", (data) async {
       if (kDebugMode) {
         print("starting public board RECIBIDO :) --------------------");
       }
 
-      widget.boardId = boardId;
+      //widget.boardId = boardId;
       getCurrentCard();
 
-      if(await conexionBoardId(boardId)) {
+      if(await conexionBoardId(widget.boardId)) {
 
         Map<String, dynamic> body = {
           'body': {
-            'boardId': boardId,
+            'boardId': widget.boardId,
           }
         };
         print("SE ha emitidoooooooooooooooooooo");
-        widget.socket.emit("players public ready", body);
+       // widget.socket.emit("players public ready", body);
       }
     });
 
@@ -291,7 +291,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
         setState(() {
           widget.socket.disconnect();
         });
-
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => Principal(widget.user)),
@@ -317,9 +316,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
             duration: Duration(seconds: 2),
           ),
         );
-        setState(() {
-          widget.socket.disconnect();
-        });
+        widget.socket.disconnect();
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => Principal(widget.user)),
@@ -369,14 +366,14 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
         Map<String, dynamic> body = {
           'body': {
-            'typeId': widget.idMesa,
+            'typeId': widget.boardId,
             'userId': widget.user.id,
           }
         };
 
-        print("JODEER");
+        print("Emit de reanudar partida realizado");
 
-        widget.socket?.emit('enter public board', body);
+        widget.socket?.emit('resume public board', body);
       }catch (err) {
         if (true) {
           print(err);
@@ -1006,7 +1003,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
         ),
         IconButton(
           onPressed: () {
-          //Abandonar partida (leaveBoard) y redirigir a principal
+            //Abandonar partida (leaveBoard) y redirigir a principal
 
 
 
@@ -1380,7 +1377,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
 void main() {
   runApp(MaterialApp(
-    home: LoadingScreen( "",
+    home: LoadingScreenResume( "",
       User(
         id: "",
         nick: "",

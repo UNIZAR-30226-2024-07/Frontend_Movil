@@ -3,6 +3,8 @@ import 'package:get/get_connect/connect.dart';
 import 'package:psoft_07/colores.dart';
 import 'package:psoft_07/pantalla_ajustes.dart';
 import 'package:psoft_07/pantalla_amigos.dart';
+import 'package:psoft_07/pantalla_carga.dart';
+import 'package:psoft_07/pantalla_cargaYTablero_torneo.dart';
 import 'package:psoft_07/pantalla_eleccion_skins.dart';
 import 'package:psoft_07/pantalla_inicio.dart';
 import 'package:psoft_07/pantalla_partida_publica.dart';
@@ -10,6 +12,7 @@ import 'package:psoft_07/pantalla_principal_partida_privada.dart';
 import 'package:psoft_07/pantalla_ranking.dart';
 import 'package:psoft_07/pantalla_tienda.dart';
 import 'package:psoft_07/pantalla_torneo.dart';
+import 'package:psoft_07/partida_publica_reanudar.dart';
 
 import 'Usuario.dart';
 
@@ -22,6 +25,30 @@ class Principal extends StatelessWidget {
   String imagenUrl = "";
 
   Principal(this.user, {super.key});
+
+  Future hayPartidaPausada(context) async {
+    try {
+      final getConnect = GetConnect();
+      final response = await getConnect.get(
+        '${EnlaceApp.enlaceBase}/api/user/getPausedBoard',
+        headers: {
+          "Authorization": user.token,
+        },
+      );
+
+      /*if (response.body['status'] == 'error' || response.body['exists'] == false) {
+        return false;
+      }
+      else {
+        // decir que hay una partida pausada y que si quiere reanudarla
+        return true;
+      }*/
+      return response.body;
+    } catch (e) {
+    }
+    //return false;
+    return {'',''};
+  }
 
   Future<String> _getImageUrl() async {
     try {
@@ -106,6 +133,108 @@ class Principal extends StatelessWidget {
           ),
         ),
         actions: [
+          IconButton(
+            onPressed: () async {
+              /*bool hayPausada = await hayPartidaPausada(context);
+              if (hayPausada) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text("SIIII hay partidas pausadas", textAlign: TextAlign.center,),
+                  ),
+                );
+              }
+              else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text("No hay partidas pausadas", textAlign: TextAlign.center,),
+                  ),
+                );
+              }*/
+
+              final respuesta = await hayPartidaPausada(context);
+              if (respuesta['status'] == 'error' || respuesta['exists'] == false) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text("No hay partidas pausadas", textAlign: TextAlign.center,),
+                  ),
+                );
+              } else {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('¿Quieres reanudar la partida pausada?', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        backgroundColor: ColoresApp.segundoColor,
+                        content: const Column(
+                          mainAxisSize: MainAxisSize.min,
+                        ),
+                        actions: <Widget>[
+                          Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                TextButton(
+                                  onPressed: () {
+                                    if (respuesta['boardType'] == "public") {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(builder: (context) => LoadingScreenResume(respuesta['pausedBoard'], user)),
+                                      );
+                                    }
+                                    else if (respuesta['boardType'] == "private") {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(builder: (context) => LoadingScreenTournament(user, respuesta['pausedBoard'])),// aqui iria la de privada
+                                      );
+                                    }
+                                    else if (respuesta['boardType'] == "tournament") {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(builder: (context) => LoadingScreenTournament(user, respuesta['pausedBoard'])),// aqui iria la de torneo
+                                      );
+                                    }
+                                    else {
+                                      print("NO ENTRA NINGUN IF");
+                                    }
+                                    //Navigator.of(context).pop();
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text('Sí', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                  ),
+                                ),
+                                SizedBox(width: 10),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red[800],
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text('No', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+
+                }
+
+
+            },
+            icon: const Icon(Icons.pause, color: Colors.white,),
+          ),
           IconButton(
             onPressed: () {
               Navigator.push(
