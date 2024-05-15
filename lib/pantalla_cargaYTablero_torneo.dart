@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:get/get_connect/connect.dart';
 import 'package:psoft_07/colores.dart';
 import 'package:psoft_07/Usuario.dart';
+import 'package:psoft_07/pantalla_principal.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:tuple/tuple.dart';
 import 'package:psoft_07/pantalla_pausa.dart' as pause;
@@ -12,6 +13,7 @@ class LoadingScreenTournament extends StatefulWidget {
   final String tournamentID;
   final User user;
   final getConnect = GetConnect();
+  bool socketConectado = false;
   bool hecho = false;
 
   bool UImesa = false;
@@ -20,6 +22,8 @@ class LoadingScreenTournament extends StatefulWidget {
 
   String boardId = "";
   String currentcard = "";
+  String currentRug = "";
+
 
   //List<(String,String)> mensajes = [];
   List<Tuple3<String, String, String>> mensajes = [];
@@ -116,6 +120,27 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
       widget.currentcard = "13f36eb4-be1e-488d-8d5e-b2d45fb70203-1711535331655.png";
     }
   }
+  void getCurrentRug() async {
+    try {
+      final response = await widget.getConnect.get(
+        '${EnlaceApp.enlaceBase}/api/rug/currentRug',
+        headers: {
+          "Authorization": widget.user.token,
+        },
+      );
+
+      if (response.body['status'] == 'error') {
+        widget.currentRug = "d04b37e8-e508-4ba7-a087-3fe0d5e505ed-1711535889700.png";
+      } else {
+        setState(() {
+          widget.currentRug = response.body['rug']['imageFileName'];
+        });
+      }
+    } catch (e) {
+      print(e);
+      widget.currentRug = "d04b37e8-e508-4ba7-a087-3fe0d5e505ed-1711535889700.png";
+    }
+  }
 
   Future<bool> conexionBoardId(boardId) async {
    // await Future.delayed(Duration(seconds: 2));
@@ -159,6 +184,9 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
     bool kDebugMode = true;
     setState(() {
       widget.socket.connect();
+      widget.socketConectado = true;
+      getCurrentCard();
+      getCurrentRug();
     });
 
     widget.socket.on("connect", (data) {
@@ -175,7 +203,7 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
       }
 
       widget.boardId = boardId;
-      getCurrentCard();
+
       if(await conexionBoardId(boardId)) { //esperamos a que nos den el objeto mesa como tal
 
         Map<String, dynamic> body = {
@@ -666,6 +694,58 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
     );
   }
 
+  funcionAbandonar() async {
+    final res = await widget.getConnect.put(
+      '${EnlaceApp.enlaceBase}/api/tournamentBoard/leaveBoard/${widget.boardId}',
+      headers: {
+        "Authorization": widget.user.token,
+      },
+      {}, //Esto sería el body pero en este caso no lo usamos
+    );
+    if (res.body['status'] == 'error') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(res.body['message'], textAlign: TextAlign.center,),
+        ),
+      );
+    }
+
+    setState(() {
+      widget.socket.disconnect();
+    });
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => Principal(widget.user)), // ir a la pantalla principal
+    );
+  }
+
+  funcionPausa() async {
+    final resPausa = await widget.getConnect.put(
+      '${EnlaceApp.enlaceBase}/api/tournamentBoard/pause/${widget.boardId}',
+      headers: {
+        "Authorization": widget.user.token,
+      },
+      {}, //Esto sería el body pero en este caso no lo usamos
+    );
+    if (resPausa.body['status'] == 'error') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(resPausa.body['message'], textAlign: TextAlign.center,),
+        ),
+      );
+    }
+
+    setState(() {
+      widget.socket.disconnect();
+    });
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => Principal(widget.user)), // ir a la pantalla principal
+    );
+  }
+
   AppBar barra() {
     return AppBar(
       backgroundColor: ColoresApp.cabeceraColor,
@@ -701,10 +781,7 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
           onPressed: () {
             //Mostrar menú de pausa de forma dinámica (flotando)
             print("Toggle menú de pausa (mostrar / ocultar");
-            setState(() {
-              widget._pauseWidget = pause.crearPantallaPausa(context, "partidaTorneo", widget.boardId, widget.user);
-              widget._pauseVisible = !widget._pauseVisible;
-            });
+            funcionPausa();
           },
           icon: const Icon(Icons.pause, color: Colors.white,),
         ),
@@ -722,9 +799,7 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
         IconButton(
           onPressed: () {
             //Abandonar partida (leaveBoard) y redirigir a principal
-
-
-
+            funcionAbandonar();
           },
           icon: const Icon(Icons.logout, color: Colors.white,),
         ),
@@ -862,7 +937,7 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
       );
     }
     if (!widget.UImesa) {
-      if (!widget.hecho) {
+      if (!(widget.hecho || widget.socketConectado)) {
         conectarPartida();
       }
       return Scaffold(

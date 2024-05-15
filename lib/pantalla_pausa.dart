@@ -4,7 +4,7 @@ import 'package:psoft_07/pantalla_principal.dart';
 import 'Usuario.dart';
 import 'colores.dart';
 
-  Widget crearPantallaPausa(BuildContext context, String tipoPartida, String boardID, User user) {
+  Widget crearPantallaPausa(BuildContext context, String tipoPartida, String boardID, User user, socket) {
     return FractionallySizedBox(
               widthFactor: 0.8,
               heightFactor: 0.8,
@@ -49,7 +49,9 @@ import 'colores.dart';
                                   "Authorization": user.token,
                                 },
                                 {}, //Esto sería el body pero en este caso no lo usamos
+
                               );
+
                               int a = 1;
                             } else if (tipoPartida == "partidaPrivada") {
                               final res = await getConnect.put(
@@ -70,6 +72,10 @@ import 'colores.dart';
                                 },
                                 {}, //Esto sería el body pero en este caso no lo usamos
                               );
+
+                              socket.disconnect();
+
+
                             }
                             Navigator.push(
                               context,
@@ -92,6 +98,13 @@ import 'colores.dart';
                                 },
                                 {}, //Esto sería el body pero en este caso no lo usamos
                               );
+                              if (resPausa.body['status'] == 'error') {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(resPausa.body['message'], textAlign: TextAlign.center,),
+                                  ),
+                                );
+                              }
                             }
                             else if (tipoPartida == "partidaPrivada") {
                               final res = await getConnect.put(
@@ -115,6 +128,7 @@ import 'colores.dart';
                                 {}, //Esto sería el body pero en este caso no lo usamos
                               );
                             }
+                            socket.disconnect();
 
                             Navigator.push(
                               context,

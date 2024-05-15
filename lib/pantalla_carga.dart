@@ -18,6 +18,7 @@ class LoadingScreen extends StatefulWidget {
   final String idMesa;
   final User user;
   final getConnect = GetConnect();
+  bool socketConectado = false;
   bool hecho = false;
 
   bool UImesa = false;
@@ -27,6 +28,8 @@ class LoadingScreen extends StatefulWidget {
 
   String boardId = "";
   String currentcard = "";
+  String currentRug = "";
+
 
   //List<(String,String)> mensajes = [];
   List<Tuple3<String, String, String>> mensajes = [];
@@ -56,7 +59,7 @@ class LoadingScreen extends StatefulWidget {
   late Widget _timeWidget;
   bool _timeVisible = false;
 
-  late int _secondsRemaining;
+  int _secondsRemaining = 30;
   late Timer? _timer;
 
   //Variables pauseWidget
@@ -138,12 +141,34 @@ class _LoadingScreenState extends State<LoadingScreen> {
       if (response.body['status'] == 'error') {
         widget.currentcard = "13f36eb4-be1e-488d-8d5e-b2d45fb70203-1711535331655.png";
       } else {
-        widget.currentcard = response.body['imageFileName'];
+        widget.currentcard = response.body['card']['imageFileName'];
       }
     } catch (e) {
       widget.currentcard = "13f36eb4-be1e-488d-8d5e-b2d45fb70203-1711535331655.png";
     }
   }
+  void getCurrentRug() async {
+    try {
+      final response = await widget.getConnect.get(
+        '${EnlaceApp.enlaceBase}/api/rug/currentRug',
+        headers: {
+          "Authorization": widget.user.token,
+        },
+      );
+
+      if (response.body['status'] == 'error') {
+        widget.currentRug = "d04b37e8-e508-4ba7-a087-3fe0d5e505ed-1711535889700.png";
+      } else {
+        setState(() {
+          widget.currentRug = response.body['rug']['imageFileName'];
+        });
+      }
+    } catch (e) {
+      print(e);
+      widget.currentRug = "d04b37e8-e508-4ba7-a087-3fe0d5e505ed-1711535889700.png";
+    }
+  }
+
 
   Future<bool> conexionBoardId(boardId) async {
     await Future.delayed(Duration(seconds: 2));
@@ -208,6 +233,9 @@ class _LoadingScreenState extends State<LoadingScreen> {
     bool kDebugMode = true;
     setState(() {
       widget.socket.connect();
+      widget.socketConectado = true;
+      getCurrentCard();
+      getCurrentRug();
     });
 
     widget.socket?.on("connect", (data) {
@@ -289,6 +317,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
         );
         setState(() {
           widget.socket.disconnect();
+          widget.hecho = false;
         });
 
         Navigator.push(
@@ -318,6 +347,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
         );
         setState(() {
           widget.socket.disconnect();
+          widget.hecho = false;
+
         });
         Navigator.push(
           context,
@@ -947,6 +978,58 @@ class _LoadingScreenState extends State<LoadingScreen> {
     );
   }
 
+  funcionAbandonar() async {
+    final res = await widget.getConnect.put(
+      '${EnlaceApp.enlaceBase}/api/publicBoard/leaveBoard/${widget.boardId}',
+      headers: {
+        "Authorization": widget.user.token,
+      },
+      {}, //Esto sería el body pero en este caso no lo usamos
+    );
+    if (res.body['status'] == 'error') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(res.body['message'], textAlign: TextAlign.center,),
+        ),
+      );
+    }
+
+    setState(() {
+      widget.socket.disconnect();
+    });
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => Principal(widget.user)), // ir a la pantalla principal
+    );
+  }
+
+  funcionPausa() async {
+    final resPausa = await widget.getConnect.put(
+      '${EnlaceApp.enlaceBase}/api/publicBoard/pause/${widget.boardId}',
+      headers: {
+        "Authorization": widget.user.token,
+      },
+      {}, //Esto sería el body pero en este caso no lo usamos
+    );
+    if (resPausa.body['status'] == 'error') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(resPausa.body['message'], textAlign: TextAlign.center,),
+        ),
+      );
+    }
+
+    setState(() {
+      widget.socket.disconnect();
+    });
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => Principal(widget.user)), // ir a la pantalla principal
+    );
+  }
+
   AppBar barra() {
     return AppBar(
       backgroundColor: ColoresApp.cabeceraColor,
@@ -985,10 +1068,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
           onPressed: () {
             //Mostrar menú de pausa de forma dinámica (flotando)
             print("Toggle menú de pausa (mostrar / ocultar");
-            setState(() {
-              widget._pauseWidget = pause.crearPantallaPausa(context, "partidaPublica", widget.boardId, widget.user);
-              widget._pauseVisible = !widget._pauseVisible;
-            });
+            funcionPausa();
+
           },
           icon: const Icon(Icons.pause, color: Colors.white,),
         ),
@@ -1007,7 +1088,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
           onPressed: () {
           //Abandonar partida (leaveBoard) y redirigir a principal
 
-
+            funcionAbandonar();
 
           },
           icon: const Icon(Icons.logout, color: Colors.white,),
@@ -1023,7 +1104,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
     Widget chatWidget = widget._chatVisible ? Expanded(child: widget._chatWidget) : SizedBox();
     Widget pauseWidget = widget._pauseVisible ? Expanded(child: widget._pauseWidget) : SizedBox();
     //Widget timeWidget = widget._timeVisible ? Expanded(child: widget._timeWidget) : SizedBox();
-    getCurrentCard();
+
+
 
 
     //codigo
@@ -1031,7 +1113,16 @@ class _LoadingScreenState extends State<LoadingScreen> {
       return Scaffold(
         backgroundColor: ColoresApp.fondoPantallaColor,
         appBar: barra(),
-        body: Row(
+        body:  Stack (
+          children: [
+        // Imagen de fondo
+        Positioned.fill(
+        child: Image.network(
+        '${EnlaceApp.enlaceBase}/images/${widget.currentRug}',
+          fit: BoxFit.fitWidth,
+        ),
+      ),
+    Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             //crearContador(),
@@ -1177,10 +1268,12 @@ class _LoadingScreenState extends State<LoadingScreen> {
             ),
           ],
         ),
+            ],
+        ),
       );
     }
     if (!widget.UImesa) {
-      if (!widget.hecho) {
+      if (!(widget.hecho || widget.socketConectado)) {
         conectarPartida();
       }
       return Scaffold(
@@ -1244,7 +1337,17 @@ class _LoadingScreenState extends State<LoadingScreen> {
       return Scaffold(
         backgroundColor: ColoresApp.fondoPantallaColor,
         appBar: barra(),
-        body: Row(
+        body:  Stack (
+          children: [
+        // Imagen de fondo
+        Positioned.fill(
+        child: Image.network(
+        '${EnlaceApp.enlaceBase}/images/${widget.currentRug}',
+          fit: BoxFit.fitWidth,
+        ),
+      ),
+
+        Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             //crearContador(),
@@ -1373,6 +1476,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
             ),
             botones(0),
           ],
+        ),
+    ],
         ),
       );
     }

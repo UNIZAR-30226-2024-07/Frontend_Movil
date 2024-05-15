@@ -19,6 +19,7 @@ class PracticeMode extends StatefulWidget {
   final User user;
   final getConnect = GetConnect();
   bool hecho = false;
+  bool socketConectado = false;
 
   bool UImesa = false;
   bool resultadosRonda = false;
@@ -76,7 +77,7 @@ class _PracticeModeState extends State<PracticeMode> {
       if (response.body['status'] == 'error') {
         widget.currentcard = "13f36eb4-be1e-488d-8d5e-b2d45fb70203-1711535331655.png";
       } else {
-        widget.currentcard = response.body['imageFileName'];
+        widget.currentcard = response.body['card']['imageFileName'];
       }
     } catch (e) {
       widget.currentcard = "13f36eb4-be1e-488d-8d5e-b2d45fb70203-1711535331655.png";
@@ -95,7 +96,9 @@ class _PracticeModeState extends State<PracticeMode> {
       if (response.body['status'] == 'error') {
         widget.currentRug = "d04b37e8-e508-4ba7-a087-3fe0d5e505ed-1711535889700.png";
       } else {
-        widget.currentRug = response.body['imageFileName'];
+        setState(() {
+          widget.currentRug = response.body['rug']['imageFileName'];
+        });
       }
     } catch (e) {
       print(e);
@@ -170,10 +173,14 @@ class _PracticeModeState extends State<PracticeMode> {
 
   void conectarPartida() async {
 
+
     bool kDebugMode = true;
 
     setState(() {
       widget.socket.connect();
+      widget.socketConectado = true;
+      getCurrentRug();
+      getCurrentCard();
     });
 
     widget.socket?.on("connect", (data) {
@@ -190,7 +197,6 @@ class _PracticeModeState extends State<PracticeMode> {
       }
 
       widget.boardId = boardId;
-      getCurrentCard();
 
       conexionBoardId(boardId);
 
@@ -247,7 +253,9 @@ class _PracticeModeState extends State<PracticeMode> {
             duration: Duration(seconds: 2),
           ),
         );
-        widget.socket.disconnect();
+        setState(() {
+          widget.socket.disconnect();
+        });
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => Principal(widget.user)),
@@ -676,13 +684,24 @@ class _PracticeModeState extends State<PracticeMode> {
   @override
   Widget build(BuildContext context) {
 
-    getCurrentRug();
+
+
     //codigo
     if (widget.resultadosRonda) {
       return Scaffold(
         backgroundColor: ColoresApp.fondoPantallaColor,
         appBar: barra(),
-        body: Row(
+        body:  Stack (
+          children: [
+        // Imagen de fondo
+        Positioned.fill(
+        child: Image.network(
+        '${EnlaceApp.enlaceBase}/images/${widget.currentRug}',
+          fit: BoxFit.fitWidth,
+        ),
+      ),
+
+        Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Column (
@@ -781,10 +800,12 @@ class _PracticeModeState extends State<PracticeMode> {
             ),
           ],
         ),
+    ],
+        ),
       );
     }
     if (!widget.UImesa) {
-      if (!widget.hecho) {
+      if (!(widget.hecho || widget.socketConectado)) {
         conectarPartida();
       }
       return Scaffold(
