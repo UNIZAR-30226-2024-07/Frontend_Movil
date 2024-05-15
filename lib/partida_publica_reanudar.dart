@@ -224,7 +224,6 @@ class _LoadingScreenResumeState extends State<LoadingScreenResume> {
       }
 
       //widget.boardId = boardId;
-      getCurrentCard();
 
       if(await conexionBoardId(widget.boardId)) {
 
@@ -1021,6 +1020,8 @@ class _LoadingScreenResumeState extends State<LoadingScreenResume> {
     Widget chatWidget = widget._chatVisible ? Expanded(child: widget._chatWidget) : SizedBox();
     Widget pauseWidget = widget._pauseVisible ? Expanded(child: widget._pauseWidget) : SizedBox();
     //Widget timeWidget = widget._timeVisible ? Expanded(child: widget._timeWidget) : SizedBox();
+    getCurrentCard();
+
 
     //codigo
     if (widget.resultadosRonda) {

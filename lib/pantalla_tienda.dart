@@ -482,6 +482,8 @@ class _ShopScreenState extends State<ShopScreen> {
                   onTap: () {
                     // Coloca aquí el código que deseas ejecutar cuando se haga tap en la imagen
                     // Por ejemplo, puedes navegar a otra pantalla, mostrar un diálogo, etc.
+                    final getConnect = GetConnect();
+                    actualizarUsuario(context, getConnect, widget.user);
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => Principal(widget.user)),

@@ -26,6 +26,7 @@ class PracticeMode extends StatefulWidget {
 
   String boardId = "";
   String currentcard = "";
+  String currentRug = "";
 
   List<Mano> myHand = [];
   ResultadosMano myResultadosHand = ResultadosMano();
@@ -81,6 +82,28 @@ class _PracticeModeState extends State<PracticeMode> {
       widget.currentcard = "13f36eb4-be1e-488d-8d5e-b2d45fb70203-1711535331655.png";
     }
   }
+
+  void getCurrentRug() async {
+    try {
+      final response = await widget.getConnect.get(
+        '${EnlaceApp.enlaceBase}/api/rug/currentRug',
+        headers: {
+          "Authorization": widget.user.token,
+        },
+      );
+
+      if (response.body['status'] == 'error') {
+        widget.currentRug = "d04b37e8-e508-4ba7-a087-3fe0d5e505ed-1711535889700.png";
+      } else {
+        widget.currentRug = response.body['imageFileName'];
+      }
+    } catch (e) {
+      print(e);
+      widget.currentRug = "d04b37e8-e508-4ba7-a087-3fe0d5e505ed-1711535889700.png";
+    }
+  }
+
+
 
   void conexionBoardId(boardId) async {
     try {
@@ -653,6 +676,7 @@ class _PracticeModeState extends State<PracticeMode> {
   @override
   Widget build(BuildContext context) {
 
+    getCurrentRug();
     //codigo
     if (widget.resultadosRonda) {
       return Scaffold(
@@ -822,9 +846,18 @@ class _PracticeModeState extends State<PracticeMode> {
     }
     else {
       return Scaffold(
-        backgroundColor: ColoresApp.fondoPantallaColor,
         appBar: barra(),
-        body: Row(
+        body: Stack (
+          children: [
+            // Imagen de fondo
+            Positioned.fill(
+            child: Image.network(
+              '${EnlaceApp.enlaceBase}/images/${widget.currentRug}',
+              fit: BoxFit.fitWidth,
+            ),
+          ),
+
+        Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             if(widget.split)
@@ -929,6 +962,8 @@ class _PracticeModeState extends State<PracticeMode> {
             botones(0),
           ],
         ),
+      ],
+      ),
       );
     }
   }
