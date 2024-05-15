@@ -1,6 +1,3 @@
-import 'dart:collection';
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_connect/connect.dart';
@@ -20,7 +17,6 @@ class LoadingScreenTournament extends StatefulWidget {
   bool UImesa = false;
   bool resultadosRonda = false;
   bool isChatActive = false;
-  bool split = false;
 
   String boardId = "";
   String currentcard = "";
@@ -165,7 +161,7 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
       widget.socket.connect();
     });
 
-    widget.socket?.on("connect", (data) {
+    widget.socket.on("connect", (data) {
       if (kDebugMode) {
         print("Socket Connect Done");
       }
@@ -173,7 +169,7 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
 
     });
 
-    widget.socket?.on("starting tournament board", (boardId) async { //Aquí recibo del socket el boardId
+    widget.socket.on("starting tournament board", (boardId) async { //Aquí recibo del socket el boardId
       if (kDebugMode) {
         print("starting tournament board RECIBIDO :) --------------------");
       }
@@ -192,7 +188,7 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
       }
     });
 
-    widget.socket?.on("play hand", (data) {
+    widget.socket.on("play hand", (data) {
       print(data);
       if (data != null) {
         setState(() {
@@ -200,14 +196,13 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
           bankHand(data);
           othersHand(data);
           widget.UImesa = true;
-          widget.split = false;
           widget.resultadosRonda = false;
         });
       }
 
     });
 
-    widget.socket?.on("hand results", (data) {
+    widget.socket.on("hand results", (data) {
       print(data);
       if (data != null) {
         setState(() {
@@ -238,14 +233,14 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
       });
     }
 
-    widget.socket?.on("new message", (mensaje) {
+    widget.socket.on("new message", (mensaje) {
       if (mensaje != null) {
         actualizarEstado(mensaje);
       }
     });
 
 
-    widget.socket?.on("error", (data) {
+    widget.socket.on("error", (data) {
       if (kDebugMode) {
         print("Socket error");
         print(data);
@@ -266,7 +261,7 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
         };
         print("Debug: estamos emitiendo entrada en torneo con datos: usuario ${widget.user.id}y idTorneo: ${widget.tournamentID}");
 
-        widget.socket?.emit('enter tournament board', body ); //Revisado: emit correcto
+        widget.socket.emit('enter tournament board', body ); //Revisado: emit correcto
       }catch (err) {
         if (true) {
           print(err);
@@ -542,75 +537,7 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
     return Column(   // Botones de Interacción
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        if(!(!widget.myHand[mano].firstHand || widget.split || widget.myHand[mano].myBlackjack))
-          if(cartasIguales())
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                    onPressed: () {
-                      //funcionSplit();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: ColoresApp.segundoColor,
-                      fixedSize: Size(40, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15), // Ajusta el radio de esquinas según sea necesario
-                      ),
-                    ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.call_split_outlined,
-                        color: Colors.white,
-                        size: 25,
-                      ),
-                    )
-                ),
-                const Text(
-                  "Dividir",
-                  style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold
-                  ),
-                ),
-              ],
-            ),
-        if(!(widget.myHand[mano].myBlackjack || !widget.myHand[mano].firstHand))
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                  onPressed: () {
-                    //funcionDoblar(mano);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ColoresApp.segundoColor,
-                    fixedSize: Size(40, 50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15), // Ajusta el radio de esquinas según sea necesario
-                    ),
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.clear,
-                      color: Colors.white,
-                      size: 25,
-                    ),
-                  )
-              ),
-              const Text(
-                "Doblar",
-                style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold
-                ),
-              ),
-            ],
-          ),
         if(!(widget.myHand[mano].myBlackjack || widget.myHand[mano].myDefeat || widget.myHand[mano].plantado))
-
           Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -620,7 +547,7 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: ColoresApp.segundoColor,
-                    fixedSize: Size(40, 50),
+                    fixedSize: const Size(40, 50),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15), // Ajusta el radio de esquinas según sea necesario
                     ),
@@ -775,7 +702,7 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
             //Mostrar menú de pausa de forma dinámica (flotando)
             print("Toggle menú de pausa (mostrar / ocultar");
             setState(() {
-              widget._pauseWidget = pause.crearPantallaPausa(context, "partidaTorneo", widget.boardId, widget.user); //TODO: dar solamente usuario como argumento y cambiar en pausa, partida publica, partida privada y partida practica
+              widget._pauseWidget = pause.crearPantallaPausa(context, "partidaTorneo", widget.boardId, widget.user);
               widget._pauseVisible = !widget._pauseVisible;
             });
           },
@@ -808,15 +735,15 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   @override
   Widget build(BuildContext context) {
-        onWillPop: () async {
-          // Aquí cierras el socket antes de regresar
-          widget.socket.close();
-          // Devuelve true para permitir que la pantalla retroceda
-          return true;
-        };
+    onWillPop: () async {
+      // Aquí cierras el socket antes de regresar
+      widget.socket.close();
+      // Devuelve true para permitir que la pantalla retroceda
+      return ;
+    };
     //variables internas de este widget
     Widget chatWidget = widget._chatVisible ? Expanded(child: widget._chatWidget) : SizedBox();
-    Widget pauseWidget = widget._pauseVisible ? Expanded(child: widget._pauseWidget) : SizedBox();
+    Widget pauseWidget = widget._pauseVisible ? Expanded(child: widget._pauseWidget) : FractionallySizedBox();
     //codigo
     if (widget.resultadosRonda) {
       return Scaffold(
@@ -861,8 +788,8 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
                             children: [
                               for (var j = 0; j < mano.cartas[i].length; j++)
                                 Image.asset(
-                                  'assets/valoresCartas/' + mano.cartas[i][j]['value'].toString() + '-' + mano.cartas[i][j]['suit'] + '.png',
-                                  width: 50, // Establece un tamaño máximo solo para el ancho
+                                  '${'assets/valoresCartas/${mano.cartas[i][j]['value']}-' + mano.cartas[i][j]['suit']}.png',
+                                  width: 50, // Establece un tamaño máximo solo para el anchor
                                   fit: BoxFit.scaleDown, // Ajusta automáticamente la altura según la proporción original de la imagen
                                 ),
                             ],
@@ -900,41 +827,6 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
                 ),
                 Row(
                   children: [
-                    if (widget.split)
-                      ...[
-                        Column (  // Cartas Jugador
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Total: ${widget.myResultadosHand.total[1]}. Monedas ganadas: ${widget.myResultadosHand.coinsEarned[1]}',
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18
-                              ),
-                            ),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                for (var card in widget.myResultadosHand.cartas[1])
-                                  Image.asset(
-                                    'assets/valoresCartas/' + card['value'].toString() + '-' + card['suit'] + '.png',
-                                    width: 90, // Establece un tamaño máximo solo para el ancho
-                                    fit: BoxFit.scaleDown, // Ajusta automáticamente la altura según la proporción original de la imagen
-                                  ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    if (widget.split)
-                      const Row(
-                        children: [
-                          SizedBox(width: 10)
-                        ],
-                      ),
                     Column (  // Cartas Jugador
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -1060,9 +952,6 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
                     )
               ],
             ),
-
-            if(widget.split)
-              botones(1),
             Column (
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -1092,44 +981,6 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
                 ),
                 Row(
                   children: [
-                    if (widget.split)
-                      Column (  // Cartas Jugador
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Total: ${widget.myHand[1].totalCards}',
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18
-                            ),
-                          ),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              for (var card in widget.myHand[1].cartas)
-                                Image.asset(
-                                  'assets/valoresCartas/' + card['value'].toString() + '-' + card['suit'] + '.png',
-                                  width: 90, // Establece un tamaño máximo solo para el ancho
-                                  fit: BoxFit.scaleDown, // Ajusta automáticamente la altura según la proporción original de la imagen
-                                ),
-                            ],
-                          )
-                        ],
-                      ),
-                    if (widget.split)
-                      Row(
-                        children: [
-                          SizedBox(width: 5,),
-                          Container(
-                            width: 1.0,
-                            color: Colors.white,
-                          ),
-                          SizedBox(width: 5,),
-                        ],
-                      ),
                     Column (  // Cartas Jugador
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
