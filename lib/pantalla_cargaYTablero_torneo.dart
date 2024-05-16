@@ -59,6 +59,9 @@ class LoadingScreenTournament extends StatefulWidget {
   _LoadingScreenState createState() => _LoadingScreenState();
 }
 
+
+
+
 class _LoadingScreenState extends State<LoadingScreenTournament> {
   double _progressValue = 0.0;
   TextEditingController _messageController = TextEditingController();
@@ -388,7 +391,7 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
   void myResultadosHand (data) {
     for (var mano in data) {
       if (mano['userId'] == widget.user.id) {
-        widget.myResultadosHand.initResultadoMano(mano['userId'], mano['userNick'], mano['cards'], mano['total'], mano['coinsEarned'], mano['currentCoins']);
+        widget.myResultadosHand.initResultadoManoTorneos(mano['userId'], mano['userNick'], mano['cards'], mano['total'], mano['coinsEarned'], mano['currentCoins'], mano['lives']);
       }
     }
   }
@@ -408,7 +411,7 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
       if (mano['userId'] != widget.user.id
           && mano['userId'] != "Bank") {
         widget.otherResultadosHand.add(ResultadosMano());
-        widget.otherResultadosHand[i].initResultadoMano(mano['userId'], mano['userNick'], mano['cards'], mano['total'], mano['coinsEarned'], mano['currentCoins']);
+        widget.otherResultadosHand[i].initResultadoManoTorneos(mano['userId'], mano['userNick'], mano['cards'], mano['total'], mano['coinsEarned'], mano['currentCoins'], mano['lives']);
         i++;
       }
     }
@@ -611,7 +614,7 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
       };
       print("El body enviado es:");
       print(body);
-      widget.socket.emit("new public message", body); //TODO: revisar que sea public message aquí tambien (ni idea de cómo funciona el chat hulio)
+      widget.socket.emit("new tournament message", body); //TODO: revisar que sea public message aquí tambien (ni idea de cómo funciona el chat hulio)
 
       _messageController.clear();
     }
@@ -725,7 +728,7 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
                             'message': widget.mensajeUsuario.text,
                           }
                         };
-                        widget.socket.emit("new public message", body); //TODO: lo mismo que el todo anterior
+                        widget.socket.emit("new tournament message", body); //TODO: lo mismo que el todo anterior
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: ColoresApp.segundoColor,
@@ -802,6 +805,9 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
     );
   }
 
+
+
+
   AppBar barra() {
     return AppBar(
       backgroundColor: ColoresApp.cabeceraColor,
@@ -817,20 +823,16 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
         ),
       ),
       actions: [
-        Text(
-          widget.user.coins.toString(),
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Image.asset(
-            'assets/moneda.png', // Ruta de la imagen
-            width: 30, // Ancho de la imagen
-            height: 30, // Altura de la imagen
-            fit: BoxFit.cover,
+          child: Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                LifeIndicator(lives: widget.myResultadosHand.vidas),
+              ],
+            ),
           ),
         ),
         IconButton(
@@ -866,25 +868,26 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   @override
   Widget build(BuildContext context) {
-    onWillPop: () async {
-      // Aquí cierras el socket antes de regresar
-      widget.socket.close();
-      // Devuelve true para permitir que la pantalla retroceda
-      return ;
-    };
     //variables internas de este widget
     Widget chatWidget = widget._chatVisible ? Expanded(child: widget._chatWidget) : SizedBox();
-    Widget pauseWidget = widget._pauseVisible ? Expanded(child: widget._pauseWidget) : FractionallySizedBox();
     //codigo
     if (widget.resultadosRonda) {
       return Scaffold(
-        backgroundColor: ColoresApp.fondoPantallaColor,
         appBar: barra(),
-        body: Row(
+        body: Stack (
+          children: [
+        // Imagen de fondo
+        Positioned.fill(
+        child: Image.network(
+        '${EnlaceApp.enlaceBase}/images/${widget.currentRug}',
+          fit: BoxFit.fitWidth,
+        ),
+      ),
+    Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             chatWidget,
-            pauseWidget,
+
             if(widget.otherResultadosHand != [])
               for (var mano in widget.otherResultadosHand)
                 Column(   //Cartas Resto Jugadores
@@ -990,6 +993,8 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
             ),
           ],
         ),
+            ],
+        ),
       );
     }
     if (!widget.UImesa) {
@@ -1055,13 +1060,20 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
     }
     else {
       return Scaffold(
-        backgroundColor: ColoresApp.fondoPantallaColor,
         appBar: barra(),
-        body: Row(
+        body: Stack (
+          children: [
+        // Imagen de fondo
+        Positioned.fill(
+        child: Image.network(
+        '${EnlaceApp.enlaceBase}/images/${widget.currentRug}',
+          fit: BoxFit.fitWidth,
+        ),
+      ),
+    Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             chatWidget,
-            pauseWidget,
             Column(   //Cartas Resto Jugadores
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1145,6 +1157,8 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
             botones(0),
           ],
         ),
+    ],
+        ),
       );
     }
   }
@@ -1169,4 +1183,30 @@ void main() {
         token: "",
       ),"idTorneoFalso99999"),
   ));
+}
+
+class LifeIndicator extends StatelessWidget {
+  final double lives;
+
+  LifeIndicator({required this.lives});
+
+  @override
+  Widget build(BuildContext context) {
+    List<Widget> heartIcons = [];
+    int fullHearts = lives.floor();
+    bool hasHalfHeart = (lives - fullHearts) > 0;
+
+    for (int i = 0; i < fullHearts; i++) {
+      heartIcons.add(Icon(Icons.favorite, color: Colors.white, size: 40));
+    }
+
+    if (hasHalfHeart) {
+      heartIcons.add(Icon(Icons.favorite_border, color: Colors.white, size: 40));
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: heartIcons,
+    );
+  }
 }

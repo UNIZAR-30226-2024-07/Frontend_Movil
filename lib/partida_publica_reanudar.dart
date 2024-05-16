@@ -1090,11 +1090,6 @@ class _LoadingScreenResumeState extends State<LoadingScreenResume> {
   Widget build(BuildContext context) {
     //variables internas de este widget
     Widget chatWidget = widget._chatVisible ? Expanded(child: widget._chatWidget) : SizedBox();
-    Widget pauseWidget = widget._pauseVisible ? Expanded(child: widget._pauseWidget) : SizedBox();
-    //Widget timeWidget = widget._timeVisible ? Expanded(child: widget._timeWidget) : SizedBox();
-
-
-
 
     //codigo
     if (widget.resultadosRonda) {
@@ -1115,7 +1110,6 @@ class _LoadingScreenResumeState extends State<LoadingScreenResume> {
           children: [
             //crearContador(),
             chatWidget,
-            pauseWidget,
             if(widget.otherResultadosHand != [])
               for (var mano in widget.otherResultadosHand)
                 Column(   //Cartas Resto Jugadores
@@ -1341,7 +1335,6 @@ class _LoadingScreenResumeState extends State<LoadingScreenResume> {
           children: [
             //crearContador(),
             chatWidget,
-            pauseWidget,
             Column(   //Cartas Resto Jugadores
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.start,
