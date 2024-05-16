@@ -300,7 +300,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
     widget.socket?.on("players deleted", (data) {
       print(data);
-      if (data != null) {
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
@@ -325,12 +325,11 @@ class _LoadingScreenState extends State<LoadingScreen> {
           MaterialPageRoute(builder: (context) => Principal(widget.user)),
         );
 
-      }
+
     });
 
     widget.socket?.on("finish board", (data) {
       print(data);
-      if (data != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
@@ -350,12 +349,11 @@ class _LoadingScreenState extends State<LoadingScreen> {
           widget.hecho = false;
 
         });
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => Principal(widget.user)),
-        );
 
-      }
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Principal(widget.user)),
+      );
     });
 
     Future<void> actualizarEstado(dynamic mensaje) async {

@@ -274,6 +274,62 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
         print(data);
       }
     });
+
+    widget.socket?.on("players deleted", (data) {
+      print(data);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Ha sido expulsado de la partida por inactividad",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      setState(() {
+        widget.socket.disconnect();
+      });
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Principal(widget.user)),
+      );
+
+
+    });
+
+    widget.socket?.on("finish board", (data) {
+      print(data);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Ha terminado la partida",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      setState(() {
+        widget.socket.disconnect();
+      });
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Principal(widget.user)),
+      );
+
+
+    });
   }
 
   Future emitEntrar() async {

@@ -300,7 +300,6 @@ class _TournamentScreenResumeState extends State<TournamentScreenResume> {
 
     widget.socket?.on("players deleted", (data) {
       print(data);
-      if (data != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
@@ -323,12 +322,10 @@ class _TournamentScreenResumeState extends State<TournamentScreenResume> {
           MaterialPageRoute(builder: (context) => Principal(widget.user)),
         );
 
-      }
     });
 
     widget.socket?.on("finish board", (data) {
       print(data);
-      if (data != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
@@ -349,7 +346,6 @@ class _TournamentScreenResumeState extends State<TournamentScreenResume> {
           MaterialPageRoute(builder: (context) => Principal(widget.user)),
         );
 
-      }
     });
 
     Future<void> actualizarEstado(dynamic mensaje) async {

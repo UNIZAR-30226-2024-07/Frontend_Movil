@@ -322,7 +322,7 @@ class _PrivateGameScreenState extends State<PrivateGameScreen> {
 
     widget.socket?.on("players deleted", (data) {
       print(data);
-      if (data != null) {
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
@@ -345,12 +345,12 @@ class _PrivateGameScreenState extends State<PrivateGameScreen> {
           MaterialPageRoute(builder: (context) => Principal(widget.user)),
         );
 
-      }
+
     });
 
     widget.socket?.on("finish board", (data) {
       print(data);
-      if (data != null) {
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
@@ -373,7 +373,7 @@ class _PrivateGameScreenState extends State<PrivateGameScreen> {
           MaterialPageRoute(builder: (context) => Principal(widget.user)),
         );
 
-      }
+
     });
 
 
