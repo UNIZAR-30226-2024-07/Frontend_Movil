@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:get/get_connect/connect.dart';
 import 'package:psoft_07/colores.dart';
 import 'package:psoft_07/Usuario.dart';
+import 'package:psoft_07/pantalla_derrota_partida.dart';
 import 'package:psoft_07/pantalla_principal.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:tuple/tuple.dart';
@@ -299,8 +300,6 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
         context,
         MaterialPageRoute(builder: (context) => Principal(widget.user)),
       );
-
-
     });
 
     widget.socket?.on("finish board", (data) {
@@ -327,7 +326,6 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
         context,
         MaterialPageRoute(builder: (context) => Principal(widget.user)),
       );
-
 
     });
   }
@@ -770,10 +768,10 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
       widget.socket.disconnect();
     });
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => Principal(widget.user)), // ir a la pantalla principal
-    );
+    //Navigator.push(
+    //  context,
+     // MaterialPageRoute(builder: (context) => DefeatScreen(widget.user, widget.coins, widget.tournamentID)), // ir a la pantalla principal //falta poner monedas cuando se termine de implementar
+    //);
   }
 
   funcionPausa() async {

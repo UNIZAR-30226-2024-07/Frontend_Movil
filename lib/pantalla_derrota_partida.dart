@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:psoft_07/pantalla_principal.dart';
+import 'package:psoft_07/pantalla_rondas_torneo_nacho.dart';
+import 'Usuario.dart';
 import 'colores.dart';
 
 class DefeatScreen extends StatelessWidget {
-  const DefeatScreen({super.key});
+  final User user;
+  final int vidas;
+  final String tournamentId;
+  const DefeatScreen(this.user, this.vidas, this.tournamentId, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -164,6 +170,21 @@ class DefeatScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Agrega aquí la lógica para lo que sucede cuando se presiona el botón de "Aceptar y Continuar"
+          if (vidas <= 0) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) =>
+                  Principal(user)), // ir a la pantalla principal
+            );
+          }
+          else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) =>
+                   // ir a la pantalla de rondas de nuevo hasta que pierda
+                TournamentRoundsScreenNacho(user, tournamentId),
+            ));
+          }
         },
         backgroundColor: Colors.red.shade300,
         child: const Icon(Icons.arrow_forward), // Color de fondo del botón
@@ -174,7 +195,4 @@ class DefeatScreen extends StatelessWidget {
 }
 
 void main() {
-  runApp(const MaterialApp(
-    home: DefeatScreen(),
-  ));
 }

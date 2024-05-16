@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_connect/connect.dart';
 import 'package:psoft_07/pantalla_cargaYTablero_torneo.dart';
-import 'package:psoft_07/pantalla_estadisticasJugador.dart';
-
 import 'Usuario.dart';
 import 'colores.dart';
 
