@@ -1,13 +1,17 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
+import 'package:psoft_07/pantalla_principal.dart';
+import 'Usuario.dart';
 import 'colores.dart';
 
 class VictoryScreen extends StatelessWidget {
-  const VictoryScreen({super.key});
+  final int coins;
+  final User user;
+  const VictoryScreen(this.user, this.coins, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    final int coinsEarned = 100; // Aquí habrá que poner el número de monedas que se gana
-
     return Scaffold(
       backgroundColor: ColoresApp.fondoPantallaColor,
       appBar: AppBar(
@@ -124,7 +128,7 @@ class VictoryScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    '+$coinsEarned',
+                    '+$coins',
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -134,39 +138,18 @@ class VictoryScreen extends StatelessWidget {
               ),
             ),
           ),
-          Positioned(
-            top: 0,
-            left: 10,
-            child: Container(
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
-                    spreadRadius: -8,
-                    blurRadius: 6,
-                    offset: const Offset(0, 0), // Cambiar la posición de la sombra
-                  ),
-                ],
-              ),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.chat,
-                  color: Colors.white, // Cambia el color del icono
-                ),
-                onPressed: () {
-                  // Agrega aquí la lógica para lo que sucede cuando se presiona el botón de chat
-                },
-                iconSize: 50,
-                splashColor: Colors.grey, // Cambia el color de la onda al presionar
-                tooltip: 'Abrir chat', // Agrega un mensaje de ayuda
-              ),
-            ),
-          ),
+
         ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          user.coins = user.coins + coins; //actualizamos monedas en local (en backend se updatean pero así no molestamos a la BD)
           // Agrega aquí la lógica para lo que sucede cuando se presiona el botón de "Aceptar y Continuar"
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) =>
+                Principal(user)), // ir a la pantalla principal
+          );
         },
         backgroundColor: Colors.red.shade300,
         child: Icon(Icons.arrow_forward), // Color de fondo del botón
@@ -177,7 +160,23 @@ class VictoryScreen extends StatelessWidget {
 }
 
 void main() {
-  runApp(const MaterialApp(
-    home: VictoryScreen(),
+  runApp(MaterialApp(
+    home: VictoryScreen(
+        User(
+            id: "",
+            nick: "",
+            name: "",
+            surname: "",
+            email: "",
+            password: "",
+            rol: "",
+            coins: 0,
+            tournaments: [],
+            avatars: [],
+            rugs: [],
+            cards: [],
+            token: ""),
+      355
+    ),
   ));
 }

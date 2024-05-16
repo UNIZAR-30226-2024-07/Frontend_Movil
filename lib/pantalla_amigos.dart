@@ -78,13 +78,13 @@ class _FriendsScreenState extends State<FriendsScreen> {
     try {
       final getConnect = GetConnect();
       await getConnect.delete(
-        'https://backend-uf65.onrender.com/api/friend/eliminateFriend/$friendId',
+        '${EnlaceApp.enlaceBase}/api/friend/eliminateFriend/$friendId',
         headers: {
           "Authorization": widget.user.token,
         },
       );
     } catch (e) {
-      throw Exception('Failed to reject friend request');
+      throw Exception('Failed to delete friend');
     }
   }
 
