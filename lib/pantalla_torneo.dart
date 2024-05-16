@@ -33,8 +33,61 @@ class _TournamentGamesState extends State<TournamentGames> {
       throw Exception('Failed to load user data');
     }
   }
+  Future<bool> _isUserInTournament(String idTorneo) async {
+    try {
+      final getConnect = GetConnect();
+      final response = await getConnect.get(
+        '${EnlaceApp.enlaceBase}/api/tournament/isUserInTournament/$idTorneo',
+        headers: {
+          "Authorization": widget.user.token,
+        },
+      );
+      return response.body['status'] == "success";
+    } catch (e) {
+      print('Failed to load round data: $e');
+      return false;
+    }
+  }
 
 
+  _enterTournamentForCurrentUser(User user, String tournamentId) async {
+
+    if (!(await _isUserInTournament(tournamentId))) {
+      try {
+        final getConnect = GetConnect();
+        final response = await getConnect.put(
+          '${EnlaceApp.enlaceBase}/api/tournament/enterTournament/$tournamentId', //TODO: preguntar si se pone aquí o en cuerpo el toruneamentID
+          {
+            "id": user.id
+          },
+          headers: {
+            "Authorization": widget.user.token,
+          },
+        );
+        ScaffoldMessenger.of(context).showSnackBar( //mostramos mensaje de error o
+          SnackBar(
+            duration: Duration(seconds: 3),
+            content: Center( // Centra horizontalmente el contenido
+              child: Text(response.body["message"]),
+            ),
+          ),
+        );
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => TournamentRoundsScreenNacho(widget.user, tournamentId)),
+        );
+
+      } catch (e) {
+        print('Error al enlistar al usuario $user en el torneo con Id: $tournamentId');
+        return 0;
+      }
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => TournamentRoundsScreenNacho(widget.user, tournamentId)),
+      );
+    }
+  }
 
 
   String dificultadTorneo (torneo){
@@ -256,11 +309,7 @@ class _TournamentGamesState extends State<TournamentGames> {
                                   onPressed: () async {
                                     //Entramos a la pantalla de rondas para ese torneo
                                     //Para cada torneo tenemos nuestro progreso, pudiendo participar en varios torneos simultáneamente
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(builder: (context) => TournamentRoundsScreenNacho(widget.user, torneo['_id'])),
-                                      //MaterialPageRoute(builder: (context) => TournamentRoundsScreen(widget.user, torneo)),
-                                    );
+                                    _enterTournamentForCurrentUser(widget.user, torneo['_id']);
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: ColoresApp.segundoColor,

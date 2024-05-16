@@ -39,6 +39,7 @@ class ResultadosMano {
   int totalBanca = 0;
   List<dynamic> coinsEarned = [];
   int currentCoins;
+  double vidas = 4;
 
   ResultadosMano({
     this.userId = "",
@@ -64,6 +65,16 @@ class ResultadosMano {
     this.userNick = _nick;
     this.cartas = _cartas;
     this.totalBanca = _total;
+  }
+
+  void initResultadoManoTorneos(_userId,_nick,_cartas,_total,_coinsEarned,_currentCoins, _vidas){
+    this.userId = _userId;
+    this.userNick = _nick;
+    this.cartas = _cartas;
+    this.total = _total;
+    this.coinsEarned = _coinsEarned;
+    this.currentCoins = _currentCoins;
+    this.vidas = _vidas;
   }
 
 

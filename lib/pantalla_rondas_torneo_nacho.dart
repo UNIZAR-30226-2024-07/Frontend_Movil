@@ -25,35 +25,14 @@ class _TournamentRoundsScreenNachoState extends State<TournamentRoundsScreenNach
   }
 
   Future<void> _loadData() async {
-    final isInTournament = await _isUserInTournament(widget.idTorneo);
-    if (!isInTournament) {
-      setState(() {
-        _userInTournament = false;
-      });
-    } else {
-      final r = await _getRoundInTournament(widget.idTorneo);
-      setState(() {
-        ronda = r;
-        print("Se guarda la ronda: ");
-        print(ronda);
-      });
-    }
-  }
 
-  Future<bool> _isUserInTournament(String idTorneo) async {
-    try {
-      final getConnect = GetConnect();
-      final response = await getConnect.get(
-        '${EnlaceApp.enlaceBase}/api/tournament/isUserInTournament/$idTorneo',
-        headers: {
-          "Authorization": widget.user.token,
-        },
-      );
-      return response.body['status'] == "success";
-    } catch (e) {
-      print('Failed to load round data: $e');
-      return false;
-    }
+    final r = await _getRoundInTournament(widget.idTorneo);
+    setState(() {
+      ronda = r;
+      print("Se guarda la ronda: ");
+      print(ronda);
+    });
+
   }
 
   Future<int> _getRoundInTournament(String idTorneo) async {
@@ -70,33 +49,6 @@ class _TournamentRoundsScreenNachoState extends State<TournamentRoundsScreenNach
       print('Failed to load round data: $e');
       return 0;
     }
-  }
-
-  _enterTournamentForCurrentUser(User user, String tournamentId) async {
-    try {
-      final getConnect = GetConnect();
-      final response = await getConnect.put(
-        '${EnlaceApp.enlaceBase}/api/tournament/enterTournament/$tournamentId', //TODO: preguntar si se pone aquí o en cuerpo el toruneamentID
-        {
-          "id": user.id
-        },
-        headers: {
-          "Authorization": widget.user.token,
-        },
-      );
-        ScaffoldMessenger.of(context).showSnackBar( //mostramos mensaje de error o
-          SnackBar(
-            duration: Duration(seconds: 3),
-            content: Center( // Centra horizontalmente el contenido
-              child: Text(response.body["message"]),
-            ),
-          ),
-        );
-    } catch (e) {
-      print('Error al enlistar al usuario $user en el torneo con Id: $tournamentId');
-      return 0;
-    }
-    _loadData();
   }
 
   @override
@@ -116,92 +68,55 @@ class _TournamentRoundsScreenNachoState extends State<TournamentRoundsScreenNach
           ),
         ),
       ),
-      body: _userInTournament
-          ? Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        floatingActionButton: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-          Row(
+            Padding(
+              padding: const EdgeInsets.only(left: 40.0, bottom: 10.0),
+              child: FloatingActionButton(
+                onPressed: () {
+                  // Acción al presionar el botón de volver
+                  //Simplemente vuelve a pantalla principal poruqe no está buscando partida
+                  Navigator.pop(context);
+                },
+                backgroundColor: ColoresApp.segundoColor,//Colors.blue.shade300,
+                child: const Icon(Icons.arrow_back),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: 10.0, bottom: 10.0),
+              child: FloatingActionButton(
+                onPressed: () {
+                  // Por hacer: Navegar a la siguiente pantalla o ejecutar alguna acción
+                  // En este caso, el botón de continuar implica buscar una nueva partida de torneo, por lo que vamos a la página correspondiente
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoadingScreenTournament(widget.user, widget.idTorneo)),//mesa['_id'], widget.user)),
+                  );
+                },
+                backgroundColor: Colors.red.shade300,
+                child: const Icon(Icons.arrow_forward),
+              ),
+            ),
+          ],
+        ),
+      body: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              crearImagen('assets/fotoRonda.jpeg', 'OCTAVOS', 100, 100, ronda < 8, ronda == 8),
-              const Icon(Icons.arrow_right_alt, color: Colors.black, size: 50),
-              crearImagen('assets/fotoRonda.jpeg', 'CUARTOS', 100, 100, ronda < 4, ronda == 4),
-              const Icon(Icons.arrow_right_alt, color: Colors.black, size: 50),
-              crearImagen('assets/fotoRonda.jpeg', 'SEMIFINAL', 100, 100, ronda < 2, ronda == 2),
-              const Icon(Icons.arrow_right_alt, color: Colors.black, size: 50),
-              crearImagen('assets/trofeo.png', 'FINAL', 120, 200, ronda < 1, ronda == 1),
-            ],
-          ),
-        ],
-      )
-          : Center(
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.all(20.0),
-                      child: Text(
-                        '¡Has sido eliminado del torneo!',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                            fontSize: 20
-                        ),
-                      ),
-                    ),
-                    FloatingActionButton.extended(
-                      onPressed: () async {
-                        // Llamar a tu función para volver a entrar al torneo
-                        // Una vez finalizada, puedes recargar la página
-                        _enterTournamentForCurrentUser(widget.user, widget.idTorneo);
-                        setState(() {}); //recargar página para que los widgets se vuelvan a dibujar
-                        //si va all ok, debería estar userInTorunament y mostrarse correctamente las rondas
-                      },
-                      label: Text(
-                        'Volver a entrar',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      icon: Icon(Icons.refresh),
-                      backgroundColor: ColoresApp.segundoColor, // Puedes ajustar el color de fondo según tus necesidades
-                    ),
-                  ],
-                )
-      ),
-      floatingActionButton: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(left: 40.0, bottom: 10.0),
-            child: FloatingActionButton(
-              onPressed: () {
-                // Acción al presionar el botón de volver
-                //Simplemente vuelve a pantalla principal poruqe no está buscando partida
-                Navigator.pop(context);
-              },
-              backgroundColor: ColoresApp.segundoColor,//Colors.blue.shade300,
-              child: const Icon(Icons.arrow_back),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                crearImagen('assets/fotoRonda.jpeg', 'OCTAVOS', 100, 100, ronda < 8, ronda == 8),
+                const Icon(Icons.arrow_right_alt, color: Colors.black, size: 50),
+                crearImagen('assets/fotoRonda.jpeg', 'CUARTOS', 100, 100, ronda < 4, ronda == 4),
+                const Icon(Icons.arrow_right_alt, color: Colors.black, size: 50),
+                crearImagen('assets/fotoRonda.jpeg', 'SEMIFINAL', 100, 100, ronda < 2, ronda == 2),
+                const Icon(Icons.arrow_right_alt, color: Colors.black, size: 50),
+                crearImagen('assets/trofeo.png', 'FINAL', 120, 200, ronda < 1, ronda == 1),
+              ],
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 10.0, bottom: 10.0),
-            child: FloatingActionButton(
-              onPressed: () {
-                // Por hacer: Navegar a la siguiente pantalla o ejecutar alguna acción
-                // En este caso, el botón de continuar implica buscar una nueva partida de torneo, por lo que vamos a la página correspondiente
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoadingScreenTournament(widget.user, widget.idTorneo)),//mesa['_id'], widget.user)),
-                );
-              },
-              backgroundColor: Colors.red.shade300,
-              child: const Icon(Icons.arrow_forward),
-            ),
-          ),
-        ],
-      ),
+          ],
+        )
     );
   }
 
