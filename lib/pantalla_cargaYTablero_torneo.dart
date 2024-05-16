@@ -389,7 +389,6 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
   void myResultadosHand (data) {
     for (var mano in data) {
       if (mano['userId'] == widget.user.id) {
-        print("MI MANO ------------------");
         widget.myResultadosHand.initResultadoManoTorneos(mano['userId'], mano['userNick'], mano['cards'], mano['total'], mano['lives']);
       }
     }
@@ -964,7 +963,7 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
-                          'Total: ${widget.myResultadosHand.totalTorneo}. Vidas: ${widget.myResultadosHand.vidas}',
+                          'Total: ${widget.myResultadosHand.totalTorneo}',
                           style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
