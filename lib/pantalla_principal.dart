@@ -9,9 +9,11 @@ import 'package:psoft_07/pantalla_eleccion_skins.dart';
 import 'package:psoft_07/pantalla_inicio.dart';
 import 'package:psoft_07/pantalla_partida_publica.dart';
 import 'package:psoft_07/pantalla_principal_partida_privada.dart';
+import 'package:psoft_07/pantalla_privada_reanudar.dart';
 import 'package:psoft_07/pantalla_ranking.dart';
 import 'package:psoft_07/pantalla_tienda.dart';
 import 'package:psoft_07/pantalla_torneo.dart';
+import 'package:psoft_07/pantalla_torneo_reanudar.dart';
 import 'package:psoft_07/partida_publica_reanudar.dart';
 
 import 'Usuario.dart';
@@ -184,13 +186,13 @@ class Principal extends StatelessWidget {
                                     else if (respuesta['boardType'] == "private") {
                                       Navigator.push(
                                         context,
-                                        MaterialPageRoute(builder: (context) => LoadingScreenTournament(user, respuesta['pausedBoard'])),// aqui iria la de privada
+                                        MaterialPageRoute(builder: (context) => PrivateScreenResume(respuesta['pausedBoard'], user)),
                                       );
                                     }
                                     else if (respuesta['boardType'] == "tournament") {
                                       Navigator.push(
                                         context,
-                                        MaterialPageRoute(builder: (context) => LoadingScreenTournament(user, respuesta['pausedBoard'])),// aqui iria la de torneo
+                                        MaterialPageRoute(builder: (context) => TournamentScreenResume(respuesta['pausedBoard'], user)),// aqui iria la de torneo
                                       );
                                     }
                                     else {
