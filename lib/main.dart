@@ -27,6 +27,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: const WelcomeScreen(), // Utiliza la pantalla de inicio de sesión como widget principal
+      debugShowCheckedModeBanner: false,
     );
   }
 }
