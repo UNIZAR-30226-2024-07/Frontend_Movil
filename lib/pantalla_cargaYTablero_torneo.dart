@@ -391,7 +391,8 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
   void myResultadosHand (data) {
     for (var mano in data) {
       if (mano['userId'] == widget.user.id) {
-        widget.myResultadosHand.initResultadoManoTorneos(mano['userId'], mano['userNick'], mano['cards'], mano['total'], mano['coinsEarned'], mano['currentCoins'], mano['lives']);
+        print("MI MANO ------------------");
+        widget.myResultadosHand.initResultadoManoTorneos(mano['userId'], mano['userNick'], mano['cards'], mano['total'], mano['lives']);
       }
     }
   }
@@ -411,7 +412,7 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
       if (mano['userId'] != widget.user.id
           && mano['userId'] != "Bank") {
         widget.otherResultadosHand.add(ResultadosMano());
-        widget.otherResultadosHand[i].initResultadoManoTorneos(mano['userId'], mano['userNick'], mano['cards'], mano['total'], mano['coinsEarned'], mano['currentCoins'], mano['lives']);
+        widget.otherResultadosHand[i].initResultadoManoTorneos(mano['userId'], mano['userNick'], mano['cards'], mano['total'], mano['lives']);
         i++;
       }
     }
@@ -902,14 +903,13 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
                           fontSize: 18
                       ),
                     ),
-                    for (var i = 0; i < mano.cartas.length; i++)
                       Column(
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          if (mano.cartas[i].length !=0)
+                          if (mano.cartas.length !=0)
                             Text(
-                              'Total: ${mano.total[i]}. Monedas ganadas: ${mano.coinsEarned[i]}',
+                              'Total: ${mano.totalTorneo}. Vidas: ${mano.vidas}',
                               style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
@@ -920,9 +920,9 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              for (var j = 0; j < mano.cartas[i].length; j++)
+                              for (var j = 0; j < mano.cartas.length; j++)
                                 Image.asset(
-                                  '${'assets/valoresCartas/${mano.cartas[i][j]['value']}-' + mano.cartas[i][j]['suit']}.png',
+                                  '${'assets/valoresCartas/${mano.cartas[j]['value']}-' + mano.cartas[j]['suit']}.png',
                                   width: 50, // Establece un tamaño máximo solo para el anchor
                                   fit: BoxFit.scaleDown, // Ajusta automáticamente la altura según la proporción original de la imagen
                                 ),
@@ -966,7 +966,7 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
-                          'Total: ${widget.myResultadosHand.total[0]}. Monedas ganadas: ${widget.myResultadosHand.coinsEarned[0]}',
+                          'Total: ${widget.myResultadosHand.totalTorneo}. Vidas: ${widget.myResultadosHand.vidas}',
                           style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -977,7 +977,7 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
                           mainAxisSize: MainAxisSize.min,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            for (var card in widget.myResultadosHand.cartas[0])
+                            for (var card in widget.myResultadosHand.cartas)
                               Image.asset(
                                 'assets/valoresCartas/' + card['value'].toString() + '-' + card['suit'] + '.png',
                                 width: 90, // Establece un tamaño máximo solo para el ancho

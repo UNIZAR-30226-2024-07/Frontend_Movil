@@ -36,6 +36,7 @@ class ResultadosMano {
   String userNick;
   dynamic cartas = [];
   List<dynamic> total = [];
+  int totalTorneo = 0;
   int totalBanca = 0;
   List<dynamic> coinsEarned = [];
   int currentCoins;
@@ -67,14 +68,17 @@ class ResultadosMano {
     this.totalBanca = _total;
   }
 
-  void initResultadoManoTorneos(_userId,_nick,_cartas,_total,_coinsEarned,_currentCoins, _vidas){
+  void initResultadoManoTorneos(_userId,_nick,_cartas,_total, _vidas){
+    print("MI userId ------------------");
     this.userId = _userId;
+    print("MI userNick ------------------");
     this.userNick = _nick;
+    print("MI cartas ------------------");
     this.cartas = _cartas;
-    this.total = _total;
-    this.coinsEarned = _coinsEarned;
-    this.currentCoins = _currentCoins;
-    this.vidas = _vidas;
+    print("MI total ------------------");
+    this.totalTorneo = _total;
+    print("MI vidas ------------------");
+    this.vidas = double.parse(_vidas.toString());
   }
 
 
