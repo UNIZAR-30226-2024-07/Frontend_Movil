@@ -15,7 +15,6 @@ class TournamentRoundsScreenNacho extends StatefulWidget {
 }
 
 class _TournamentRoundsScreenNachoState extends State<TournamentRoundsScreenNacho> {
-  bool _userInTournament = true;
   int ronda = 0;
 
   @override

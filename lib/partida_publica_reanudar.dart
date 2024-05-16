@@ -1097,7 +1097,11 @@ class _LoadingScreenResumeState extends State<LoadingScreenResume> {
 
     //codigo
     if (widget.resultadosRonda) {
-      return Scaffold(
+      return WillPopScope(
+          onWillPop: () async  {
+            return false;
+          },
+          child: Scaffold(
         backgroundColor: ColoresApp.fondoPantallaColor,
         appBar: barra(),
         body:  Stack (
@@ -1256,6 +1260,7 @@ class _LoadingScreenResumeState extends State<LoadingScreenResume> {
         ),
             ],
         ),
+          ),
       );
     }
     if (!widget.UImesa) {
@@ -1321,7 +1326,11 @@ class _LoadingScreenResumeState extends State<LoadingScreenResume> {
       );
     }
     else {
-      return Scaffold(
+      return WillPopScope(
+          onWillPop: () async  {
+        return false;
+      },
+    child: Scaffold(
         backgroundColor: ColoresApp.fondoPantallaColor,
         appBar: barra(),
         body:
@@ -1464,6 +1473,7 @@ class _LoadingScreenResumeState extends State<LoadingScreenResume> {
           ],
         ),
     ],
+    ),
     ),
       );
     }

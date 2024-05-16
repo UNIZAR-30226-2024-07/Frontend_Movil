@@ -1104,7 +1104,11 @@ class _PrivateScreenResumeState extends State<PrivateScreenResume> {
 
     //codigo
     if (widget.resultadosRonda) {
-      return Scaffold(
+      return WillPopScope(
+          onWillPop: () async  {
+            return false;
+          },
+          child: Scaffold(
         backgroundColor: ColoresApp.fondoPantallaColor,
         appBar: barra(),
         body:  Stack (
@@ -1264,6 +1268,7 @@ class _PrivateScreenResumeState extends State<PrivateScreenResume> {
             ),
           ],
         ),
+          ),
       );
     }
     if (!widget.UImesa) {
@@ -1329,8 +1334,11 @@ class _PrivateScreenResumeState extends State<PrivateScreenResume> {
       );
     }
     else {
-      return Scaffold(
-        backgroundColor: ColoresApp.fondoPantallaColor,
+      return WillPopScope(
+          onWillPop: () async  {
+        return false;
+      },
+    child: Scaffold(
         appBar: barra(),
         body:
         Stack (
@@ -1474,6 +1482,7 @@ class _PrivateScreenResumeState extends State<PrivateScreenResume> {
             ),
           ],
         ),
+    ),
       );
     }
   }

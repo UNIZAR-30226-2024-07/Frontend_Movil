@@ -1110,7 +1110,11 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
     //codigo
     if (widget.resultadosRonda) {
-      return Scaffold(
+      return WillPopScope(
+          onWillPop: () async  {
+            return false;
+          },
+          child: Scaffold(
         backgroundColor: ColoresApp.fondoPantallaColor,
         appBar: barra(),
         body:  Stack (
@@ -1270,6 +1274,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
         ),
             ],
         ),
+          ),
       );
     }
     if (!widget.UImesa) {
@@ -1334,7 +1339,11 @@ class _LoadingScreenState extends State<LoadingScreen> {
       );
     }
     else {
-      return Scaffold(
+      return WillPopScope(
+          onWillPop: () async  {
+        return false;
+      },
+    child: Scaffold(
         backgroundColor: ColoresApp.fondoPantallaColor,
         appBar: barra(),
         body:  Stack (
@@ -1479,6 +1488,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
         ),
     ],
         ),
+    ),
       );
     }
   }

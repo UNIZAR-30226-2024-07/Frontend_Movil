@@ -286,7 +286,6 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
           myResultadosHand(data);
           bankResultadosHand(data);
           othersResutadosHand(data);
-          widget.user.coins = widget.myResultadosHand.currentCoins;
           widget.resultadosRonda = true;
         });
       }
@@ -394,6 +393,8 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
           }
         };
         print("Debug: estamos emitiendo entrada en torneo con datos: usuario ${widget.user.id}y idTorneo: ${widget.tournamentID}");
+
+        print("HACEMOS EMIT DE TORNEOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
 
         widget.socket.emit('enter tournament board', body ); //Revisado: emit correcto
       }catch (err) {
@@ -921,7 +922,11 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
     Widget chatWidget = widget._chatVisible ? Expanded(child: widget._chatWidget) : SizedBox();
     //codigo
     if (widget.resultadosRonda) {
-      return Scaffold(
+      return WillPopScope(
+          onWillPop: () async  {
+            return false;
+          },
+          child: Scaffold(
         appBar: barra(),
         body: Stack (
           children: [
@@ -1043,6 +1048,7 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
         ),
             ],
         ),
+          ),
       );
     }
     if (!widget.UImesa) {
@@ -1107,9 +1113,13 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
       );
     }
     else {
-      return Scaffold(
+      return WillPopScope(
+          onWillPop: () async  {
+        return false;
+      },
+    child: Scaffold(
         appBar: barra(),
-        body: Stack (
+        body:  Stack (
           children: [
         // Imagen de fondo
         Positioned.fill(
@@ -1207,6 +1217,7 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
         ),
     ],
         ),
+    ),
       );
     }
   }

@@ -1141,7 +1141,11 @@ class _PrivateGameScreenState extends State<PrivateGameScreen> {
     Widget pauseWidget = widget._pauseVisible ? Expanded(child: widget._pauseWidget) : SizedBox();
     //codigo
     if (widget.resultadosRonda) {
-      return Scaffold(
+      return WillPopScope(
+          onWillPop: () async  {
+            return false;
+          },
+          child: Scaffold(
         backgroundColor: ColoresApp.fondoPantallaColor,
         appBar: barra(),
         body: Row(
@@ -1289,6 +1293,7 @@ class _PrivateGameScreenState extends State<PrivateGameScreen> {
             ),
           ],
         ),
+          ),
       );
     }
     if (!widget.UImesa) {
@@ -1353,7 +1358,11 @@ class _PrivateGameScreenState extends State<PrivateGameScreen> {
       );
     }
     else {
-      return Scaffold(
+      return WillPopScope(
+          onWillPop: () async  {
+        return false;
+      },
+    child: Scaffold(
         backgroundColor: ColoresApp.fondoPantallaColor,
         appBar: barra(),
         body: Row(
@@ -1485,7 +1494,9 @@ class _PrivateGameScreenState extends State<PrivateGameScreen> {
             botones(0),
           ],
         ),
+    ),
       );
+
     }
   }
 }

@@ -287,7 +287,6 @@ class _TournamentScreenResumeState extends State<TournamentScreenResume> {
           myResultadosHand(data);
           bankResultadosHand(data);
           othersResutadosHand(data);
-          widget.user.coins = widget.myResultadosHand.currentCoins;
           widget.resultadosRonda = true;
         });
       }
