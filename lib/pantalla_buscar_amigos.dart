@@ -20,9 +20,13 @@ class SearchFriendsScreen extends StatefulWidget {
         },
       );
       final List<dynamic> usersData = response.body['user'];
+      //final List<dynamic> usersData2 = new List<dynamic>();
+
+      List<dynamic> usersWithUserRole = usersData.where((user) => user['rol'] == 'user').toList();
+
 
       // Filtrar los usuarios cuyo nick coincida con la búsqueda
-      final List<dynamic> filteredUsers = usersData
+      final List<dynamic> filteredUsers = usersWithUserRole
           .where((userData) =>
           (userData['nick'] as String)
               .toLowerCase()

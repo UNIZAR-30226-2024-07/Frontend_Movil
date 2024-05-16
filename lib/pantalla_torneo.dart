@@ -27,10 +27,35 @@ class _TournamentGamesState extends State<TournamentGames> {
           "Authorization": widget.user.token,
         },
       );
-      final torneos = List<dynamic>.from(response.body['tournaments']);
+      List<dynamic> torneos = List<dynamic>.from(response.body['tournaments']);
+
+      torneos.sort((torneo1, torneo2) {
+        String bankLevel1 = torneo1['bankLevel'];
+        String bankLevel2 = torneo2['bankLevel'];
+        int bet1 = torneo1['price'];
+        int bet2 = torneo2['price'];
+
+        if (bankLevel1 != bankLevel2) { // se ordena por dificultad
+          if (bankLevel1 == 'beginner') {
+            return -1;
+          } else if (bankLevel1 == 'medium') {
+            if (bankLevel2 == 'beginner') {
+              return 1;
+            } else {
+              return -1;
+            }
+          } else {
+            return 1;
+          }
+        } else { // si la dificultad es la misma, se ordena por dinero apostado
+          return bet1.compareTo(bet2);
+        }
+      });
+
       return torneos;
+
     } catch (e) {
-      throw Exception('Failed to load user data');
+      throw Exception('Failed to load tournament data');
     }
   }
   Future<bool> _isUserInTournament(String idTorneo) async {
