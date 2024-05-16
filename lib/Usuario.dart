@@ -3,7 +3,7 @@ import 'colores.dart';
 
 
 void actualizarUsuario(context, getConnect, user) async {
-  final res = await getConnect.post('${EnlaceApp.enlaceBase}/api/user/verify', {},
+  final res = await getConnect.get('${EnlaceApp.enlaceBase}/api/user/verify',
     headers: {
       "Authorization": user.token,
     },

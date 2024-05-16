@@ -67,6 +67,20 @@ class Principal extends StatelessWidget {
     }
   }
 
+  Future<int> _getCoins() async {
+    try {
+      final getConnect = GetConnect();
+      final res = await getConnect.get('${EnlaceApp.enlaceBase}/api/user/verify',
+        headers: {
+          "Authorization": user.token,
+        },
+      );
+      return res.body['user']['coins'].toInt();
+    } catch (e) {
+      return user.coins;
+    }
+  }
+
   void apiHayRecompensa(context) async {
     try {
       final getConnect = GetConnect();
@@ -111,14 +125,20 @@ class Principal extends StatelessWidget {
   Future<void> cargaImagen() async {
     if (!imagenCargada) {
       imagenUrl = await _getImageUrl();
+      user.coins = await _getCoins();
+
     }
+  }
+
+  Future<void> cargaCoins() async {
+    user.coins = await _getCoins();
   }
 
 
   @override
   Widget build(BuildContext context) {
    cargaImagen();
-
+    //cargaCoins();
     apiHayRecompensa(context);
     return Scaffold(
       backgroundColor: ColoresApp.fondoPantallaColor,
