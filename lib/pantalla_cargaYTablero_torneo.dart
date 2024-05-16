@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_connect/connect.dart';
@@ -50,6 +52,13 @@ class LoadingScreenTournament extends StatefulWidget {
   bool _chatVisible = false;
   Map<String, String> urlAvatares = {};
 
+  //Variables contadorWidget
+  late Widget _timeWidget;
+  bool _timeVisible = false;
+
+  int _secondsRemaining = 30;
+  late Timer? _timer;
+
   //Variables pauseWidget
   late Widget _pauseWidget;
   bool _pauseVisible = false;
@@ -72,6 +81,19 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
     super.initState();
     // Simulación de carga de datos
     _simulateLoading();
+  }
+
+  void _startCountdown() {
+    // Inicia un temporizador que actualiza el contador cada segundo
+    widget._timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        if (widget._secondsRemaining == 0) {
+          widget._timer?.cancel();
+        } else {
+          widget._secondsRemaining--;
+        }
+      });
+    });
   }
 
   void _simulateLoading() {
@@ -183,6 +205,27 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
     }
   }
 
+  Widget crearContador() {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.access_time, color: ColoresApp.segundoColor),
+          SizedBox(width: 8.0),
+          Text(
+            widget._secondsRemaining.toString(),
+            style: TextStyle(fontSize: 24.0, color: ColoresApp.segundoColor),
+          ),
+        ],
+      ),
+    );
+  }
+
   void conectarPartida() async {
 
     bool kDebugMode = true;
@@ -229,6 +272,8 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
           othersHand(data);
           widget.UImesa = true;
           widget.resultadosRonda = false;
+          widget._secondsRemaining = 30;
+          _startCountdown();
         });
       }
 
@@ -821,7 +866,9 @@ class _LoadingScreenState extends State<LoadingScreenTournament> {
         ),
       ),
       actions: [
-
+        Spacer(), // Espaciador flexible para empujar el contador al centro
+        crearContador(), // Widget crearContador() en el medio
+        Spacer(),
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Center(
