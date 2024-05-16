@@ -328,27 +328,31 @@ class _TournamentScreenResumeState extends State<TournamentScreenResume> {
     widget.socket?.on("players deleted", (data) {
       print(data);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            "Ha sido expulsado de la partida por inactividad",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+      for (var usuario in data) {
+        if (widget.user.id == usuario) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                "Ha sido expulsado de la partida por inactividad",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              duration: Duration(seconds: 2),
             ),
-          ),
-          duration: Duration(seconds: 2),
-        ),
-      );
-      setState(() {
-        widget.socket.disconnect();
-      });
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => Principal(widget.user)),
-      );
+          );
+          setState(() {
+            widget.socket.disconnect();
+          });
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => Principal(widget.user)),
+          );
+        }
+      }
     });
 
     widget.socket?.on("finish board", (data) {
