@@ -102,7 +102,7 @@ class SettingsScreen extends StatelessWidget {
                 // Acción para la tercera opción
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => estadisticasJugador(user)),
+                  MaterialPageRoute(builder: (context) => estadisticasJugador(user, true, user)),
                 );
               },
               style: ElevatedButton.styleFrom(

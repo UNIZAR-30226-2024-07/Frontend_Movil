@@ -8,7 +8,12 @@ import 'Usuario.dart';
 class estadisticasJugador extends StatelessWidget {
 
   final User user;
-  estadisticasJugador(this.user, {super.key});
+  final bool misEstadisticas;
+  final User otroUser;
+
+
+  estadisticasJugador(this.user, this.misEstadisticas, this.otroUser, {super.key});
+
   final getConnect = GetConnect();
   void mostrarError(String mensaje, BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -24,8 +29,14 @@ class estadisticasJugador extends StatelessWidget {
 
   Future<String> _getImageUrl() async {
     try {
+      String url;
+      if (misEstadisticas) {
+        url = '${EnlaceApp.enlaceBase}/api/avatar/currentAvatarById/${user.id}';
+      } else {
+        url = '${EnlaceApp.enlaceBase}/api/avatar/currentAvatarById/${otroUser.id}';
+      }
       final response = await getConnect.get(
-        '${EnlaceApp.enlaceBase}/api/avatar/currentAvatar',
+        url,
         headers: {
           "Authorization": user.token,
         },
@@ -40,13 +51,17 @@ class estadisticasJugador extends StatelessWidget {
 
   Future<List<dynamic>> _getAllUserStats() async {
     try {
+      String url;
+      if (misEstadisticas) {
+        url = "${EnlaceApp.enlaceBase}/api/stat/getAllStatsByUser/${user.id}";
+      } else {
+        url = "${EnlaceApp.enlaceBase}/api/stat/getAllStatsByUser/${otroUser.id}";
+      }
       final getConnect = GetConnect();
       final response = await getConnect.get(
-        '${EnlaceApp.enlaceBase}/api/stat/getAllUserStats',
+        url,
         headers: {
           'Authorization': user.token, // Reemplaza con tu token de autorización
-          'nick': user.nick,
-          'id': user.id
         },
       );
 
@@ -114,14 +129,24 @@ class estadisticasJugador extends StatelessWidget {
                     }
                   },
                 ),
-                Text(
-                  user.nick,
-                  style: const TextStyle(
-                      fontSize: 24,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold
+                if (misEstadisticas)
+                  Text(
+                    user.nick,
+                    style: const TextStyle(
+                        fontSize: 24,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold
+                    ),
                   ),
-                ),
+                if (!misEstadisticas)
+                  Text(
+                    otroUser.nick,
+                    style: const TextStyle(
+                        fontSize: 24,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold
+                    ),
+                  ),
               ],
             ),
             SizedBox(width: 20), // Añade un espacio entre las columnas
@@ -210,19 +235,34 @@ class estadisticasJugador extends StatelessWidget {
   runApp(MaterialApp(
     home: estadisticasJugador(
         User(
-            id: "662005b2d914947a6b71d9c5",
-            nick: "U1",
-            name: "U1",
-            surname: "U1",
-            email: "U1",
-            password: "U1",
-            rol: "user",
-            coins: 98800,
+            id: "",
+            nick: "",
+            name: "",
+            surname: "",
+            email: "",
+            password: "",
+            rol: "",
+            coins: 0,
             tournaments: [],
             avatars: [],
             rugs: [],
             cards: [],
-            token: "")
+            token: ""),
+      true,
+      User(
+          id: "",
+          nick: "",
+          name: "",
+          surname: "",
+          email: "",
+          password: "",
+          rol: "",
+          coins: 0,
+          tournaments: [],
+          avatars: [],
+          rugs: [],
+          cards: [],
+          token: ""),
     ),
   ));
 }

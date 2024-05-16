@@ -205,7 +205,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
                               User amigoBuscado = _getUserFromMapString(friend, widget.user);
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => estadisticasJugador(amigoBuscado)),
+                                MaterialPageRoute(builder: (context) => estadisticasJugador(widget.user, false, amigoBuscado)),
                               );
                             },
                             leading: FutureBuilder<String>(
